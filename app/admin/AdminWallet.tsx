@@ -16,8 +16,8 @@ export default function AdminWallet({ onConnect }: AdminWalletProps) {
 
     try {
       // Check if MetaMask or another wallet is installed
-      if (typeof window !== 'undefined' && (window as any).ethereum) {
-        const ethereum = (window as any).ethereum;
+      if (typeof window !== 'undefined' && (window as Window & { ethereum?: any }).ethereum) {
+        const ethereum = (window as Window & { ethereum?: any }).ethereum;
         
         // Request account access
         const accounts = await ethereum.request({ 
@@ -31,9 +31,9 @@ export default function AdminWallet({ onConnect }: AdminWalletProps) {
               method: 'wallet_switchEthereumChain',
               params: [{ chainId: '0x2105' }], // Base mainnet
             });
-          } catch (switchError: any) {
+          } catch (switchError) {
             // If the chain doesn't exist, add it
-            if (switchError.code === 4902) {
+            if ((switchError as any).code === 4902) {
               await ethereum.request({
                 method: 'wallet_addEthereumChain',
                 params: [{
@@ -56,8 +56,8 @@ export default function AdminWallet({ onConnect }: AdminWalletProps) {
       } else {
         setError("No wallet found. Please install MetaMask or another Web3 wallet.");
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to connect wallet");
+    } catch (err) {
+      setError((err as Error).message || "Failed to connect wallet");
     } finally {
       setIsConnecting(false);
     }
