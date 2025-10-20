@@ -124,9 +124,21 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
             className={styles.profileLink}
             title="View profile"
           >
-            {user.profileImage && (
-              <Image 
+            {user.profileImage ? (
+              <img
                 src={user.profileImage} 
+                alt={user.displayName}
+                className={styles.profilePic}
+                width={32}
+                height={32}
+                onError={(e) => {
+                  console.error('[StreamOverlay] Profile image failed to load:', user.profileImage);
+                  e.currentTarget.src = `https://api.dicebear.com/7.x/personas/svg?seed=${user.fid}`;
+                }}
+              />
+            ) : (
+              <img
+                src={`https://api.dicebear.com/7.x/personas/svg?seed=${user.fid}`}
                 alt={user.displayName}
                 className={styles.profilePic}
                 width={32}
