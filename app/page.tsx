@@ -29,6 +29,10 @@ interface User {
 }
 
 export default function Home() {
+  // Force page to show deployment test
+  if (typeof window !== 'undefined') {
+    document.title = "🚀 DEPLOYMENT V3 - Click n Pray 🚀";
+  }
   const { setMiniAppReady, isMiniAppReady, context } = useMiniKit();
   const [streamConfig, setStreamConfig] = useState<StreamConfig | null>(null);
   const [loading, setLoading] = useState(true);
