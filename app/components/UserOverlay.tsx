@@ -7,6 +7,7 @@ interface UserOverlayProps {
   user: {
     fid: string;
     displayName: string;
+    username?: string;
     balance: number;
     profileImage?: string;
   };
