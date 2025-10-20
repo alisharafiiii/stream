@@ -71,3 +71,33 @@
   pointer-events: all;
   background: transparent;
 }
+
+.muteButton {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 50px;
+  height: 50px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid white;
+  border-radius: 50%;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.muteButton:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+}
+
+.muteButton:active {
+  transform: scale(0.95);
+}

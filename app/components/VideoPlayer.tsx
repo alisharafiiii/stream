@@ -9,6 +9,7 @@ interface VideoPlayerProps {
 
 export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
   const [error, setError] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   
@@ -69,6 +70,17 @@ export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
   }, [streamUrl]);
 
   // Check if it's a YouTube URL and convert to embed format
+  const toggleMute = () => {
+    if (iframeRef.current?.contentWindow) {
+      const command = isMuted 
+        ? '{"event":"command","func":"unMute","args":""}'
+        : '{"event":"command","func":"mute","args":""}';
+      
+      iframeRef.current.contentWindow.postMessage(command, '*');
+      setIsMuted(!isMuted);
+    }
+  };
+
   const getEmbedUrl = (url: string) => {
     // Already an embed URL
     if (url.includes("embed")) return url;
@@ -135,6 +147,14 @@ export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
         sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
       />
       <div className={styles.clickBlocker} aria-hidden="true" />
+      <button 
+        className={styles.muteButton}
+        onClick={toggleMute}
+        aria-label={isMuted ? "Unmute" : "Mute"}
+        title={isMuted ? "Click to unmute" : "Click to mute"}
+      >
+        {isMuted ? '🔇' : '🔊'}
+      </button>
     </div>
   );
 }
