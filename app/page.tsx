@@ -221,7 +221,7 @@ export default function Home() {
             />
           )}
         {/* Floating Comments Overlay */}
-        <CommentsOverlay isBettingCollapsed={isBettingCollapsed} />
+        <CommentsOverlay />
           {/* Comment Input FAB */}
           {user && (
             <CommentInput

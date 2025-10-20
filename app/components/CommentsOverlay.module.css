@@ -1,11 +1,11 @@
 .overlay {
   position: fixed;
-  bottom: calc(var(--betting-deck-height, 160px) + 10px); /* Dynamic positioning above betting deck */
+  bottom: 90px; /* Fixed position above mute button and FABs */
   left: 12px;
   width: 300px;
   max-width: calc(100vw - 100px); /* Leave space for FAB */
-  height: calc(100vh - var(--betting-deck-height, 160px) - 100px); /* Fill space up to header */
-  max-height: 500px;
+  height: 45vh; /* Fixed height */
+  max-height: 400px;
   pointer-events: none;
   z-index: 15;
   display: flex;
@@ -14,7 +14,6 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding-top: 10px;
-  transition: bottom 0.3s ease;
   
   /* Hide scrollbar */
   scrollbar-width: none;
@@ -30,7 +29,7 @@
   align-items: flex-start;
   gap: 8px;
   padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.7); /* Reduced opacity to 70% */
+  background: rgba(0, 0, 0, 0.5); /* Reduced opacity to 50% */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 16px;
@@ -54,8 +53,8 @@
 }
 
 .profilePic {
-  width: 38px; /* Increased by 35% from 28px */
-  height: 38px; /* Increased by 35% from 28px */
+  width: 51px; /* Increased by 35% from 38px (total 82% increase from original 28px) */
+  height: 51px; /* Increased by 35% from 38px (total 82% increase from original 28px) */
   border-radius: 50%;
   border: 2px solid var(--accent-purple);
   flex-shrink: 0;
@@ -101,11 +100,11 @@
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .overlay {
-    bottom: calc(var(--betting-deck-height, 140px) + 10px); /* Dynamic positioning */
+    bottom: 85px; /* Fixed position on mobile */
     left: 8px;
     width: 260px;
-    height: calc(100vh - var(--betting-deck-height, 140px) - 80px);
-    max-height: 400px;
+    height: 40vh;
+    max-height: 350px;
   }
   
   .comment {
@@ -113,8 +112,8 @@
   }
   
   .profilePic {
-    width: 32px; /* Increased by 35% from 24px */
-    height: 32px; /* Increased by 35% from 24px */
+    width: 43px; /* Increased by 35% from 32px (total 79% increase from original 24px) */
+    height: 43px; /* Increased by 35% from 32px (total 79% increase from original 24px) */
   }
   
   .content {
