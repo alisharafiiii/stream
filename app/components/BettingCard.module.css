@@ -33,12 +33,15 @@
 }
 
 .bettingCard.collapsed .content { display: none; }
-.bettingCard.collapsed .headerContent { display: flex; }
 
 /* Make sure toggle button is always visible when collapsed */
 .bettingCard.collapsed .header {
   position: relative;
   z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 40px;
 }
 
 .bettingCard.collapsed .toggleButton {
@@ -46,6 +49,7 @@
   box-shadow: 0 2px 12px rgba(153, 69, 255, 0.6);
   border: 2px solid white;
   animation: subtle-pulse 2s infinite;
+  display: block !important;
 }
 
 @keyframes slideInUp {
@@ -82,6 +86,11 @@
 
 .bettingCard.collapsed .headerContent {
   display: none;
+}
+
+/* But keep toggle button visible */
+.bettingCard.collapsed .toggleButton {
+  display: flex !important;
 }
 
 .bettingCard.collapsed .header {

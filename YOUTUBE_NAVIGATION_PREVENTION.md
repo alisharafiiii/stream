@@ -59,3 +59,4 @@ The middle area remains clickable for play/pause functionality.
 3. Test on multiple devices and browsers
 4. Consider using a custom video player for full control
 
+

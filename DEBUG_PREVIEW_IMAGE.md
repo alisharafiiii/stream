@@ -38,3 +38,4 @@ If Base app is caching old metadata:
 - Recommended: 1200x630px for best display
 - PNG format for transparency support
 
+

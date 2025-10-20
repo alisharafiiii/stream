@@ -64,3 +64,4 @@ vercel --prod
 - KV is free for up to 30,000 requests per month
 - Each user profile counts as 1 read/write operation
 
+

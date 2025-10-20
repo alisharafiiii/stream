@@ -41,3 +41,4 @@ When MiniKit releases the `useFundWallet` hook or similar payment functionality:
 ## Note
 The payment simulation allows testing the complete user flow while waiting for the official MiniKit payment API.
 
+
