@@ -83,6 +83,7 @@ export default function AdminPage() {
   // Get admin wallet from environment or use default
   const ADMIN_WALLETS = [
     process.env.NEXT_PUBLIC_ADMIN_WALLET || "0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D",
+    "0x37ed24e7c7311836fd01702a882937138688c1a9", // Added admin wallet
   ].map(w => w.toLowerCase());
   
   const isAdmin = address ? ADMIN_WALLETS.includes(address.toLowerCase()) : false;

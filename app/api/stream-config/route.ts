@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { redis, REDIS_KEYS } from '@/lib/redis';
+import { isAdminWallet } from '@/lib/admin-auth';
 
 interface StreamConfig {
   streamUrl: string;
@@ -52,8 +53,7 @@ export async function POST(request: NextRequest) {
     console.log('[API] Updating stream config:', { streamUrl, isLive, title });
 
     // Verify admin wallet
-    const ADMIN_WALLET = process.env.ADMIN_WALLET || '0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D';
-    if (walletAddress?.toLowerCase() !== ADMIN_WALLET.toLowerCase()) {
+    if (!isAdminWallet(walletAddress)) {
       console.error('[API] Unauthorized wallet:', walletAddress);
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }

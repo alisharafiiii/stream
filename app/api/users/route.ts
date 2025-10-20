@@ -6,9 +6,12 @@ export async function GET(request: NextRequest) {
   try {
     // Check admin auth
     const walletAddress = request.headers.get('x-wallet-address')
-    const ADMIN_WALLET = "0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D"
+    const ADMIN_WALLETS = [
+      "0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D",
+      "0x37ed24e7c7311836fd01702a882937138688c1a9"
+    ].map(w => w.toLowerCase())
     
-    if (!walletAddress || walletAddress.toLowerCase() !== ADMIN_WALLET.toLowerCase()) {
+    if (!walletAddress || !ADMIN_WALLETS.includes(walletAddress.toLowerCase())) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     

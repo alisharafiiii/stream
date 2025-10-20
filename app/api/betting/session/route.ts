@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { BettingService } from '@/lib/betting-service'
+import { isAdminWallet } from '@/lib/admin-auth'
 
 // GET current betting session
 export async function GET() {
@@ -24,8 +25,7 @@ export async function POST(request: NextRequest) {
     const { question, showPrizePool = true, walletAddress } = body
     
     // Verify admin wallet
-    const ADMIN_WALLET = process.env.ADMIN_WALLET || '0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D'
-    if (walletAddress?.toLowerCase() !== ADMIN_WALLET.toLowerCase()) {
+    if (!isAdminWallet(walletAddress)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
     
@@ -57,8 +57,7 @@ export async function PUT(request: NextRequest) {
     const { sessionId, action, walletAddress } = body
     
     // Verify admin wallet
-    const ADMIN_WALLET = process.env.ADMIN_WALLET || '0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D'
-    if (walletAddress?.toLowerCase() !== ADMIN_WALLET.toLowerCase()) {
+    if (!isAdminWallet(walletAddress)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
     
@@ -94,8 +93,7 @@ export async function DELETE(request: NextRequest) {
     const { sessionId, walletAddress } = body
     
     // Verify admin wallet
-    const ADMIN_WALLET = process.env.ADMIN_WALLET || '0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D'
-    if (walletAddress?.toLowerCase() !== ADMIN_WALLET.toLowerCase()) {
+    if (!isAdminWallet(walletAddress)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
     
