@@ -127,27 +127,31 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
             title="View profile"
           >
             {user.profileImage ? (
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-                src={user.profileImage} 
-                alt={user.displayName}
-                className={styles.profilePic}
-                width={32}
-                height={32}
-                onError={(e) => {
-                  console.error('[StreamOverlay] Profile image failed to load:', user.profileImage);
-                  e.currentTarget.src = `https://api.dicebear.com/7.x/personas/svg?seed=${user.fid}`;
-                }}
-              />
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={user.profileImage} 
+                  alt={user.displayName}
+                  className={styles.profilePic}
+                  width={32}
+                  height={32}
+                  onError={(e) => {
+                    console.error('[StreamOverlay] Profile image failed to load:', user.profileImage);
+                    e.currentTarget.src = `https://api.dicebear.com/7.x/personas/svg?seed=${user.fid}`;
+                  }}
+                />
+              </>
             ) : (
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                 src={`https://api.dicebear.com/7.x/personas/svg?seed=${user.fid}`}
                 alt={user.displayName}
                 className={styles.profilePic}
-                width={32}
-                height={32}
-              />
+                  width={32}
+                  height={32}
+                />
+              </>
             )}
             <span className={styles.displayName}>
               {user.username && !user.username.startsWith('0x') 
