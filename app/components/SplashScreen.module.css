@@ -1,10 +1,8 @@
 .splashScreen {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh; /* Dynamic viewport height for mobile */
+  inset: 0;
+  width: 100%;
+  height: 100%;
   background: #000;
   display: flex;
   align-items: center;
@@ -14,6 +12,12 @@
   overflow: hidden;
 }
 
+@supports (height: 100dvh) {
+  .splashScreen {
+    height: 100dvh;
+  }
+}
+
 @keyframes fadeOut {
   to {
     opacity: 0;
@@ -21,21 +25,26 @@
   }
 }
 
-.fullscreenLogo {
+.imageContainer {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+}
+
+.fullscreenLogo {
+  object-fit: cover !important;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
-/* Mobile portrait mode */
-@media (orientation: portrait) and (max-width: 768px) {
+/* Mobile devices */
+@media (max-width: 768px) {
   .fullscreenLogo {
-    object-fit: contain;
-    padding: 2rem;
+    object-fit: contain !important;
+  }
+  
+  .imageContainer {
+    background: #000;
   }
 }
 

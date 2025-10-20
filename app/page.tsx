@@ -120,7 +120,7 @@ export default function Home() {
               fid: String(fid),
               username: context.user.username || `user${fid}`,
               displayName: context.user.displayName || context.user.username || `User ${fid}`,
-              profileImage: `https://api.dicebear.com/7.x/personas/svg?seed=${fid}`,
+              // Don't send profileImage - let the API fetch from Farcaster
               balance: 0, // New users start with $0 - must deposit real money
             }),
           });

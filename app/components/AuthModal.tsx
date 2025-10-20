@@ -34,7 +34,7 @@ export default function AuthModal({ onComplete }: AuthModalProps) {
         fid: authUser.fid,
         username: authUser.username,
         displayName: authUser.displayName,
-        profileImage: authUser.profileImage,
+        profileImage: authUser.profileImage?.includes('dicebear') ? undefined : authUser.profileImage,
       }, false); // Skip topup
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -238,7 +238,10 @@ export default function AuthModal({ onComplete }: AuthModalProps) {
                 setError(null);
                 const authenticatedUser = await signIn();
                 if (authenticatedUser) {
-                  createUserProfile(authenticatedUser);
+                  createUserProfile({
+                    ...authenticatedUser,
+                    profileImage: authenticatedUser.profileImage?.includes('dicebear') ? undefined : authenticatedUser.profileImage,
+                  });
                 }
               }}
               disabled={isLoading}
