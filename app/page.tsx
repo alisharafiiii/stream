@@ -42,7 +42,7 @@ export default function Home() {
     if (!isMiniAppReady) {
       setMiniAppReady();
     }
-  }, [setMiniAppReady, isMiniAppReady]);
+  }, [setMiniAppReady, isMiniAppReady, showSplash]);
 
   useEffect(() => {
     console.log('🎬 Initial load effect running');

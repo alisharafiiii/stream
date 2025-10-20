@@ -9,9 +9,6 @@ interface AuthUser {
   profileImage?: string;
 }
 
-interface EthereumProvider {
-  request: (args: { method: string }) => Promise<string[]>;
-}
 
 export function useUniversalAuth() {
   const { context } = useMiniKit();
