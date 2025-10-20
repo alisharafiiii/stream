@@ -20,8 +20,8 @@ export default function CommentsOverlay() {
         if (data.type === 'initial' && data.comments) {
           // Load initial comments (show last 5)
           // Filter out any duplicates based on ID
-          const uniqueComments = data.comments.slice(-5).filter((comment, index, self) => 
-            index === self.findIndex(c => c.id === comment.id)
+          const uniqueComments = data.comments.slice(-5).filter((comment: Comment, index: number, self: Comment[]) => 
+            index === self.findIndex((c: Comment) => c.id === comment.id)
           );
           setComments(uniqueComments);
           // Scroll to bottom after initial load
