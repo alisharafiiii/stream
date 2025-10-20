@@ -10,7 +10,7 @@
   align-items: center;
   justify-content: center;
   z-index: 10000;
-  animation: fadeOut 0.5s ease-out 2s forwards;
+  animation: fadeOut 0.5s ease-out 2.5s forwards;
 }
 
 @keyframes fadeOut {

@@ -160,6 +160,11 @@ export default function Home() {
     localStorage.setItem('streamUser', JSON.stringify(authenticatedUser));
   };
 
+  // Show splash screen immediately, even while loading
+  if (showSplash) {
+    return <SplashScreen />;
+  }
+
   if (loading) {
     return (
       <div className={styles.container}>
@@ -170,8 +175,6 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
-      {/* Splash Screen */}
-      {showSplash && <SplashScreen />}
       
       {/* Auth modal */}
       {showAuth && <AuthModal onComplete={handleAuthComplete} />}

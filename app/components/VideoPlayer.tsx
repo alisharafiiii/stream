@@ -83,12 +83,12 @@ export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
   return (
     <div className={styles.videoWrapper}>
       <iframe
-        src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1&mute=0&playsinline=1&controls=0&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&showinfo=0&loop=1`}
+        src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&showinfo=0&loop=1`}
         className={styles.streamPlayer}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
         title={title}
         loading="eager"
-        sandbox="allow-same-origin allow-scripts allow-presentation"
         style={{ aspectRatio: '16/9' }}
       />
     </div>
