@@ -104,13 +104,25 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
           const resolvedSessionBets = betsData.userBets || { leftAmount: 0, rightAmount: 0 };
           
           console.log('🎰 Resolved session bets:', resolvedSessionBets);
+          console.log('🎰 Bets detail - Left:', resolvedSessionBets.leftAmount, 'Right:', resolvedSessionBets.rightAmount);
           
           // Check if user had bets in this resolved session
           const userBetTotal = resolvedSessionBets.leftAmount + resolvedSessionBets.rightAmount;
-          if (userBetTotal === 0) {
+          
+          // TEMPORARY: Force show overlay for testing
+          const FORCE_SHOW_OVERLAY = true;
+          
+          if (userBetTotal === 0 && !FORCE_SHOW_OVERLAY) {
             console.log('🎰 No bets in resolved session, skipping overlay');
             setProcessedSessionId(session.id);
             return;
+          }
+          
+          // If forcing overlay, use test amounts
+          if (FORCE_SHOW_OVERLAY && userBetTotal === 0) {
+            console.log('🎰 FORCING OVERLAY FOR TEST - Setting fake bets');
+            resolvedSessionBets.leftAmount = 5;
+            resolvedSessionBets.rightAmount = 3;
           }
           
           // Calculate if user won
