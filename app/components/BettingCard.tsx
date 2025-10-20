@@ -221,8 +221,26 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
   const showPrizePool = session.showPrizePool !== false;
 
   return (
-    <div className={`${styles.bettingCard} ${isCollapsed ? styles.collapsed : ''}`}>
-      <div className={styles.header}>
+    <>
+      {/* Floating toggle button - always visible */}
+      {isCollapsed && (
+        <button 
+          className={styles.floatingToggle}
+          onClick={() => {
+            console.log('Floating toggle clicked');
+            setIsCollapsed(false);
+            onToggleCollapse?.(false);
+          }}
+          aria-label="Expand betting section"
+          title="Click to expand betting deck"
+        >
+          <span className={styles.toggleIcon}>🎲</span>
+          <span className={styles.toggleText}>Betting</span>
+        </button>
+      )}
+      
+      <div className={`${styles.bettingCard} ${isCollapsed ? styles.collapsed : ''}`}>
+        <div className={styles.header}>
         <div className={styles.headerContent}>
           <h3 className={styles.question}>{session.question}</h3>
           <div className={styles.status}>
@@ -240,11 +258,13 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
         <button 
           className={styles.toggleButton}
           onClick={() => {
+            console.log('Toggle clicked, current state:', isCollapsed);
             const newState = !isCollapsed;
             setIsCollapsed(newState);
             onToggleCollapse?.(newState);
           }}
           aria-label={isCollapsed ? "Expand betting section" : "Collapse betting section"}
+          title={isCollapsed ? "Click to expand" : "Click to collapse"}
         >
           {isCollapsed ? '▲' : '▼'}
         </button>
@@ -456,5 +476,6 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
         </div>
       )}
     </div>
+    </>
   );
 }
