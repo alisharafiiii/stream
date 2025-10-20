@@ -25,7 +25,7 @@ async function getFarcasterProfileData(fid: string) {
   return {
     username: profile.username,
     displayName: profile.displayName,
-    profileImage: profile.pfpUrl || profile.profileImage || `https://api.dicebear.com/7.x/personas/svg?seed=${profile.fid}`,
+    profileImage: profile.pfpUrl || `https://api.dicebear.com/7.x/personas/svg?seed=${profile.fid}`,
   };
 }
 
