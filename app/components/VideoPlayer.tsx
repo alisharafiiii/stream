@@ -128,7 +128,7 @@ export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
     <div className={styles.videoWrapper}>
       <iframe
         ref={iframeRef}
-        src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&showinfo=0&loop=1&enablejsapi=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`}
+        src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&showinfo=0&loop=1&enablejsapi=1&cc_load_policy=0&autohide=1&playerapiid=ytplayer&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`}
         className={styles.streamPlayer}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
         allowFullScreen
@@ -137,6 +137,7 @@ export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
         style={{ aspectRatio: '16/9' }}
         sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
       />
+      <div className={styles.clickBlocker} aria-hidden="true" />
     </div>
   );
 }
