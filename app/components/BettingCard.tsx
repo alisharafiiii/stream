@@ -142,20 +142,6 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
     
     checkResolvedSession();
   }, [session, processedSessionId, userId]);
-    
-    // Fetch updated balance
-    setTimeout(async () => {
-      try {
-        const response = await fetch(`/api/user?fid=${userId}`);
-        if (response.ok) {
-          const userData = await response.json();
-          onBalanceUpdate(userData.balance);
-        }
-      } catch (error) {
-        console.error('Failed to fetch updated balance:', error);
-      }
-    }, 1000);
-  }, [session, userBets, processedSessionId, userId, onBalanceUpdate]);
 
   const handleBet = async (option: 'left' | 'right') => {
     if (!session || !amount || betting) return;
@@ -467,7 +453,7 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
                   <div className={styles.payoutAmount}>{formatAmount(resultPayout)}</div>
                 </div>
                 <div className={styles.receipt}>
-                  <h3 className={styles.receiptTitle}>Payout Breakdown</h3>
+                  <div className={styles.receiptTitle}>Betting Round #{session.id}</div>
                   <div className={styles.receiptRow}>
                     <span className={styles.receiptLabel}>Winning Bet</span>
                     <span className={styles.receiptValue}>{formatAmount(session.winner === 'left' ? savedUserBets.leftAmount : savedUserBets.rightAmount)}</span>
@@ -491,7 +477,7 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
               <>
                 <h2 className={styles.loseTitle}>💀 YOU LOST 💀</h2>
                 <div className={styles.receipt} style={{ borderColor: '#ff0040' }}>
-                  <div className={styles.receiptTitle}>Betting Round #{session.sessionId}</div>
+                  <div className={styles.receiptTitle}>Betting Round #{session.id}</div>
                   <div className={styles.receiptRow}>
                     <span className={styles.receiptLabel} style={{ color: '#ff0040' }}>X BET</span>
                     <span className={styles.receiptValue} style={{ color: '#ff0040' }}>{formatAmount(savedUserBets.leftAmount)}</span>
