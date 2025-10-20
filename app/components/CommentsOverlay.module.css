@@ -13,7 +13,7 @@
   gap: 8px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-top: 10px;
+  padding-bottom: 10px; /* Changed from padding-top to padding-bottom for column-reverse */
   /* Debug: Add background to verify visibility */
   /* background: rgba(255, 0, 0, 0.1); */
   

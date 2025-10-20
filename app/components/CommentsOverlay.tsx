@@ -20,16 +20,22 @@ export default function CommentsOverlay() {
         if (data.type === 'initial' && data.comments) {
           // Load initial comments (show last 5)
           setComments(data.comments.slice(-5));
+          // Scroll to bottom after initial load
+          setTimeout(() => {
+            if (containerRef.current) {
+              containerRef.current.scrollTop = 0;
+            }
+          }, 100);
         } else if (data.type === 'new' && data.comment) {
           // Add new comment
           setComments(prev => {
             // Keep only last 10 comments
             const updated = [...prev, data.comment].slice(-10);
             
-            // Scroll to bottom after adding new comment
+            // With column-reverse, scrollTop = 0 shows the bottom (newest items)
             setTimeout(() => {
               if (containerRef.current) {
-                containerRef.current.scrollTop = containerRef.current.scrollHeight;
+                containerRef.current.scrollTop = 0;
               }
             }, 100);
             
