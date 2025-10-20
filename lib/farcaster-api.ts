@@ -14,6 +14,8 @@ interface FarcasterProfile {
 const NEYNAR_API_KEY = process.env.NEYNAR_API_KEY;
 const NEYNAR_API_URL = 'https://api.neynar.com/v2/farcaster';
 
+console.log('[Farcaster API] NEYNAR_API_KEY:', NEYNAR_API_KEY ? 'Configured' : 'Not configured');
+
 // Fetch real Farcaster profile data
 export async function fetchFarcasterProfile(fid: string): Promise<FarcasterProfile | null> {
   try {
@@ -28,8 +30,11 @@ export async function fetchFarcasterProfile(fid: string): Promise<FarcasterProfi
       };
     }
 
-    // Fetch user data from Neynar API
-    const response = await fetch(`${NEYNAR_API_URL}/user/by-fid?fid=${fid}`, {
+    // Fetch user data from Neynar API (using bulk endpoint)
+    const url = `${NEYNAR_API_URL}/user/bulk?fids=${fid}`;
+    console.log('[Farcaster API] Fetching:', url);
+    
+    const response = await fetch(url, {
       headers: {
         'accept': 'application/json',
         'api_key': NEYNAR_API_KEY,
@@ -41,11 +46,13 @@ export async function fetchFarcasterProfile(fid: string): Promise<FarcasterProfi
     }
 
     const data = await response.json();
-    const user = data.user;
+    const users = data.users;
 
-    if (!user) {
+    if (!users || users.length === 0) {
       throw new Error('User not found');
     }
+    
+    const user = users[0];
 
     return {
       fid: user.fid.toString(),
