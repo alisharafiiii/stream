@@ -4,6 +4,7 @@ import { useUniversalAuth } from "../hooks/useUniversalAuth";
 import styles from "./AuthModal.module.css";
 import { pay, getPaymentStatus } from '@base-org/account';
 import { PAYMENT_CONFIG } from '../config/payment';
+import Image from "next/image";
 
 interface User {
   fid: string;
@@ -23,6 +24,7 @@ export default function AuthModal({ onComplete }: AuthModalProps) {
   const [user, setUser] = useState<User | null>(null);
   const [localError, setError] = useState<string | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [isCreatingGuest, setIsCreatingGuest] = useState(false);
   const { user: authUser, isLoading, error: authError, signIn, isInBaseApp } = useUniversalAuth();
 
   useEffect(() => {
@@ -63,6 +65,23 @@ export default function AuthModal({ onComplete }: AuthModalProps) {
     } catch {
       setError('Failed to create profile. Please try again.');
     }
+  };
+
+  const handleGuestLogin = async () => {
+    setIsCreatingGuest(true);
+    setError(null);
+    
+    // Generate a random guest ID
+    const guestId = `guest_${Math.random().toString(36).substring(2, 15)}`;
+    
+    await createUserProfile({
+      fid: guestId,
+      username: `Guest_${guestId.substring(6, 11)}`,
+      displayName: `Guest Player`,
+      profileImage: undefined,
+    });
+    
+    setIsCreatingGuest(false);
   };
 
   const handleTopup = async () => {
@@ -182,27 +201,24 @@ export default function AuthModal({ onComplete }: AuthModalProps) {
   };
 
   if (step === 'complete') {
-    return (
-      <div className={styles.overlay}>
-        <div className={styles.modal}>
-          <div className={styles.success}>
-            <div className={styles.successIcon}>✅</div>
-            <h2>Welcome to Stream Live!</h2>
-            <p>Enjoy the stream</p>
-          </div>
-        </div>
-      </div>
-    );
+    return null; // Modal will close and app will load
   }
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
+    <div className={styles.modal}>
+      <div className={styles.modalContent}>
         {step === 'signin' && (
-          <div className={styles.content}>
-            <div className={styles.icon}>📺</div>
-            <h2>Welcome to Stream Live</h2>
-            <p>Sign in to create your profile and start watching</p>
+          <>
+            <Image 
+              src="/clicknpray-preview.png" 
+              alt="Click n Pray" 
+              width={120}
+              height={120}
+              className={styles.logo}
+              priority
+            />
+            <h1 className={styles.title}>Welcome</h1>
+            <p className={styles.subtitle}>Join the action</p>
             
             {(authError || localError) && (
               <div className={styles.error}>
@@ -212,25 +228,26 @@ export default function AuthModal({ onComplete }: AuthModalProps) {
             
             <button 
               onClick={async () => {
-                setError(null); // Clear any previous errors
+                setError(null);
                 const authenticatedUser = await signIn();
                 if (authenticatedUser) {
                   createUserProfile(authenticatedUser);
                 }
               }}
               disabled={isLoading}
-              className={styles.primaryButton}
+              className={styles.baseAuthButton}
             >
-              {isLoading ? 'Connecting...' : isInBaseApp ? 'Connect with Base' : 'Connect Wallet'}
+              {isLoading ? 'Connecting...' : 'Connect Base Wallet'}
             </button>
             
-            <p className={styles.hint}>
-              {isInBaseApp 
-                ? 'Your profile will be created automatically' 
-                : 'Connect your wallet or continue as demo user'
-              }
-            </p>
-          </div>
+            <button
+              onClick={handleGuestLogin}
+              disabled={isCreatingGuest}
+              className={styles.guestButton}
+            >
+              {isCreatingGuest ? 'Creating...' : 'Continue as Guest'}
+            </button>
+          </>
         )}
 
         {step === 'topup' && user && (

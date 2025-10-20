@@ -41,47 +41,26 @@ export function useUniversalAuth() {
   }, [context]);
 
   const signInBrowser = useCallback(async () => {
-    // Browser wallet authentication
+    // In browser, we'll use a simplified auth flow
     try {
-      // Check if ethereum wallet is available
-      if (typeof window !== 'undefined' && (window as Window & { ethereum?: EthereumProvider }).ethereum) {
-        const ethereum = (window as Window & { ethereum?: EthereumProvider }).ethereum;
-        
-        // Request account access
-        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-        
-        if (accounts && accounts.length > 0) {
-          const address = accounts[0];
-          const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
-          
-          // Create user from wallet address
-          const walletUser: AuthUser = {
-            fid: address.toLowerCase(), // Use wallet address as FID
-            username: `wallet_${shortAddress}`,
-            displayName: `Wallet User ${shortAddress}`,
-            profileImage: `https://api.dicebear.com/7.x/identicon/svg?seed=${address}`,
-          };
-          
-          return walletUser;
-        }
-      } else {
-        // Fallback to demo user if no wallet available
-        const randomFid = Math.floor(100000 + Math.random() * 900000).toString();
-        
-        const demoUser: AuthUser = {
-          fid: randomFid,
-          username: `demo${randomFid}`,
-          displayName: `Demo User ${randomFid}`,
-          profileImage: `https://api.dicebear.com/7.x/personas/svg?seed=${randomFid}`,
-        };
-        
-        return demoUser;
+      // Create a unique browser session ID
+      const browserId = localStorage.getItem('browserId') || `browser_${Math.random().toString(36).substring(2, 15)}`;
+      if (!localStorage.getItem('browserId')) {
+        localStorage.setItem('browserId', browserId);
       }
+      
+      // Create user from browser session
+      const browserUser: AuthUser = {
+        fid: browserId,
+        username: `User_${browserId.substring(8, 13)}`,
+        displayName: `Browser User`,
+        profileImage: `https://api.dicebear.com/7.x/identicon/svg?seed=${browserId}`,
+      };
+      
+      return browserUser;
     } catch {
-      throw new Error('Failed to connect wallet');
+      throw new Error('Failed to create browser session');
     }
-    
-    return null;
   }, []);
 
   const signInMiniKit = useCallback(async () => {
