@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { redis } from '@/lib/redis';
+import { Comment } from '@/lib/types/comment';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
       controller.enqueue(encoder.encode(`data: {"type": "connected"}\n\n`));
 
       // Function to send SSE message
-      const sendMessage = (data: any) => {
+      const sendMessage = (data: { type: string; comment?: any; comments?: any[] }) => {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
       };
 
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
         const comments = [];
         
         for (const commentId of recentCommentIds) {
-          const comment = await redis.get<any>(`stream:comment:${commentId}`);
+          const comment = await redis.get<Comment>(`stream:comment:${commentId}`);
           if (comment) {
             comments.push(comment);
           }
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
           const recentCommentIds = await redis.lrange('stream:comments:recent', 0, 9);
           
           for (const commentId of recentCommentIds) {
-            const comment = await redis.get<any>(`stream:comment:${commentId}`);
+            const comment = await redis.get<Comment>(`stream:comment:${commentId}`);
             if (comment && comment.timestamp > lastCheck) {
               sendMessage({ type: 'new', comment });
             }

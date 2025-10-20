@@ -71,6 +71,7 @@ export default function CommentsOverlay() {
           className={styles.comment}
           style={{ top: `${comment.position}%` }}
         >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
             src={comment.profileImage} 
             alt={comment.username}
