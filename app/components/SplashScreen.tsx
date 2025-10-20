@@ -6,7 +6,7 @@ export default function SplashScreen() {
     <div className={styles.splashScreen}>
       <div className={styles.imageContainer}>
         <Image 
-          src="/clicknpray-preview.png" 
+          src="/splash2.PNG" 
           alt="Click n Pray" 
           fill
           className={styles.fullscreenLogo}

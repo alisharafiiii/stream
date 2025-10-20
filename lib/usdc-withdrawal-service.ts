@@ -23,12 +23,13 @@ export class USDCWithdrawalService {
     this.provider = new ethers.JsonRpcProvider(rpcUrl);
     
     // Load treasury wallet
-    if (!process.env.TREASURY_PRIVATE_KEY) {
+    const privateKey = process.env.PRIVATE_KEY || process.env.TREASURY_PRIVATE_KEY;
+    if (!privateKey) {
       throw new Error('Treasury private key not configured');
     }
     
     this.wallet = new ethers.Wallet(
-      process.env.TREASURY_PRIVATE_KEY,
+      privateKey,
       this.provider
     );
     
@@ -41,8 +42,14 @@ export class USDCWithdrawalService {
   }
   
   async getUSDCBalance(): Promise<string> {
-    const balance = await this.usdcContract.balanceOf(this.wallet.address);
-    return ethers.formatUnits(balance, 6); // USDC has 6 decimals
+    try {
+      const balance = await this.usdcContract.balanceOf(this.wallet.address);
+      return ethers.formatUnits(balance, 6); // USDC has 6 decimals
+    } catch (error) {
+      console.error('Error getting USDC balance:', error);
+      // Return 0 if we can't get the balance
+      return "0";
+    }
   }
   
   async getETHBalance(): Promise<string> {
@@ -61,7 +68,14 @@ export class USDCWithdrawalService {
       const amountInUnits = ethers.parseUnits(amount.toString(), 6);
       
       // Check USDC balance
-      const usdcBalance = await this.usdcContract.balanceOf(this.wallet.address);
+      let usdcBalance;
+      try {
+        usdcBalance = await this.usdcContract.balanceOf(this.wallet.address);
+      } catch (error) {
+        console.error('Error checking USDC balance:', error);
+        throw new Error('Failed to check treasury balance. Please try again later.');
+      }
+      
       if (usdcBalance < amountInUnits) {
         throw new Error('Insufficient USDC balance in treasury');
       }
