@@ -23,7 +23,7 @@ export class USDCWithdrawalService {
     this.provider = new ethers.JsonRpcProvider(rpcUrl);
     
     // Load treasury wallet
-    const privateKey = process.env.PRIVATE_KEY || process.env.TREASURY_PRIVATE_KEY;
+    const privateKey = process.env.TREASURY_PRIVATE_KEY;
     if (!privateKey) {
       throw new Error('Treasury private key not configured');
     }
