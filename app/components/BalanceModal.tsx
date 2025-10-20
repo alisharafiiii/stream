@@ -109,6 +109,11 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
                 const userData = await response.json();
                 onBalanceUpdate(userData.balance);
                 setShowDeposit(false);
+                alert('Deposit successful!');
+              } else {
+                const error = await response.text();
+                console.error('Deposit API error:', error);
+                alert('Failed to record deposit. Please contact support.');
               }
             }
           } catch (error) {

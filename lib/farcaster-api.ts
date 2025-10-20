@@ -18,13 +18,13 @@ const NEYNAR_API_URL = 'https://api.neynar.com/v2/farcaster';
 export async function fetchFarcasterProfile(fid: string): Promise<FarcasterProfile | null> {
   try {
     // If no API key is configured, return placeholder data
-    if (!NEYNAR_API_KEY) {
+    if (!NEYNAR_API_KEY || NEYNAR_API_KEY === '') {
       console.warn('[Farcaster API] No NEYNAR_API_KEY configured, using placeholder data');
       return {
         fid,
         username: `user${fid}`,
         displayName: `User ${fid}`,
-        pfpUrl: `https://i.imgur.com/default.png`, // Default placeholder
+        pfpUrl: `https://api.dicebear.com/7.x/personas/svg?seed=${fid}`, // Better placeholder
       };
     }
 
