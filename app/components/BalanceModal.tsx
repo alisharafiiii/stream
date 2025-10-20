@@ -67,6 +67,13 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
           }
         }
       } else {
+        // Browser: Check if user is a guest
+        if (user.fid.startsWith('guest_')) {
+          alert('Guest accounts cannot deposit real money. Please sign out and connect with a real wallet to deposit.');
+          setIsProcessing(false);
+          return;
+        }
+        
         // Browser: Connect wallet and send USDC
         if (typeof window !== 'undefined' && (window as Window & { ethereum?: EthereumProvider }).ethereum) {
           try {
@@ -175,6 +182,12 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
 
   const handleWithdraw = async (amount: number) => {
     try {
+      // Check if user is a guest
+      if (user.fid.startsWith('guest_')) {
+        alert('Guest accounts cannot withdraw. Please sign out and connect with a real wallet.');
+        return;
+      }
+      
       // Get user's wallet address
       let walletAddress = '';
       

@@ -154,6 +154,18 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
           >
             <span className={styles.balance}>${user.balance.toFixed(2)}</span>
           </div>
+          {user.fid.startsWith('guest_') && (
+            <button
+              className={styles.signOutButton}
+              onClick={() => {
+                localStorage.removeItem('streamUser');
+                window.location.reload();
+              }}
+              title="Sign out and connect wallet"
+            >
+              Sign Out
+            </button>
+          )}
         </div>
       </div>
 
