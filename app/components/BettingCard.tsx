@@ -80,36 +80,68 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
 
   // Check for resolved sessions
   useEffect(() => {
+    console.log('🎰 Checking for resolved session:', {
+      session: session?.id,
+      status: session?.status,
+      winner: session?.winner,
+      userBets,
+      processedSessionId
+    });
+    
     if (!session || !session.winner || session.status !== 'resolved') return;
     if (processedSessionId === session.id) return; // Already processed
     
-    // Check if user had bets in this session
-    const userBetTotal = userBets.leftAmount + userBets.rightAmount;
-    if (userBetTotal === 0) return;
+    // IMPORTANT: When a session is resolved, we need to check if there WERE bets
+    // The current userBets might already be reset for the new session
+    // So we need to fetch the historical bets for this resolved session
     
-    // Calculate if user won
-    const userBetOnWinner = session.winner === 'left' ? userBets.leftAmount : userBets.rightAmount;
+    const checkResolvedSession = async () => {
+      try {
+        // Fetch user's bets for the resolved session specifically
+        const betsResponse = await fetch(`/api/betting/session?sessionId=${session.id}&userId=${userId}`);
+        if (betsResponse.ok) {
+          const betsData = await betsResponse.json();
+          const resolvedSessionBets = betsData.userBets || { leftAmount: 0, rightAmount: 0 };
+          
+          console.log('🎰 Resolved session bets:', resolvedSessionBets);
+          
+          // Check if user had bets in this resolved session
+          const userBetTotal = resolvedSessionBets.leftAmount + resolvedSessionBets.rightAmount;
+          if (userBetTotal === 0) {
+            console.log('🎰 No bets in resolved session, skipping overlay');
+            setProcessedSessionId(session.id);
+            return;
+          }
+          
+          // Calculate if user won
+          const userBetOnWinner = session.winner === 'left' ? resolvedSessionBets.leftAmount : resolvedSessionBets.rightAmount;
+          
+          if (userBetOnWinner > 0) {
+            // Calculate payout if user won - simple 2x minus service fee
+            const serviceFeePercent = session.serviceFeePercent || 6.9;
+            const grossPayout = userBetOnWinner * 2;
+            const serviceFee = grossPayout * (serviceFeePercent / 100);
+            const netPayout = grossPayout - serviceFee;
+            setResultPayout(netPayout);
+          } else {
+            setResultPayout(0);
+          }
+          
+          // Save the resolved session bets for display
+          setSavedUserBets(resolvedSessionBets);
+          
+          // Show result
+          console.log('🎰 Showing result overlay!');
+          setShowResult(true);
+          setProcessedSessionId(session.id);
+        }
+      } catch (error) {
+        console.error('Failed to fetch resolved session bets:', error);
+      }
+    };
     
-    if (userBetOnWinner > 0) {
-      // Calculate payout if user won - simple 2x minus service fee
-      const serviceFeePercent = session.serviceFeePercent || 6.9;
-      const grossPayout = userBetOnWinner * 2;
-      const serviceFee = grossPayout * (serviceFeePercent / 100);
-      const netPayout = grossPayout - serviceFee;
-      setResultPayout(netPayout);
-    } else {
-      setResultPayout(0);
-    }
-    
-    // Only show result if user has placed bets
-    if (userBets.leftAmount > 0 || userBets.rightAmount > 0) {
-      // Save user bets for display
-      setSavedUserBets({...userBets});
-      
-      // Show result
-      setShowResult(true);
-    }
-    setProcessedSessionId(session.id);
+    checkResolvedSession();
+  }, [session, processedSessionId, userId]);
     
     // Fetch updated balance
     setTimeout(async () => {
