@@ -19,6 +19,18 @@ console.log('[Farcaster API] NEYNAR_API_KEY:', NEYNAR_API_KEY ? 'Configured' : '
 // Fetch real Farcaster profile data
 export async function fetchFarcasterProfile(fid: string): Promise<FarcasterProfile | null> {
   try {
+    // Check if FID is a wallet address (starts with 0x)
+    if (fid.startsWith('0x')) {
+      console.log('[Farcaster API] Wallet address detected, using generated avatar');
+      const shortAddress = `${fid.slice(0, 6)}...${fid.slice(-4)}`;
+      return {
+        fid,
+        username: shortAddress,
+        displayName: shortAddress,
+        pfpUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${fid}`,
+      };
+    }
+    
     // If no API key is configured, return placeholder data
     if (!NEYNAR_API_KEY || NEYNAR_API_KEY === '') {
       console.warn('[Farcaster API] No NEYNAR_API_KEY configured, using placeholder data');
@@ -67,12 +79,24 @@ export async function fetchFarcasterProfile(fid: string): Promise<FarcasterProfi
     console.error('[Farcaster API] Error fetching profile:', error);
     
     // Return fallback data
-    return {
-      fid,
-      username: `user${fid}`,
-      displayName: `User ${fid}`,
-      pfpUrl: `https://i.imgur.com/default.png`,
-    };
+    if (fid.startsWith('0x')) {
+      // For wallet addresses, use identicon
+      const shortAddress = `${fid.slice(0, 6)}...${fid.slice(-4)}`;
+      return {
+        fid,
+        username: shortAddress,
+        displayName: shortAddress,
+        pfpUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${fid}`,
+      };
+    } else {
+      // For numeric FIDs, use personas
+      return {
+        fid,
+        username: `user${fid}`,
+        displayName: `User ${fid}`,
+        pfpUrl: `https://api.dicebear.com/7.x/personas/svg?seed=${fid}`,
+      };
+    }
   }
 }
 

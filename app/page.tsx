@@ -108,8 +108,9 @@ export default function Home() {
         
         if (response.ok) {
           const userData = await response.json();
-          console.log('🎬 User created:', userData);
+          console.log('🎬 User fetched:', userData);
           console.log('🎬 Profile image URL:', userData.profileImage);
+          console.log('🎬 FID type:', typeof userData.fid, 'value:', userData.fid);
           setUser(userData);
           setShowAuth(false);
           localStorage.setItem('streamUser', JSON.stringify(userData));
