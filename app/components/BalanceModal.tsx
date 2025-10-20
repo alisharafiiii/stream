@@ -67,14 +67,7 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
           }
         }
       } else {
-        // Browser: Check if user is a guest
-        if (user.fid.startsWith('guest_')) {
-          alert('Guest accounts cannot deposit real money. Please sign out and connect with a real wallet to deposit.');
-          setIsProcessing(false);
-          return;
-        }
-        
-        // Browser: Connect wallet and send USDC
+        // Browser: For both guest and wallet users, connect wallet and send USDC
         if (typeof window !== 'undefined' && (window as Window & { ethereum?: EthereumProvider }).ethereum) {
           try {
             const treasuryAddress = process.env.NEXT_PUBLIC_TREASURY_ADDRESS || "0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D";
@@ -170,7 +163,10 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
             }
           }
         } else {
-          alert('Please install MetaMask or another Web3 wallet to deposit.');
+          // No wallet detected
+          if (window.confirm('No wallet detected. Would you like to install MetaMask?')) {
+            window.open('https://metamask.io/download/', '_blank');
+          }
         }
       }
     } catch (error) {

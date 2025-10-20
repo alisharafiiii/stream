@@ -20,6 +20,8 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
   const [viewerCount, setViewerCount] = useState(0);
   const [youtubeViewers, setYoutubeViewers] = useState(0);
   const [showBalanceModal, setShowBalanceModal] = useState(false);
+  
+  console.log('StreamOverlay - user.fid:', user.fid, 'isGuest:', user.fid.startsWith('guest_'));
   const [sessionId] = useState(() => {
     // Get existing session ID from localStorage or create a new one
     if (typeof window !== 'undefined') {

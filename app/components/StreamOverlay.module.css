@@ -207,21 +207,27 @@
 
 /* Sign out button for guest users */
 .signOutButton {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--accent-purple);
+  border: 2px solid white;
   color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  margin-left: 0.5rem;
-  font-family: var(--font-mono);
+  margin-left: 1rem;
+  font-family: var(--font-pixel);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(153, 69, 255, 0.3);
 }
 
 .signOutButton:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: white;
+  color: var(--accent-purple);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(153, 69, 255, 0.5);
 }
 
 .balanceLabel {
