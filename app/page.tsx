@@ -178,6 +178,25 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
+      {/* DEPLOYMENT TEST BANNER - REMOVE AFTER CONFIRMING */}
+      <div style={{
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        background: 'rgba(255, 0, 255, 0.9)',
+        color: 'white',
+        padding: '20px 40px',
+        fontSize: '24px',
+        fontWeight: 'bold',
+        borderRadius: '10px',
+        zIndex: 99999,
+        textAlign: 'center',
+        boxShadow: '0 0 20px rgba(255, 0, 255, 0.8)'
+      }}>
+        🚀 DEPLOYMENT V2 WORKING! 🚀<br/>
+        <span style={{ fontSize: '14px' }}>All features active</span>
+      </div>
       
       {/* Auth modal */}
       {showAuth && <AuthModal onComplete={handleAuthComplete} />}
