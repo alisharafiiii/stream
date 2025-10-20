@@ -220,8 +220,10 @@ export default function Home() {
               onToggleCollapse={setIsBettingCollapsed}
             />
           )}
-        {/* Floating Comments Overlay */}
-        <CommentsOverlay />
+          
+          {/* Floating Comments Overlay - Always visible */}
+          <CommentsOverlay />
+          
           {/* Comment Input FAB */}
           {user && (
             <CommentInput
