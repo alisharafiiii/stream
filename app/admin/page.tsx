@@ -465,6 +465,14 @@ export default function AdminPage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className={pageStyles.container}>
+        <div className={styles.error}>Error: {error}</div>
+      </div>
+    );
+  }
+
   if (!isConnected) {
     return (
       <div className={pageStyles.container}>
