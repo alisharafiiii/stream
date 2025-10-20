@@ -81,12 +81,11 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<'stream' | 'betting' | 'users'>('stream');
 
   // Get admin wallet from environment or use default
-  // const ADMIN_WALLETS = [
-  //   process.env.NEXT_PUBLIC_ADMIN_WALLET || process.env.ADMIN_WALLET || "0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D",
-  // ].map(w => w.toLowerCase());
+  const ADMIN_WALLETS = [
+    process.env.NEXT_PUBLIC_ADMIN_WALLET || "0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D",
+  ].map(w => w.toLowerCase());
   
-  // TEMPORARY: Allow any wallet for testing (REMOVE IN PRODUCTION!)
-  const isAdmin = true; // address ? ADMIN_WALLETS.includes(address.toLowerCase()) : false;
+  const isAdmin = address ? ADMIN_WALLETS.includes(address.toLowerCase()) : false;
 
   useEffect(() => {
     fetchStreamConfig();
