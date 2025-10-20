@@ -4,12 +4,14 @@
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile */
   background: #000;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10000;
   animation: fadeOut 0.5s ease-out 2.5s forwards;
+  overflow: hidden;
 }
 
 @keyframes fadeOut {
@@ -25,7 +27,16 @@
   left: 0;
   width: 100%;
   height: 100%;
+  object-fit: cover;
   animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Mobile portrait mode */
+@media (orientation: portrait) and (max-width: 768px) {
+  .fullscreenLogo {
+    object-fit: contain;
+    padding: 2rem;
+  }
 }
 
 @keyframes pulse {

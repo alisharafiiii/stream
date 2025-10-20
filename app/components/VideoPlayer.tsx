@@ -95,13 +95,14 @@ export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
     <div className={styles.videoWrapper}>
       <iframe
         ref={iframeRef}
-        src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&showinfo=0&loop=1&enablejsapi=1`}
+        src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&showinfo=0&loop=1&enablejsapi=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`}
         className={styles.streamPlayer}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
         allowFullScreen
         title={title}
         loading="eager"
         style={{ aspectRatio: '16/9' }}
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
       />
     </div>
   );
