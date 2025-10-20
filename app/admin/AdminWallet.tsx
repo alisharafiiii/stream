@@ -2,6 +2,10 @@
 import { useState } from "react";
 import styles from "./admin.module.css";
 
+interface EthereumProvider {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+}
+
 interface AdminWalletProps {
   onConnect: (address: string) => void;
 }
@@ -16,13 +20,13 @@ export default function AdminWallet({ onConnect }: AdminWalletProps) {
 
     try {
       // Check if MetaMask or another wallet is installed
-      if (typeof window !== 'undefined' && (window as Window & { ethereum?: any }).ethereum) {
-        const ethereum = (window as Window & { ethereum?: any }).ethereum;
+      if (typeof window !== 'undefined' && (window as Window & { ethereum?: EthereumProvider }).ethereum) {
+        const ethereum = (window as Window & { ethereum?: EthereumProvider }).ethereum;
         
         // Request account access
         const accounts = await ethereum.request({ 
           method: 'eth_requestAccounts' 
-        });
+        }) as string[];
         
         if (accounts && accounts.length > 0) {
           // Switch to Base network if needed
@@ -33,7 +37,7 @@ export default function AdminWallet({ onConnect }: AdminWalletProps) {
             });
           } catch (switchError) {
             // If the chain doesn't exist, add it
-            if ((switchError as any).code === 4902) {
+            if ((switchError as { code?: number }).code === 4902) {
               await ethereum.request({
                 method: 'wallet_addEthereumChain',
                 params: [{
