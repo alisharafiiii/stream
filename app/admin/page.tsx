@@ -88,19 +88,24 @@ export default function AdminPage() {
   const isAdmin = address ? ADMIN_WALLETS.includes(address.toLowerCase()) : false;
 
   useEffect(() => {
-    fetchStreamConfig();
-    fetchBettingSession();
-  }, []);
+    // Only fetch data after wallet is connected
+    if (isConnected && address) {
+      fetchStreamConfig();
+      fetchBettingSession();
+    }
+  }, [isConnected, address]);
 
   const fetchStreamConfig = async () => {
     try {
       const response = await fetch('/api/stream-config');
-      if (response.ok) {
-        const data = await response.json();
-        setStreamConfig(data);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      const data = await response.json();
+      setStreamConfig(data);
     } catch (error) {
       console.error('Failed to fetch stream config:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch stream config');
     } finally {
       setLoading(false);
     }
