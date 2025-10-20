@@ -3,7 +3,11 @@ import { useEffect, useState, useRef } from 'react';
 import styles from './CommentsOverlay.module.css';
 import { Comment } from '@/lib/types/comment';
 
-export default function CommentsOverlay() {
+interface CommentsOverlayProps {
+  isBettingCollapsed?: boolean;
+}
+
+export default function CommentsOverlay({ isBettingCollapsed = false }: CommentsOverlayProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const eventSourceRef = useRef<EventSource | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -60,7 +64,13 @@ export default function CommentsOverlay() {
   }, []);
 
   return (
-    <div className={styles.overlay} ref={containerRef}>
+    <div 
+      className={styles.overlay} 
+      ref={containerRef}
+      style={{
+        '--betting-deck-height': isBettingCollapsed ? '60px' : '160px'
+      } as React.CSSProperties}
+    >
       {comments.map((comment) => (
         <div
           key={comment.id}

@@ -1,19 +1,20 @@
 .overlay {
   position: fixed;
-  bottom: 180px; /* Above betting controls */
+  bottom: calc(var(--betting-deck-height, 160px) + 10px); /* Dynamic positioning above betting deck */
   left: 12px;
   width: 300px;
   max-width: calc(100vw - 100px); /* Leave space for FAB */
-  height: 40vh;
-  max-height: 300px;
+  height: calc(100vh - var(--betting-deck-height, 160px) - 100px); /* Fill space up to header */
+  max-height: 500px;
   pointer-events: none;
   z-index: 15;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse; /* Stack from bottom up */
   gap: 8px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: 10px;
+  padding-top: 10px;
+  transition: bottom 0.3s ease;
   
   /* Hide scrollbar */
   scrollbar-width: none;
@@ -29,32 +30,32 @@
   align-items: flex-start;
   gap: 8px;
   padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.7); /* Reduced opacity to 70% */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   pointer-events: none;
-  animation: slideInLeft 0.3s ease-out;
-  transform-origin: left center;
+  animation: slideUp 0.4s ease-out;
+  transform-origin: bottom left;
   width: fit-content;
   max-width: 100%;
 }
 
-@keyframes slideInLeft {
+@keyframes slideUp {
   0% {
     opacity: 0;
-    transform: translateX(-20px) scale(0.8);
+    transform: translateY(20px) scale(0.9);
   }
   100% {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: translateY(0) scale(1);
   }
 }
 
 .profilePic {
-  width: 28px;
-  height: 28px;
+  width: 38px; /* Increased by 35% from 28px */
+  height: 38px; /* Increased by 35% from 28px */
   border-radius: 50%;
   border: 2px solid var(--accent-purple);
   flex-shrink: 0;
@@ -100,11 +101,11 @@
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .overlay {
-    bottom: 100px; /* Lower when betting deck is collapsed */
+    bottom: calc(var(--betting-deck-height, 140px) + 10px); /* Dynamic positioning */
     left: 8px;
     width: 260px;
-    height: 40vh;
-    max-height: 280px;
+    height: calc(100vh - var(--betting-deck-height, 140px) - 80px);
+    max-height: 400px;
   }
   
   .comment {
@@ -112,8 +113,8 @@
   }
   
   .profilePic {
-    width: 24px;
-    height: 24px;
+    width: 32px; /* Increased by 35% from 24px */
+    height: 32px; /* Increased by 35% from 24px */
   }
   
   .content {
