@@ -1,5 +1,10 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-onchain`](https://www.npmjs.com/package/create-onchain).
 
+## 🔊 Audio Control Update
+- Added mute/unmute button for YouTube streams
+- Button located in bottom-left corner
+- Pulsing animation when muted to draw attention
+
 
 ## Getting Started
 

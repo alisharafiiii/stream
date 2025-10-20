@@ -76,8 +76,19 @@ export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
         ? '{"event":"command","func":"unMute","args":""}'
         : '{"event":"command","func":"mute","args":""}';
       
+      // Send command multiple times to ensure it works
       iframeRef.current.contentWindow.postMessage(command, '*');
+      setTimeout(() => {
+        iframeRef.current?.contentWindow?.postMessage(command, '*');
+      }, 100);
+      setTimeout(() => {
+        iframeRef.current?.contentWindow?.postMessage(command, '*');
+      }, 300);
+      
       setIsMuted(!isMuted);
+      
+      // Log for debugging
+      console.log('🔊 Sound toggled:', isMuted ? 'Unmuting' : 'Muting');
     }
   };
 
