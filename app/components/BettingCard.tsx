@@ -457,11 +457,26 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
               </>
             ) : (
               <>
-                <h2 className={styles.loseTitle}>😔 You Lost</h2>
-                <div className={styles.resultAmount}>
-                  <div>Your Bet: {formatAmount(savedUserBets.leftAmount + savedUserBets.rightAmount)}</div>
-                  <div style={{ marginTop: '1rem', fontSize: '1rem', color: 'var(--text-secondary)' }}>
-                    Better luck next time!
+                <h2 className={styles.loseTitle}>💀 YOU LOST 💀</h2>
+                <div className={styles.receipt} style={{ borderColor: '#ff0040' }}>
+                  <div className={styles.receiptTitle}>Betting Round #{session.sessionId}</div>
+                  <div className={styles.receiptRow}>
+                    <span className={styles.receiptLabel} style={{ color: '#ff0040' }}>X BET</span>
+                    <span className={styles.receiptValue} style={{ color: '#ff0040' }}>{formatAmount(savedUserBets.leftAmount)}</span>
+                  </div>
+                  <div className={styles.receiptRow}>
+                    <span className={styles.receiptLabel} style={{ color: '#ff0040' }}>O BET</span>
+                    <span className={styles.receiptValue} style={{ color: '#ff0040' }}>{formatAmount(savedUserBets.rightAmount)}</span>
+                  </div>
+                  <div className={styles.receiptDivider} style={{ borderColor: '#ff0040' }} />
+                  <div className={styles.receiptRow}>
+                    <span className={styles.receiptLabel} style={{ color: '#ff0040' }}>TOTAL LOST</span>
+                    <span className={`${styles.receiptValue} ${styles.receiptTotal}`} style={{ color: '#ff0040' }}>
+                      -{formatAmount(savedUserBets.leftAmount + savedUserBets.rightAmount)}
+                    </span>
+                  </div>
+                  <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '1.2rem', color: '#ff0040' }}>
+                    Better luck next time! 🎲
                   </div>
                 </div>
               </>
