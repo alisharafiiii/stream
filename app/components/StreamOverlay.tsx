@@ -127,7 +127,8 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
             title="View profile"
           >
             {user.profileImage ? (
-              <img
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
                 src={user.profileImage} 
                 alt={user.displayName}
                 className={styles.profilePic}
@@ -139,7 +140,8 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
                 }}
               />
             ) : (
-              <img
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
                 src={`https://api.dicebear.com/7.x/personas/svg?seed=${user.fid}`}
                 alt={user.displayName}
                 className={styles.profilePic}

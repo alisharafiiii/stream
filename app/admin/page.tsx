@@ -59,6 +59,7 @@ export default function AdminPage() {
   });
   const [loading, setLoading] = useState(false); // Don't load until wallet connected
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Betting states
   const [bettingSession, setBettingSession] = useState<BettingSession | null>(null);
