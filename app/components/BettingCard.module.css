@@ -27,9 +27,9 @@
 }
 
 .bettingCard.collapsed {
-  bottom: calc(-100% + 50px + env(safe-area-inset-bottom));
+  bottom: calc(-100% + 60px + env(safe-area-inset-bottom));
   padding: 0.5rem;
-  min-height: 50px;
+  min-height: 60px;
 }
 
 .bettingCard.collapsed .content { display: none; }
@@ -41,7 +41,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 40px;
+  min-height: 50px;
+  width: 100%;
+  padding: 0;
 }
 
 .bettingCard.collapsed .toggleButton {
@@ -542,15 +544,15 @@
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
   animation: fadeIn 0.5s ease-out;
-  padding: 1rem;
+  padding: 0;
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
 }

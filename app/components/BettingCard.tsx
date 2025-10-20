@@ -101,11 +101,14 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
       setResultPayout(0);
     }
     
-    // Save user bets for display
-    setSavedUserBets({...userBets});
-    
-    // Show result
-    setShowResult(true);
+    // Only show result if user has placed bets
+    if (userBets.leftAmount > 0 || userBets.rightAmount > 0) {
+      // Save user bets for display
+      setSavedUserBets({...userBets});
+      
+      // Show result
+      setShowResult(true);
+    }
     setProcessedSessionId(session.id);
     
     // Fetch updated balance
