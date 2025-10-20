@@ -19,7 +19,11 @@ export default function CommentsOverlay() {
         
         if (data.type === 'initial' && data.comments) {
           // Load initial comments (show last 5)
-          setComments(data.comments.slice(-5));
+          // Filter out any duplicates based on ID
+          const uniqueComments = data.comments.slice(-5).filter((comment, index, self) => 
+            index === self.findIndex(c => c.id === comment.id)
+          );
+          setComments(uniqueComments);
           // Scroll to bottom after initial load
           setTimeout(() => {
             if (containerRef.current) {
@@ -29,6 +33,11 @@ export default function CommentsOverlay() {
         } else if (data.type === 'new' && data.comment) {
           // Add new comment
           setComments(prev => {
+            // Check if comment already exists to prevent duplicates
+            if (prev.some(c => c.id === data.comment.id)) {
+              return prev;
+            }
+            
             // Keep only last 10 comments
             const updated = [...prev, data.comment].slice(-10);
             
@@ -69,7 +78,7 @@ export default function CommentsOverlay() {
     <div className={styles.overlay} ref={containerRef}>
       {comments.map((comment) => (
         <div
-          key={comment.id}
+          key={`${comment.id}-${comment.timestamp}`}
           className={styles.comment}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
