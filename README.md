@@ -38,3 +38,4 @@ To learn more about OnchainKit, see our [documentation](https://docs.base.org/on
 
 To learn more about Next.js, see the [Next.js documentation](https://nextjs.org/docs).
 # Deployment trigger: Mon Oct 20 11:29:11 EDT 2025
+# Railway deployment trigger - Mon Oct 20 17:18:24 EDT 2025
