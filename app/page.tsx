@@ -220,21 +220,22 @@ export default function Home() {
               onToggleCollapse={setIsBettingCollapsed}
             />
           )}
-          
-          {/* Floating Comments Overlay - Always visible */}
-          <CommentsOverlay />
-          
-          {/* Comment Input FAB */}
-          {user && (
-            <CommentInput
-              userId={user.fid}
-              username={user.username}
-              profileImage={user.profileImage}
-            />
-          )}
         </>
       ) : (
         <OfflineVideo />
+      )}
+      
+      {/* Comments Components - Outside all conditionals to always be visible */}
+      {/* Floating Comments Overlay - Always visible */}
+      <CommentsOverlay />
+      
+      {/* Comment Input FAB - Only show when user is logged in */}
+      {user && (
+        <CommentInput
+          userId={user.fid}
+          username={user.username}
+          profileImage={user.profileImage}
+        />
       )}
     </div>
   );
