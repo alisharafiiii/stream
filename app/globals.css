@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+@layer base {
+  :root {
+    /* Main colors from logo */
+    --background: #000000;
+    --foreground: #ffffff;
+    --purple: #9945FF;
+    --blue: #0066FF;
+    --purple-dark: #7835CC;
+    --blue-dark: #0052CC;
+    
+    /* UI colors */
+    --card-bg: #0a0a0a;
+    --card-border: #1a1a1a;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --text-muted: #666666;
+    
+    /* Accent colors */
+    --accent-purple: #9945FF;
+    --accent-blue: #0066FF;
+    --accent-gradient: var(--purple); /* Solid purple, no gradient */
+    
+    /* Status colors */
+    --success: #0066FF;
+    --error: #FF3366;
+    --warning: #FFB800;
+    
+    /* Pixel font */
+    --font-pixel: 'VT323', monospace;
+  }
+
+  html,
+  body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  body {
+    color: var(--foreground);
+    background: var(--background);
+    font-family: var(--font-inter), sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  code {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    font-family: var(--font-source-code-pro), monospace;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem calc(0.25rem + 2px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    code {
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html {
+      color-scheme: dark;
+    }
+  }
+}

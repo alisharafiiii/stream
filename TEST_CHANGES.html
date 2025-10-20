@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Changes</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #000; color: #0f0; }
+        .check { margin: 10px 0; }
+        .found { color: #0f0; }
+        .not-found { color: #f00; }
+    </style>
+</head>
+<body>
+    <h1>Changes Made to Your Code:</h1>
+    
+    <div class="check">
+        <h2>1. Toggle Button Size (35x35px)</h2>
+        <p>File: app/components/BettingCard.module.css - Line 103</p>
+        <pre class="found">✓ width: 35px; height: 35px;</pre>
+    </div>
+    
+    <div class="check">
+        <h2>2. Retro Gaming Overlay</h2>
+        <p>File: app/components/BettingCard.module.css</p>
+        <pre class="found">✓ @keyframes pixelWin - Line 759
+✓ @keyframes pixelLose - Line 786
+✓ .winTitle with 5rem size - Line 577
+✓ .loseTitle with 5rem size - Line 593</pre>
+    </div>
+    
+    <div class="check">
+        <h2>3. Balance Modal Fix</h2>
+        <p>File: app/components/BalanceModal.module.css</p>
+        <pre class="found">✓ .overlay { (was .modalOverlay)</pre>
+    </div>
+    
+    <div class="check">
+        <h2>4. Withdrawal Error Fix</h2>
+        <p>File: app/api/user/withdraw-real/route.ts - Line 42</p>
+        <pre class="found">✓ Added try-catch for JSON parsing</pre>
+    </div>
+    
+    <h2>New Server Running:</h2>
+    <p style="font-size: 24px; color: yellow;">
+        Open: <a href="http://localhost:3005" style="color: cyan;">http://localhost:3005</a>
+    </p>
+    
+    <p>This is running on a NEW PORT (3005) with ALL caches cleared!</p>
+</body>
+</html>

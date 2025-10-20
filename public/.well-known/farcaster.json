@@ -1,0 +1,32 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "baseBuilder": {
+    "allowedAddresses": []
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "Stream",
+    "homeUrl": "https://stream-bay-delta.vercel.app",
+    "iconUrl": "https://stream-bay-delta.vercel.app/icon.png",
+    "splashImageUrl": "https://stream-bay-delta.vercel.app/splash.png",
+    "splashBackgroundColor": "#000000",
+    "webhookUrl": "https://stream-bay-delta.vercel.app/api/webhook",
+    "subtitle": "Connect and interact",
+    "description": "A modern mini app built with OnchainKit for seamless blockchain interactions.",
+    "screenshotUrls": [
+      "https://stream-bay-delta.vercel.app/screenshot.png"
+    ],
+    "primaryCategory": "utility",
+    "tags": ["blockchain", "onchain", "web3"],
+    "heroImageUrl": "https://stream-bay-delta.vercel.app/hero.png",
+    "tagline": "Stream your onchain experience",
+    "ogTitle": "Stream - OnchainKit Mini App",
+    "ogDescription": "Connect and interact with blockchain using Stream mini app.",
+    "ogImageUrl": "https://stream-bay-delta.vercel.app/hero.png",
+    "noindex": false
+  }
+}

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 1200px;
+            height: 630px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Glow effect */
+        .glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 255, 0, 0.2) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .content {
+            position: relative;
+            text-align: center;
+            z-index: 10;
+        }
+        
+        .title {
+            font-size: 80px;
+            color: #00ff00;
+            text-shadow: 0 0 30px #00ff00;
+            margin: 0;
+            letter-spacing: 8px;
+            font-weight: bold;
+        }
+        
+        .subtitle {
+            font-size: 32px;
+            color: #fff;
+            margin: 20px 0;
+            letter-spacing: 4px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 60px;
+            justify-content: center;
+            margin-top: 50px;
+        }
+        
+        .button {
+            width: 120px;
+            height: 120px;
+            border: 3px solid #00ff00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            font-weight: bold;
+            color: #fff;
+            position: relative;
+        }
+        
+        .button.left {
+            background: #a855f7;
+            box-shadow: 0 0 30px #a855f7;
+        }
+        
+        .button.right {
+            background: #3b82f6;
+            box-shadow: 0 0 30px #3b82f6;
+        }
+        
+        .tagline {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ff00;
+            font-size: 24px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        
+        .corner-decoration {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border: 2px solid #00ff00;
+            opacity: 0.3;
+        }
+        
+        .corner-decoration.top-left {
+            top: -100px;
+            left: -100px;
+            border-right: none;
+            border-bottom: none;
+            transform: rotate(45deg);
+        }
+        
+        .corner-decoration.bottom-right {
+            bottom: -100px;
+            right: -100px;
+            border-left: none;
+            border-top: none;
+            transform: rotate(45deg);
+        }
+    </style>
+</head>
+<body>
+    <div class="glow"></div>
+    <div class="corner-decoration top-left"></div>
+    <div class="corner-decoration bottom-right"></div>
+    
+    <div class="content">
+        <h1 class="title">STREAM LIVE</h1>
+        <p class="subtitle">BET • WIN • WITHDRAW</p>
+        
+        <div class="buttons">
+            <div class="button left">X</div>
+            <div class="button right">O</div>
+        </div>
+    </div>
+    
+    <div class="tagline">RETRO GAMING MEETS LIVE STREAMING</div>
+</body>
+</html>

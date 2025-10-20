@@ -1,0 +1,181 @@
+.container {
+  background: #000;
+  border: 2px solid #00ff00;
+  border-radius: 0;
+  padding: 1.5rem;
+  margin-top: 2rem;
+  font-family: 'Courier New', monospace;
+}
+
+.title {
+  color: #00ff00;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 10px #00ff00;
+  letter-spacing: 2px;
+}
+
+.demoMode {
+  text-align: center;
+  padding: 2rem;
+  color: #999;
+}
+
+.hint {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 1rem;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat {
+  background: rgba(0, 255, 0, 0.05);
+  border: 1px solid #00ff00;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  color: #999;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.value {
+  color: #00ff00;
+  font-size: 1.125rem;
+  font-weight: bold;
+  word-break: break-all;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.link {
+  background: #000;
+  border: 2px solid #00ff00;
+  color: #00ff00;
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+
+.link:hover {
+  background: #00ff00;
+  color: #000;
+  box-shadow: 0 0 20px #00ff00;
+}
+
+.copyButton {
+  background: #000;
+  border: 2px solid #00ff00;
+  color: #00ff00;
+  padding: 0.75rem 1.5rem;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+
+.copyButton:hover {
+  background: #00ff00;
+  color: #000;
+  box-shadow: 0 0 20px #00ff00;
+}
+
+.transactions {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #00ff00;
+}
+
+.transactions h4 {
+  color: #00ff00;
+  margin-bottom: 1rem;
+  font-size: 1.125rem;
+}
+
+.transaction {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: rgba(0, 255, 0, 0.05);
+  border: 1px solid rgba(0, 255, 0, 0.2);
+  margin-bottom: 0.5rem;
+}
+
+.txType {
+  font-weight: bold;
+  min-width: 60px;
+}
+
+.txAmount {
+  color: #fff;
+  flex: 1;
+  text-align: center;
+}
+
+.txLink {
+  color: #00ff00;
+  text-decoration: none;
+  font-size: 1.5rem;
+  padding: 0 0.5rem;
+}
+
+.txLink:hover {
+  text-shadow: 0 0 10px #00ff00;
+}
+
+.warning {
+  background: rgba(255, 153, 0, 0.1);
+  border: 1px solid rgba(255, 153, 0, 0.3);
+  padding: 1rem;
+  margin-top: 1.5rem;
+  color: #ff9900;
+  font-size: 0.875rem;
+}
+
+.warning ul {
+  margin: 0.5rem 0 0 1.5rem;
+  padding: 0;
+}
+
+.warning li {
+  margin: 0.25rem 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .actions {
+    flex-direction: column;
+  }
+  
+  .link, .copyButton {
+    width: 100%;
+    text-align: center;
+  }
+}
