@@ -35,12 +35,12 @@ export default function AuthModal({ onComplete }: AuthModalProps) {
         username: authUser.username,
         displayName: authUser.displayName,
         profileImage: authUser.profileImage,
-      });
+      }, false); // Skip topup
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser]);
 
-  const createUserProfile = async (userData: Omit<User, 'balance'>) => {
+  const createUserProfile = async (userData: Omit<User, 'balance'>, skipTopup = false) => {
     try {
       const response = await fetch('/api/user', {
         method: 'POST',
@@ -57,7 +57,14 @@ export default function AuthModal({ onComplete }: AuthModalProps) {
       if (response.ok) {
         const userProfile = await response.json();
         setUser(userProfile);
-        setStep('topup');
+        
+        if (skipTopup) {
+          // Skip topup for guest users
+          onComplete(userProfile);
+        } else {
+          // Skip topup for all users now - go directly to the app
+          onComplete(userProfile);
+        }
       } else {
         const errorData = await response.json();
         setError(`Failed to create profile: ${errorData.error || 'Unknown error'}`);
@@ -79,7 +86,7 @@ export default function AuthModal({ onComplete }: AuthModalProps) {
       username: `Guest_${guestId.substring(6, 11)}`,
       displayName: `Guest Player`,
       profileImage: undefined,
-    });
+    }, true); // Skip topup for guest users
     
     setIsCreatingGuest(false);
   };
@@ -250,6 +257,7 @@ export default function AuthModal({ onComplete }: AuthModalProps) {
           </>
         )}
 
+        {/* Topup step removed - users go directly to the app */}
         {step === 'topup' && user && (
           <div className={styles.content}>
             <div className={styles.userInfo}>
