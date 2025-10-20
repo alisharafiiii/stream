@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from 'react';
 import styles from './CommentsOverlay.module.css';
-import { Comment, CommentWithPosition } from '@/lib/types/comment';
+import { Comment } from '@/lib/types/comment';
 
 export default function CommentsOverlay() {
   const [comments, setComments] = useState<Comment[]>([]);

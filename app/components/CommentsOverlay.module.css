@@ -100,11 +100,11 @@
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .overlay {
-    bottom: 160px;
+    bottom: 100px; /* Lower when betting deck is collapsed */
     left: 8px;
     width: 260px;
-    height: 35vh;
-    max-height: 250px;
+    height: 40vh;
+    max-height: 280px;
   }
   
   .comment {
