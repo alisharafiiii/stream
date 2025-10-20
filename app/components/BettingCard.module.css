@@ -624,7 +624,7 @@
     5px 5px 0 #660000,
     10px 10px 0 #330000,
     15px 15px 20px rgba(0, 0, 0, 0.8);
-  animation: pixelLose 0.1s ease-in-out 30, pixelShake 0.5s ease-in-out 6;
+  animation: pixelShake 0.1s ease-in-out 20, pixelLose 0.5s ease-in-out 3;
   letter-spacing: 12px;
   transform: perspective(500px) rotateX(-20deg) scale(1.2);
   font-family: 'VT323', monospace !important;

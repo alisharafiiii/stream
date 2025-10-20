@@ -85,7 +85,7 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
                 params: [{ chainId: '0x2105' }], // Base mainnet
               });
               } catch (switchError) {
-              if ((switchError as any).code === 4902) {
+              if ((switchError as { code?: number }).code === 4902) {
                 await ethereum.request({
                   method: 'wallet_addEthereumChain',
                   params: [{
@@ -154,7 +154,7 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
             }
           } catch (error) {
             console.error('Wallet transaction failed:', error);
-            if ((error as any).code === 4001) {
+            if ((error as { code?: number }).code === 4001) {
               alert('Transaction rejected by user.');
             } else if ((error as Error).message?.includes('insufficient funds')) {
               alert('Insufficient USDC balance. Please ensure you have enough USDC on Base network.');

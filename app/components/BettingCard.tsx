@@ -149,7 +149,7 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
     };
     
     checkResolvedSession();
-  }, [session, processedSessionId, userId]);
+  }, [session, processedSessionId, userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleBet = async (option: 'left' | 'right') => {
     if (!session || !amount || betting) return;

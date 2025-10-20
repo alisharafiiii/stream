@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import Image from "next/image";
+// import Image from "next/image";  // Commented out - using img tags for dicebear SVG URLs
 import styles from "./StreamOverlay.module.css";
 import BalanceModal from "./BalanceModal";
 

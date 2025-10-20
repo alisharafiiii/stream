@@ -65,7 +65,7 @@ export function useWalletAuth() {
                 blockExplorerUrls: ['https://basescan.org']
               }]
             });
-          } catch (addError) {
+                      } catch {
             throw new Error('Failed to add Base network');
           }
         } else {
