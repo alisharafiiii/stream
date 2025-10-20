@@ -57,7 +57,7 @@ export default function AdminPage() {
     isLive: false,
     title: 'Live Stream'
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Don't load until wallet connected
   const [saving, setSaving] = useState(false);
 
   // Betting states
@@ -90,21 +90,32 @@ export default function AdminPage() {
   useEffect(() => {
     // Only fetch data after wallet is connected
     if (isConnected && address) {
+      console.log('Wallet connected, fetching data. Address:', address);
       fetchStreamConfig();
       fetchBettingSession();
+    } else {
+      console.log('Waiting for wallet connection. Connected:', isConnected, 'Address:', address);
     }
   }, [isConnected, address]);
 
   const fetchStreamConfig = async () => {
+    setLoading(true);
     try {
+      console.log('Fetching stream config...');
       const response = await fetch('/api/stream-config');
+      console.log('Stream config response:', response.status);
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Stream config error response:', errorText);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
       setStreamConfig(data);
     } catch (error) {
       console.error('Failed to fetch stream config:', error);
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        console.error('Network error - API might be down or CORS issue');
+      }
       setError(error instanceof Error ? error.message : 'Failed to fetch stream config');
     } finally {
       setLoading(false);
