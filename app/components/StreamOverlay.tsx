@@ -13,9 +13,10 @@ interface StreamOverlayProps {
     balance: number;
   };
   onBalanceUpdate: (newBalance: number) => void;
+  isLive?: boolean;
 }
 
-export default function StreamOverlay({ user, onBalanceUpdate }: StreamOverlayProps) {
+export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: StreamOverlayProps) {
   const [viewerCount, setViewerCount] = useState(0);
   const [youtubeViewers, setYoutubeViewers] = useState(0);
   const [showBalanceModal, setShowBalanceModal] = useState(false);
@@ -107,8 +108,8 @@ export default function StreamOverlay({ user, onBalanceUpdate }: StreamOverlayPr
       <div className={`${styles.overlay} ${styles.header}`}>
         <div className={styles.streamInfo}>
       <div className={styles.live}>
-        <span className={styles.liveDot}></span>
-        LIVE
+        {isLive && <span className={styles.liveDot}></span>}
+        {isLive ? 'LIVE' : 'PLAYBACK'}
       </div>
           <div className={styles.viewers}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">

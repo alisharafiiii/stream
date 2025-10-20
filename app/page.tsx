@@ -7,6 +7,7 @@ import VideoPlayer from "./components/VideoPlayer";
 import StreamOverlay from "./components/StreamOverlay";
 import BettingCard from "./components/BettingCard";
 import OfflineVideo from "./components/OfflineVideo";
+import SplashScreen from "./components/SplashScreen";
 
 // Dynamically import AuthModal to avoid SSR issues
 const AuthModal = dynamic(() => import("./components/AuthModal"), {
@@ -34,6 +35,7 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [isBettingCollapsed, setIsBettingCollapsed] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
     if (!isMiniAppReady) {
@@ -44,6 +46,13 @@ export default function Home() {
   useEffect(() => {
     fetchStreamConfig();
     checkExistingUser();
+    
+    // Hide splash screen after 2.5 seconds
+    const splashTimer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2500);
+    
+    return () => clearTimeout(splashTimer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -161,12 +170,14 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
+      {/* Splash Screen */}
+      {showSplash && <SplashScreen />}
       
       {/* Auth modal */}
       {showAuth && <AuthModal onComplete={handleAuthComplete} />}
       
-      {/* Stream content */}
-      {streamConfig?.isLive && streamConfig.streamUrl ? (
+      {/* Stream content - show both live and playback */}
+      {streamConfig?.streamUrl ? (
         <>
           <div className={`${styles.streamContainer} ${isBettingCollapsed ? styles.fullscreen : ''}`}>
             <VideoPlayer streamUrl={streamConfig.streamUrl} title={streamConfig.title} />
@@ -183,6 +194,7 @@ export default function Home() {
                   setUser(prev => prev ? { ...prev, balance: newBalance } : null);
                   localStorage.setItem('streamUser', JSON.stringify({ ...user, balance: newBalance }));
                 }}
+                isLive={streamConfig.isLive}
               />
             )}
           </div>
