@@ -147,7 +147,11 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
                 height={32}
               />
             )}
-            <span className={styles.displayName}>{user.displayName}</span>
+            <span className={styles.displayName}>
+              {user.username && !user.username.startsWith('0x') 
+                ? `${user.username}.base.eth` 
+                : user.displayName}
+            </span>
           </a>
           <div
             className={styles.userBalance}

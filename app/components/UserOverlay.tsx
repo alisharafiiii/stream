@@ -64,7 +64,11 @@ export default function UserOverlay({ user, onBalanceUpdate }: UserOverlayProps)
             />
           )}
           <div className={styles.details}>
-            <div className={styles.name}>{user.displayName}</div>
+            <div className={styles.name}>
+              {user.username && !user.username.startsWith('0x') 
+                ? `${user.username}.base.eth` 
+                : user.displayName}
+            </div>
             <div 
               className={styles.balance}
               onClick={() => setShowWithdraw(true)}
