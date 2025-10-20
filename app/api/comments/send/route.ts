@@ -34,15 +34,20 @@ export async function POST(request: NextRequest) {
       }, { status: 429 });
     }
 
-    // Create comment
+    // Create comment with basename formatting
+    const displayUsername = username && !username.startsWith('0x') 
+      ? username 
+      : userId.startsWith('0x') 
+        ? `${userId.slice(0, 6)}...${userId.slice(-4)}`
+        : username;
+    
     const comment: Comment = {
       id: `comment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       userId,
-      username,
+      username: displayUsername,
       profileImage: profileImage || `https://api.dicebear.com/7.x/personas/png?seed=${userId}`,
       message: message.trim(),
-      timestamp: now,
-      position: Math.random() * 40 + 10 // Random position between 10% and 50% from top
+      timestamp: now
     };
 
     // Store comment in Redis with TTL

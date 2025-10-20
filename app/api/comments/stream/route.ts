@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       controller.enqueue(encoder.encode(`data: {"type": "connected"}\n\n`));
 
       // Function to send SSE message
-      const sendMessage = (data: { type: string; comment?: any; comments?: any[] }) => {
+      const sendMessage = (data: { type: string; comment?: Comment; comments?: Comment[] }) => {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
       };
 

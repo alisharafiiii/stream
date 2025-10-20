@@ -4,9 +4,9 @@ import styles from './CommentsOverlay.module.css';
 import { Comment, CommentWithPosition } from '@/lib/types/comment';
 
 export default function CommentsOverlay() {
-  const [comments, setComments] = useState<CommentWithPosition[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const eventSourceRef = useRef<EventSource | null>(null);
-  const commentIdCounter = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Connect to SSE endpoint
@@ -18,27 +18,23 @@ export default function CommentsOverlay() {
         const data = JSON.parse(event.data);
         
         if (data.type === 'initial' && data.comments) {
-          // Load initial comments
-          const initialComments = data.comments.map((comment: Comment) => ({
-            ...comment,
-            key: `comment-${commentIdCounter.current++}`,
-            position: comment.position || Math.random() * 40 + 10
-          }));
-          setComments(initialComments);
+          // Load initial comments (show last 5)
+          setComments(data.comments.slice(-5));
         } else if (data.type === 'new' && data.comment) {
           // Add new comment
-          const newComment: CommentWithPosition = {
-            ...data.comment,
-            key: `comment-${commentIdCounter.current++}`,
-            position: data.comment.position || Math.random() * 40 + 10
-          };
-          
-          setComments(prev => [...prev, newComment]);
-          
-          // Remove comment after animation completes (15 seconds)
-          setTimeout(() => {
-            setComments(prev => prev.filter(c => c.key !== newComment.key));
-          }, 15000);
+          setComments(prev => {
+            // Keep only last 10 comments
+            const updated = [...prev, data.comment].slice(-10);
+            
+            // Scroll to bottom after adding new comment
+            setTimeout(() => {
+              if (containerRef.current) {
+                containerRef.current.scrollTop = containerRef.current.scrollHeight;
+              }
+            }, 100);
+            
+            return updated;
+          });
         }
       } catch (error) {
         console.error('Error parsing comment data:', error);
@@ -64,12 +60,11 @@ export default function CommentsOverlay() {
   }, []);
 
   return (
-    <div className={styles.overlay}>
+    <div className={styles.overlay} ref={containerRef}>
       {comments.map((comment) => (
         <div
-          key={comment.key}
+          key={comment.id}
           className={styles.comment}
-          style={{ top: `${comment.position}%` }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
@@ -81,7 +76,11 @@ export default function CommentsOverlay() {
             }}
           />
           <div className={styles.content}>
-            <span className={styles.username}>{comment.username}</span>
+            <span className={styles.username}>
+              {comment.username && !comment.username.startsWith('0x') 
+                ? `${comment.username}.base.eth` 
+                : comment.username}
+            </span>
             <span className={styles.message}>{comment.message}</span>
           </div>
         </div>
