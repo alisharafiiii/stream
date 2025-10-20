@@ -25,7 +25,7 @@ async function getFarcasterProfileData(fid: string) {
   return {
     username: profile.username,
     displayName: profile.displayName,
-    profileImage: profile.pfpUrl || `https://i.imgur.com/default.png`,
+    profileImage: profile.pfpUrl || profile.profileImage || `https://api.dicebear.com/7.x/personas/svg?seed=${profile.fid}`,
   };
 }
 
@@ -79,7 +79,9 @@ export async function GET(request: NextRequest) {
       profile.lastSeen = Date.now();
       await redis.set(REDIS_KEYS.USER_PROFILE(fid), profile);
 
-      return NextResponse.json(profileToUser(profile));
+      const userResponse = profileToUser(profile);
+      console.log('[API] Returning user with image:', userResponse.profileImage);
+      return NextResponse.json(userResponse);
     } catch (error) {
       console.error('[API] Redis error:', error);
       return NextResponse.json({ error: 'Database error' }, { status: 500 });
@@ -113,11 +115,14 @@ export async function POST(request: NextRequest) {
 
       // If no username/displayName provided, try to fetch from Farcaster
       if (!username || !displayName || !profileImage) {
+        console.log('[API] Missing user data, fetching from Farcaster for FID:', fid);
         const farcasterData = await getFarcasterProfileData(fid);
+        console.log('[API] Farcaster data received:', farcasterData);
         if (farcasterData) {
           finalUsername = username || farcasterData.username;
           finalDisplayName = displayName || farcasterData.displayName;
           finalProfileImage = profileImage || farcasterData.profileImage;
+          console.log('[API] Final profile image after Farcaster fetch:', finalProfileImage);
         }
       }
 
@@ -130,6 +135,8 @@ export async function POST(request: NextRequest) {
         createdAt: existingProfile?.createdAt || Date.now(),
         lastSeen: Date.now(),
       };
+      
+      console.log('[API] Creating profile with image:', profile.profileImage);
 
       // Save to Redis
       await redis.set(REDIS_KEYS.USER_PROFILE(fid), profile);
