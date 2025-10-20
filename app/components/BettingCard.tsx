@@ -109,20 +109,10 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
           // Check if user had bets in this resolved session
           const userBetTotal = resolvedSessionBets.leftAmount + resolvedSessionBets.rightAmount;
           
-          // TEMPORARY: Force show overlay for testing
-          const FORCE_SHOW_OVERLAY = true;
-          
-          if (userBetTotal === 0 && !FORCE_SHOW_OVERLAY) {
+          if (userBetTotal === 0) {
             console.log('🎰 No bets in resolved session, skipping overlay');
             setProcessedSessionId(session.id);
             return;
-          }
-          
-          // If forcing overlay, use test amounts
-          if (FORCE_SHOW_OVERLAY && userBetTotal === 0) {
-            console.log('🎰 FORCING OVERLAY FOR TEST - Setting fake bets');
-            resolvedSessionBets.leftAmount = 5;
-            resolvedSessionBets.rightAmount = 3;
           }
           
           // Calculate if user won
@@ -146,6 +136,12 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
           console.log('🎰 Showing result overlay!');
           setShowResult(true);
           setProcessedSessionId(session.id);
+          
+          // Auto-hide overlay after 10 seconds
+          setTimeout(() => {
+            console.log('🎰 Auto-hiding overlay');
+            setShowResult(false);
+          }, 10000);
         }
       } catch (error) {
         console.error('Failed to fetch resolved session bets:', error);
@@ -459,7 +455,11 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
           >
             {resultPayout > 0 ? (
               <>
-                <h2 className={styles.winTitle}>🎉 YOU WON!</h2>
+                <h2 className={styles.winTitle}>
+                  <span className={styles.emoji}>🤑</span>
+                  <span>YOU WON!</span>
+                  <span className={styles.emoji}>🤑</span>
+                </h2>
                 <div className={styles.resultAmount}>
                   <div>Your Bet: {formatAmount(session.winner === 'left' ? savedUserBets.leftAmount : savedUserBets.rightAmount)}</div>
                   <div className={styles.payoutAmount}>{formatAmount(resultPayout)}</div>
@@ -487,7 +487,11 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
               </>
             ) : (
               <>
-                <h2 className={styles.loseTitle}>💀 YOU LOST 💀</h2>
+                <h2 className={styles.loseTitle}>
+                  <span className={styles.emoji}>💀</span>
+                  <span>YOU LOST</span>
+                  <span className={styles.emoji}>💀</span>
+                </h2>
                 <div className={styles.receipt} style={{ borderColor: '#ff0040' }}>
                   <div className={styles.receiptTitle}>Betting Round #{session.id}</div>
                   <div className={styles.receiptRow}>
