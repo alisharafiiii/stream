@@ -53,13 +53,13 @@ export default function UserOverlay({ user, onBalanceUpdate }: UserOverlayProps)
               className={styles.avatar}
               onError={(e) => {
                 console.error('[UserOverlay] Profile image failed to load:', user.profileImage);
-                e.currentTarget.src = `https://api.dicebear.com/7.x/personas/svg?seed=${user.fid}`;
+                e.currentTarget.src = `https://api.dicebear.com/7.x/personas/png?seed=${user.fid}`;
               }}
             />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={`https://api.dicebear.com/7.x/personas/svg?seed=${user.fid}`}
+              src={`https://api.dicebear.com/7.x/personas/png?seed=${user.fid}`}
               alt={user.displayName}
               className={styles.avatar}
             />

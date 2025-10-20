@@ -79,7 +79,7 @@ export function useWalletAuth() {
         fid: address.toLowerCase(), // Use wallet address as FID
         username: shortAddress,
         displayName: shortAddress,
-        profileImage: `https://api.dicebear.com/7.x/identicon/svg?seed=${address}`,
+        profileImage: `https://api.dicebear.com/7.x/identicon/png?seed=${address}`,
         walletAddress: address,
       };
 

@@ -27,7 +27,7 @@ export async function fetchFarcasterProfile(fid: string): Promise<FarcasterProfi
         fid,
         username: shortAddress,
         displayName: shortAddress,
-        pfpUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${fid}`,
+        pfpUrl: `https://api.dicebear.com/7.x/identicon/png?seed=${fid}`,
       };
     }
     
@@ -38,7 +38,7 @@ export async function fetchFarcasterProfile(fid: string): Promise<FarcasterProfi
         fid,
         username: `user${fid}`,
         displayName: `User ${fid}`,
-        pfpUrl: `https://api.dicebear.com/7.x/personas/svg?seed=${fid}`, // Better placeholder
+        pfpUrl: `https://api.dicebear.com/7.x/personas/png?seed=${fid}`, // Better placeholder
       };
     }
 
@@ -96,7 +96,7 @@ export async function fetchFarcasterProfile(fid: string): Promise<FarcasterProfi
         fid,
         username: shortAddress,
         displayName: shortAddress,
-        pfpUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${fid}`,
+        pfpUrl: `https://api.dicebear.com/7.x/identicon/png?seed=${fid}`,
       };
     } else {
       // For numeric FIDs, use personas
@@ -104,7 +104,7 @@ export async function fetchFarcasterProfile(fid: string): Promise<FarcasterProfi
         fid,
         username: `user${fid}`,
         displayName: `User ${fid}`,
-        pfpUrl: `https://api.dicebear.com/7.x/personas/svg?seed=${fid}`,
+        pfpUrl: `https://api.dicebear.com/7.x/personas/png?seed=${fid}`,
       };
     }
   }

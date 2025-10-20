@@ -51,7 +51,7 @@ export function useUniversalAuth() {
         fid: browserId,
         username: `User_${browserId.substring(8, 13)}`,
         displayName: `Browser User`,
-        profileImage: `https://api.dicebear.com/7.x/identicon/svg?seed=${browserId}`,
+        profileImage: `https://api.dicebear.com/7.x/identicon/png?seed=${browserId}`,
       };
       
       return browserUser;
@@ -73,7 +73,7 @@ export function useUniversalAuth() {
             fid: String(fid),
             username: context?.user?.username || `user${fid}`,
             displayName: context?.user?.displayName || context?.user?.username || `User ${fid}`,
-            profileImage: `https://api.dicebear.com/7.x/personas/svg?seed=${fid}`,
+            profileImage: `https://api.dicebear.com/7.x/personas/png?seed=${fid}`,
           };
           
           return authUser;
@@ -122,7 +122,7 @@ export function useUniversalAuth() {
     fid: String(context.user.fid),
     username: context.user.username || `user${context.user.fid}`,
     displayName: context.user.displayName || context.user.username || `User ${context.user.fid}`,
-    profileImage: `https://api.dicebear.com/7.x/personas/svg?seed=${context.user.fid}`,
+    profileImage: `https://api.dicebear.com/7.x/personas/png?seed=${context.user.fid}`,
   } : null;
 
   return {
