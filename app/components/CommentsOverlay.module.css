@@ -1,0 +1,101 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50vh; /* Top 50% of screen for mobile */
+  pointer-events: none;
+  z-index: 15; /* Above video, below other UI */
+  overflow: hidden;
+}
+
+.comment {
+  position: absolute;
+  right: -400px; /* Start off-screen */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 85vw;
+  animation: floatComment 15s linear forwards;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@keyframes floatComment {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-100vw - 400px));
+  }
+}
+
+.profilePic {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-purple);
+  flex-shrink: 0;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-pixel);
+  font-size: 0.875rem;
+  color: white;
+}
+
+.username {
+  font-weight: 600;
+  color: var(--accent-purple);
+  flex-shrink: 0;
+}
+
+.username::after {
+  content: ':';
+  margin-left: 2px;
+}
+
+.message {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+/* Stagger animations for multiple comments */
+.comment:nth-child(2n) {
+  animation-duration: 12s;
+}
+
+.comment:nth-child(3n) {
+  animation-duration: 18s;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .comment {
+    padding: 6px 10px;
+  }
+  
+  .profilePic {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .content {
+    font-size: 0.75rem;
+  }
+  
+  .message {
+    max-width: 150px;
+  }
+}

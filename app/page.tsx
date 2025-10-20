@@ -8,6 +8,8 @@ import StreamOverlay from "./components/StreamOverlay";
 import BettingCard from "./components/BettingCard";
 import OfflineVideo from "./components/OfflineVideo";
 import SplashScreen from "./components/SplashScreen";
+import CommentsOverlay from "./components/CommentsOverlay";
+import CommentInput from "./components/CommentInput";
 
 // Dynamically import AuthModal to avoid SSR issues
 const AuthModal = dynamic(() => import("./components/AuthModal"), {
@@ -216,6 +218,16 @@ export default function Home() {
                 setUser(prev => prev ? { ...prev, balance: newBalance } : null);
               }}
               onToggleCollapse={setIsBettingCollapsed}
+            />
+          )}
+          {/* Floating Comments Overlay */}
+          <CommentsOverlay />
+          {/* Comment Input FAB */}
+          {user && (
+            <CommentInput
+              userId={user.fid}
+              username={user.username}
+              profileImage={user.profileImage}
             />
           )}
         </>
