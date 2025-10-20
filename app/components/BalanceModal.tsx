@@ -78,9 +78,44 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
               method: 'eth_requestAccounts' 
             }) as string[];
             
+            // Switch to Base network if needed
+            try {
+              await ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: '0x2105' }], // Base mainnet
+              });
+              } catch (switchError) {
+              if ((switchError as any).code === 4902) {
+                await ethereum.request({
+                  method: 'wallet_addEthereumChain',
+                  params: [{
+                    chainId: '0x2105',
+                    chainName: 'Base',
+                    nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
+                    rpcUrls: ['https://mainnet.base.org'],
+                    blockExplorerUrls: ['https://basescan.org']
+                  }]
+                });
+              }
+            }
+            
             // USDC contract on Base
             const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
             const amount_wei = (amount * 1e6).toString(); // USDC has 6 decimals
+            
+            // Create the transfer data correctly
+            const iface = {
+              encodeFunctionData: (func: string, params: unknown[]) => {
+                if (func === 'transfer') {
+                  const to = (params[0] as string).slice(2).padStart(64, '0');
+                  const value = BigInt(params[1] as string).toString(16).padStart(64, '0');
+                  return '0xa9059cbb' + to + value;
+                }
+                return '0x';
+              }
+            };
+            
+            const data = iface.encodeFunctionData('transfer', [treasuryAddress, amount_wei]);
             
             // Send USDC using wallet
             const txHash = await ethereum.request({
@@ -88,9 +123,10 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
               params: [{
                 from: accounts[0],
                 to: USDC_ADDRESS,
-                data: `0xa9059cbb${treasuryAddress.slice(2).padStart(64, '0')}${parseInt(amount_wei).toString(16).padStart(64, '0')}`, // transfer(to, amount)
+                data: data,
+                gas: '0x15F90', // 90000 gas limit
               }],
-            });
+            }) as string;
             
             // Wait for confirmation and update balance
             if (txHash) {
@@ -118,7 +154,13 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
             }
           } catch (error) {
             console.error('Wallet transaction failed:', error);
-            alert('Transaction failed. Make sure you have USDC in your wallet.');
+            if ((error as any).code === 4001) {
+              alert('Transaction rejected by user.');
+            } else if ((error as Error).message?.includes('insufficient funds')) {
+              alert('Insufficient USDC balance. Please ensure you have enough USDC on Base network.');
+            } else {
+              alert(`Transaction failed: ${(error as Error).message || 'Unknown error'}. Make sure you have USDC on Base network.`);
+            }
           }
         } else {
           alert('Please install MetaMask or another Web3 wallet to deposit.');
