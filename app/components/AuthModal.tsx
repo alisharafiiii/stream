@@ -240,17 +240,20 @@ export default function AuthModal({ onComplete }: AuthModalProps) {
                 console.log('Connect button clicked, isInBaseApp:', isInBaseApp);
                 setError(null);
                 
-                if (isInBaseApp) {
-                  // Use Base app authentication
-                  const authenticatedUser = await signIn();
-                  console.log('Base auth result:', authenticatedUser);
-                  if (authenticatedUser) {
-                    createUserProfile({
-                      ...authenticatedUser,
-                      profileImage: authenticatedUser.profileImage?.includes('dicebear') ? undefined : authenticatedUser.profileImage,
-                    });
-                  }
-                } else {
+              if (isInBaseApp) {
+                // Use Base app authentication
+                const authenticatedUser = await signIn();
+                console.log('Base auth result:', authenticatedUser);
+                console.log('🎭 Base FID:', authenticatedUser?.fid);
+                console.log('🎭 Base username:', authenticatedUser?.username);
+                console.log('🎭 Base profileImage:', authenticatedUser?.profileImage);
+                if (authenticatedUser) {
+                  createUserProfile({
+                    ...authenticatedUser,
+                    profileImage: authenticatedUser.profileImage?.includes('dicebear') ? undefined : authenticatedUser.profileImage,
+                  });
+                }
+              } else {
                   // Use wallet connection in browser
                   const walletUser = await connectWallet();
                   console.log('Wallet auth result:', walletUser);

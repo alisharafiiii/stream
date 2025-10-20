@@ -14,7 +14,7 @@ interface FarcasterProfile {
 const NEYNAR_API_KEY = process.env.NEYNAR_API_KEY;
 const NEYNAR_API_URL = 'https://api.neynar.com/v2/farcaster';
 
-console.log('[Farcaster API] NEYNAR_API_KEY:', NEYNAR_API_KEY ? 'Configured' : 'Not configured');
+console.log('[Farcaster API] NEYNAR_API_KEY:', NEYNAR_API_KEY ? `Configured (${NEYNAR_API_KEY.substring(0, 10)}...)` : 'Not configured');
 
 // Fetch real Farcaster profile data
 export async function fetchFarcasterProfile(fid: string): Promise<FarcasterProfile | null> {
@@ -65,8 +65,15 @@ export async function fetchFarcasterProfile(fid: string): Promise<FarcasterProfi
     }
     
     const user = users[0];
+    console.log('[Farcaster API] User data:', {
+      fid: user.fid,
+      username: user.username,
+      display_name: user.display_name,
+      pfp_url: user.pfp_url,
+      pfp: user.pfp
+    });
 
-    return {
+    const result = {
       fid: user.fid.toString(),
       username: user.username,
       displayName: user.display_name || user.username,
@@ -75,6 +82,9 @@ export async function fetchFarcasterProfile(fid: string): Promise<FarcasterProfi
       followerCount: user.follower_count,
       followingCount: user.following_count,
     };
+    
+    console.log('[Farcaster API] Returning profile with pfpUrl:', result.pfpUrl);
+    return result;
   } catch (error) {
     console.error('[Farcaster API] Error fetching profile:', error);
     

@@ -37,11 +37,8 @@ export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
         attempts++;
         
         if (iframeRef.current?.contentWindow) {
-          // Send a sequence of commands to ensure autoplay
+          // Send a sequence of commands to ensure autoplay (keep muted)
           const commands = [
-            '{"event":"command","func":"mute","args":""}',
-            '{"event":"command","func":"playVideo","args":""}',
-            '{"event":"command","func":"unMute","args":""}',
             '{"event":"command","func":"mute","args":""}',
             '{"event":"command","func":"playVideo","args":""}'
           ];
