@@ -27,7 +27,9 @@
 }
 
 .bettingCard.collapsed {
-  bottom: calc(-100% + 60px + env(safe-area-inset-bottom));
+  /* Keep only the header visible when collapsed */
+  bottom: 0;
+  transform: translateY(calc(100% - 60px - env(safe-area-inset-bottom)));
   padding: 0.5rem;
   min-height: 60px;
 }
@@ -41,9 +43,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 50px;
+  min-height: 60px;
   width: 100%;
-  padding: 0;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.9);
+  border-radius: 12px 12px 0 0;
 }
 
 .bettingCard.collapsed .toggleButton {
@@ -101,18 +105,18 @@
 
 .toggleButton {
   background: var(--accent-purple);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid white;
   color: white;
-  font-size: 1rem;
-  padding: 0.3rem;
+  font-size: 1.2rem;
+  padding: 0;
   cursor: pointer;
   transition: all 0.2s;
   line-height: 1;
-  border-radius: 4px;
+  border-radius: 50%;
   font-weight: bold;
-  box-shadow: 0 2px 8px rgba(153, 69, 255, 0.4);
-  width: 35px;
-  height: 35px;
+  box-shadow: 0 4px 12px rgba(153, 69, 255, 0.6);
+  width: 45px;
+  height: 45px;
   display: flex;
   align-items: center;
   justify-content: center;
