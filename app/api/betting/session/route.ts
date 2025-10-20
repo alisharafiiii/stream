@@ -2,9 +2,23 @@ import { NextRequest, NextResponse } from 'next/server'
 import { BettingService } from '@/lib/betting-service'
 import { isAdminWallet } from '@/lib/admin-auth'
 
-// GET current betting session
-export async function GET() {
+// GET current betting session or specific session with user bets
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url)
+    const sessionId = searchParams.get('sessionId')
+    const userId = searchParams.get('userId')
+    
+    // If sessionId and userId provided, get user's bets for that specific session
+    if (sessionId && userId) {
+      const userBets = await BettingService.getUserBets(sessionId, userId)
+      return NextResponse.json({ 
+        sessionId,
+        userBets: userBets || { leftAmount: 0, rightAmount: 0 }
+      })
+    }
+    
+    // Otherwise get current session
     const session = await BettingService.getCurrentSession()
     
     if (!session) {

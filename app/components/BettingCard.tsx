@@ -98,9 +98,13 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
     const checkResolvedSession = async () => {
       try {
         // Fetch user's bets for the resolved session specifically
+        console.log('🎰 Fetching bets for resolved session:', session.id, 'userId:', userId);
         const betsResponse = await fetch(`/api/betting/session?sessionId=${session.id}&userId=${userId}`);
+        console.log('🎰 Bets API response status:', betsResponse.status);
+        
         if (betsResponse.ok) {
           const betsData = await betsResponse.json();
+          console.log('🎰 Full bets API response:', betsData);
           const resolvedSessionBets = betsData.userBets || { leftAmount: 0, rightAmount: 0 };
           
           console.log('🎰 Resolved session bets:', resolvedSessionBets);
@@ -109,7 +113,10 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
           // Check if user had bets in this resolved session
           const userBetTotal = resolvedSessionBets.leftAmount + resolvedSessionBets.rightAmount;
           
-          if (userBetTotal === 0) {
+          // TEMPORARY: Force show overlay for testing
+          const FORCE_SHOW_OVERLAY = true;
+          
+          if (userBetTotal === 0 && !FORCE_SHOW_OVERLAY) {
             console.log('🎰 No bets in resolved session, skipping overlay');
             setProcessedSessionId(session.id);
             return;
