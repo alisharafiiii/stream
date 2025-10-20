@@ -181,7 +181,7 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
       // Check if user is a guest
       if (user.fid.startsWith('guest_')) {
         alert('Guest accounts cannot withdraw. Please sign out and connect with a real wallet.');
-        return;
+        return { success: false, error: 'Guest accounts cannot withdraw' };
       }
       
       // Get user's wallet address
@@ -218,7 +218,7 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
       
       if (response.ok && data.success) {
         onBalanceUpdate(data.newBalance);
-        return { success: true, transactionHash: data.transactionHash };
+        return { success: true, transactionHash: data.transactionHash as string };
       } else {
         return { success: false, error: data.error || 'Withdrawal failed' };
       }
