@@ -1,9 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
-import { Wallet } from "@coinbase/onchainkit/wallet";
 import Link from "next/link";
 import Image from "next/image";
+import AdminWallet from "./AdminWallet";
 import styles from "./admin.module.css";
 import pageStyles from "../page.module.css";
 import TreasuryMonitor from "../components/TreasuryMonitor";
@@ -51,7 +50,8 @@ interface UserProfile {
 }
 
 export default function AdminPage() {
-  const { address, isConnected } = useAccount();
+  const [address, setAddress] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
   const [streamConfig, setStreamConfig] = useState<StreamConfig>({
     streamUrl: '',
     isLive: false,
@@ -456,7 +456,10 @@ export default function AdminPage() {
           <p className={pageStyles.unauthorizedText}>
             Please connect your wallet to access the admin panel
           </p>
-          <Wallet />
+          <AdminWallet onConnect={(addr) => {
+            setAddress(addr);
+            setIsConnected(true);
+          }} />
         </div>
       </div>
     );

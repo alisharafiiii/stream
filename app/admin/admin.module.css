@@ -421,6 +421,30 @@
   }
 }
 
+/* Connect Button */
+.connectButton {
+  background: #9945FF;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.connectButton:hover {
+  background: #7C3AED;
+  transform: translateY(-1px);
+}
+
+.connectButton:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .adminContent {
