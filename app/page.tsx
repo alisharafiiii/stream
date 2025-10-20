@@ -38,17 +38,20 @@ export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
+    console.log('🎬 App mounted, showSplash:', showSplash);
     if (!isMiniAppReady) {
       setMiniAppReady();
     }
   }, [setMiniAppReady, isMiniAppReady]);
 
   useEffect(() => {
+    console.log('🎬 Initial load effect running');
     fetchStreamConfig();
     checkExistingUser();
     
     // Hide splash screen after 2.5 seconds
     const splashTimer = setTimeout(() => {
+      console.log('🎬 Hiding splash screen');
       setShowSplash(false);
     }, 2500);
     

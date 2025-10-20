@@ -1,38 +1,30 @@
-#!/usr/bin/env node
+import { Redis } from '@upstash/redis';
 
-// Script to reset viewer count
-
-const { Redis } = require('@upstash/redis');
-
-// Initialize Redis
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL || 'https://lucky-kangaroo-5978.upstash.io',
-  token: process.env.UPSTASH_REDIS_REST_TOKEN || 'ARdaAAImcDJmNTY0NmViMTU2MWI0MmEwOWU0OTczMzBjNzQ1NjllN3AyNTk3OA',
+  token: process.env.UPSTASH_REDIS_REST_TOKEN || ''
 });
 
 async function resetViewerCount() {
   try {
-    console.log('🧹 Resetting viewer count...\n');
+    // Reset the active viewers counter
+    await redis.set('stream:active_viewers', 0);
     
-    // Delete the active viewers counter
-    await redis.del('stream:active_viewers');
+    // Clean up all viewer sessions
+    const pattern = 'viewer:session:*';
+    const sessions = await redis.keys(pattern);
     
-    // Delete all viewer sessions
-    const sessions = await redis.keys('viewer:session:*');
-    console.log(`Found ${sessions.length} viewer sessions`);
-    
-    for (const session of sessions) {
-      await redis.del(session);
+    if (sessions.length > 0) {
+      console.log(`Found ${sessions.length} viewer sessions, removing...`);
+      for (const session of sessions) {
+        await redis.del(session);
+      }
     }
     
-    console.log('\n✅ Viewer count reset complete!');
-    console.log('Next viewers will start fresh from base count (4) + active sessions');
-    
+    console.log('✅ Viewer count reset successfully');
   } catch (error) {
-    console.error('❌ Error:', error);
-    process.exit(1);
+    console.error('❌ Error resetting viewer count:', error);
   }
 }
 
-// Run the script
 resetViewerCount();

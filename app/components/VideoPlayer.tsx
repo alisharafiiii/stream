@@ -10,6 +10,7 @@ interface VideoPlayerProps {
 export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
   const [error, setError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   
   // Store stream URL globally for YouTube viewer count
   useEffect(() => {
@@ -24,6 +25,16 @@ export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
       videoRef.current.play().catch((e) => {
         console.log("Autoplay failed, user interaction may be required:", e);
       });
+    }
+    
+    // For YouTube, try to trigger play via postMessage
+    if (iframeRef.current && streamUrl.includes('youtube')) {
+      setTimeout(() => {
+        iframeRef.current?.contentWindow?.postMessage(
+          '{"event":"command","func":"playVideo","args":""}',
+          '*'
+        );
+      }, 1000);
     }
   }, [streamUrl]);
 
@@ -83,7 +94,8 @@ export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
   return (
     <div className={styles.videoWrapper}>
       <iframe
-        src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&showinfo=0&loop=1`}
+        ref={iframeRef}
+        src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&showinfo=0&loop=1&enablejsapi=1`}
         className={styles.streamPlayer}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen

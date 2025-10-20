@@ -11,7 +11,7 @@ export async function GET() {
     const count = await redis.get(ACTIVE_VIEWERS_KEY) || 0
     
     // Add base viewers for realism (3-5)
-    const baseViewers = 4
+    const baseViewers = 3 + Math.floor(Math.random() * 3) // Random 3-5
     const totalViewers = Number(count) + baseViewers
     
     return NextResponse.json({ viewerCount: totalViewers })
