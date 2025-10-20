@@ -27,14 +27,47 @@ export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
       });
     }
     
-    // For YouTube, try to trigger play via postMessage
+    // Enhanced YouTube autoplay for Base app
     if (iframeRef.current && streamUrl.includes('youtube')) {
-      setTimeout(() => {
-        iframeRef.current?.contentWindow?.postMessage(
-          '{"event":"command","func":"playVideo","args":""}',
-          '*'
-        );
-      }, 1000);
+      let attempts = 0;
+      const maxAttempts = 10;
+      
+      const forceYouTubePlay = () => {
+        if (attempts >= maxAttempts) return;
+        attempts++;
+        
+        if (iframeRef.current?.contentWindow) {
+          // Send a sequence of commands to ensure autoplay
+          const commands = [
+            '{"event":"command","func":"mute","args":""}',
+            '{"event":"command","func":"playVideo","args":""}',
+            '{"event":"command","func":"unMute","args":""}',
+            '{"event":"command","func":"mute","args":""}',
+            '{"event":"command","func":"playVideo","args":""}'
+          ];
+          
+          commands.forEach((cmd, i) => {
+            setTimeout(() => {
+              iframeRef.current?.contentWindow?.postMessage(cmd, '*');
+            }, i * 200);
+          });
+          
+          // Retry after delay
+          if (attempts < maxAttempts) {
+            setTimeout(forceYouTubePlay, 2000);
+          }
+        }
+      };
+      
+      // Start attempts after iframe loads
+      setTimeout(forceYouTubePlay, 1000);
+      
+      // Also try on iframe load
+      if (iframeRef.current) {
+        iframeRef.current.onload = () => {
+          setTimeout(forceYouTubePlay, 500);
+        };
+      }
     }
   }, [streamUrl]);
 

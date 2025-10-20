@@ -6,11 +6,15 @@ import { RootProvider } from "./rootProvider";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const baseUrl = "https://stream-bay-delta.vercel.app";
+  const baseUrl = "https://stream-production-7739.up.railway.app";
 
   return {
     title: minikitConfig.miniapp.name,
     description: minikitConfig.miniapp.description,
+    icons: {
+      icon: '/icon.png',
+      apple: '/icon.png',
+    },
     openGraph: {
       title: minikitConfig.miniapp.ogTitle,
       description: minikitConfig.miniapp.ogDescription,
