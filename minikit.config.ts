@@ -1,4 +1,4 @@
-const ROOT_URL = "https://stream-seven-ashen.vercel.app";
+const ROOT_URL = "https://stream-production-7739.up.railway.app";
 
 /**
  * MiniApp configuration object. Must follow the mini app manifest specification.
