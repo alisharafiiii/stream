@@ -11,7 +11,7 @@
   bottom: max(0px, env(safe-area-inset-bottom));
   left: 0;
   right: 0;
-  z-index: 30;
+  z-index: 1100; /* Higher than comments overlay (999) */
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
   margin: 0;
 }
