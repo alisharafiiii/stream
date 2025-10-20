@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useUniversalAuth } from "../hooks/useUniversalAuth";
+import { useBaseWalletAuth } from "../hooks/useBaseWalletAuth";
 import styles from "./AuthModal.module.css";
 import { pay, getPaymentStatus } from '@base-org/account';
 import { PAYMENT_CONFIG } from '../config/payment';
@@ -26,6 +27,7 @@ export default function AuthModal({ onComplete }: AuthModalProps) {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [isCreatingGuest, setIsCreatingGuest] = useState(false);
   const { user: authUser, isLoading, error: authError, signIn, isInBaseApp } = useUniversalAuth();
+  const { connectWallet, isLoading: walletLoading, error: walletError } = useBaseWalletAuth();
 
   useEffect(() => {
     // Check if user is already authenticated
@@ -227,27 +229,44 @@ export default function AuthModal({ onComplete }: AuthModalProps) {
             <h1 className={styles.title}>Welcome</h1>
             <p className={styles.subtitle}>Join the action</p>
             
-            {(authError || localError) && (
+            {(authError || localError || walletError) && (
               <div className={styles.error}>
-                {localError || authError || 'Failed to sign in. Please try again.'}
+                {localError || walletError || authError || 'Failed to sign in. Please try again.'}
               </div>
             )}
             
             <button 
               onClick={async () => {
                 setError(null);
-                const authenticatedUser = await signIn();
-                if (authenticatedUser) {
-                  createUserProfile({
-                    ...authenticatedUser,
-                    profileImage: authenticatedUser.profileImage?.includes('dicebear') ? undefined : authenticatedUser.profileImage,
-                  });
+                try {
+                  // Check if we're in Base app
+                  if (isInBaseApp) {
+                    // Use MiniKit auth in Base app
+                    const authenticatedUser = await signIn();
+                    if (authenticatedUser) {
+                      createUserProfile({
+                        ...authenticatedUser,
+                        profileImage: authenticatedUser.profileImage?.includes('dicebear') ? undefined : authenticatedUser.profileImage,
+                      });
+                    }
+                  } else {
+                    // Use direct wallet connection in browser
+                    const walletUser = await connectWallet();
+                    if (walletUser) {
+                      createUserProfile({
+                        ...walletUser,
+                        profileImage: walletUser.profileImage?.includes('dicebear') ? undefined : walletUser.profileImage,
+                      });
+                    }
+                  }
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : 'Failed to connect wallet');
                 }
               }}
-              disabled={isLoading}
+              disabled={isLoading || walletLoading}
               className={styles.baseAuthButton}
             >
-              {isLoading ? 'Connecting...' : 'Connect Base Wallet'}
+              {(isLoading || walletLoading) ? 'Connecting...' : 'Connect Base Wallet'}
             </button>
             
             <button
