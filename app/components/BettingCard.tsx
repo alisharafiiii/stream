@@ -252,22 +252,7 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
 
   return (
     <>
-      {/* Floating toggle button - always visible */}
-      {isCollapsed && (
-        <button 
-          className={styles.floatingToggle}
-          onClick={() => {
-            console.log('Floating toggle clicked');
-            setIsCollapsed(false);
-            onToggleCollapse?.(false);
-          }}
-          aria-label="Expand betting section"
-          title="Click to expand betting deck"
-        >
-          <span className={styles.toggleIcon}>🎲</span>
-          <span className={styles.toggleText}>Betting</span>
-        </button>
-      )}
+      {/* Floating toggle button removed - now in CollapsedFooter */}
       
       <div className={`${styles.bettingCard} ${isCollapsed ? styles.collapsed : ''}`}>
         <div className={styles.header}>

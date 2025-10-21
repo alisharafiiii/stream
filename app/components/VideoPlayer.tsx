@@ -5,13 +5,19 @@ import styles from "./VideoPlayer.module.css";
 interface VideoPlayerProps {
   streamUrl: string;
   title: string;
+  isMuted?: boolean;
+  onMuteChange?: (muted: boolean) => void;
+  hideControls?: boolean;
 }
 
-export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
+export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideControls = false }: VideoPlayerProps) {
   const [error, setError] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [localMuted, setLocalMuted] = useState(true); // Local state for when not controlled
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  
+  // Use controlled state if provided, otherwise use local state
+  const isMuted = muteState !== undefined ? muteState : localMuted;
   
   // Store stream URL globally for YouTube viewer count
   useEffect(() => {
@@ -71,6 +77,8 @@ export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
 
   // Check if it's a YouTube URL and convert to embed format
   const toggleMute = () => {
+    const newMutedState = !isMuted;
+    
     if (iframeRef.current?.contentWindow) {
       const command = isMuted 
         ? '{"event":"command","func":"unMute","args":""}'
@@ -85,10 +93,15 @@ export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
         iframeRef.current?.contentWindow?.postMessage(command, '*');
       }, 300);
       
-      setIsMuted(!isMuted);
-      
       // Log for debugging
       console.log('🔊 Sound toggled:', isMuted ? 'Unmuting' : 'Muting');
+    }
+    
+    // Update state
+    if (onMuteChange) {
+      onMuteChange(newMutedState);
+    } else {
+      setLocalMuted(newMutedState);
     }
   };
 
@@ -158,14 +171,16 @@ export default function VideoPlayer({ streamUrl, title }: VideoPlayerProps) {
         sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
       />
       <div className={styles.clickBlocker} aria-hidden="true" />
-      <button 
-        className={styles.muteButton}
-        onClick={toggleMute}
-        aria-label={isMuted ? "Unmute" : "Mute"}
-        title={isMuted ? "Click to unmute" : "Click to mute"}
-      >
-        {isMuted ? '🔇' : '🔊'}
-      </button>
+      {!hideControls && (
+        <button 
+          className={styles.muteButton}
+          onClick={toggleMute}
+          aria-label={isMuted ? "Unmute" : "Mute"}
+          title={isMuted ? "Click to unmute" : "Click to mute"}
+        >
+          {isMuted ? '🔇' : '🔊'}
+        </button>
+      )}
     </div>
   );
 }

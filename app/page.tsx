@@ -10,6 +10,7 @@ import OfflineVideo from "./components/OfflineVideo";
 import SplashScreen from "./components/SplashScreen";
 import CommentsOverlay from "./components/CommentsOverlay";
 import CommentInput from "./components/CommentInput";
+import CollapsedFooter from "./components/CollapsedFooter";
 
 // Dynamically import AuthModal to avoid SSR issues
 const AuthModal = dynamic(() => import("./components/AuthModal"), {
@@ -38,6 +39,7 @@ export default function Home() {
   const [showAuth, setShowAuth] = useState(false);
   const [isBettingCollapsed, setIsBettingCollapsed] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
+  const [isMuted, setIsMuted] = useState(true); // Start muted for autoplay
 
   useEffect(() => {
     console.log('🎬 App mounted, showSplash:', showSplash);
@@ -199,7 +201,13 @@ export default function Home() {
       {streamConfig?.streamUrl ? (
         <>
           <div className={`${styles.streamContainer} ${isBettingCollapsed ? styles.fullscreen : ''}`}>
-            <VideoPlayer streamUrl={streamConfig.streamUrl} title={streamConfig.title} />
+            <VideoPlayer 
+              streamUrl={streamConfig.streamUrl} 
+              title={streamConfig.title}
+              isMuted={isMuted}
+              onMuteChange={setIsMuted}
+              hideControls={isBettingCollapsed} // Hide mute button when footer is shown
+            />
             {user && (
               <StreamOverlay 
                 user={{
@@ -244,6 +252,29 @@ export default function Home() {
           username={user.username}
           profileImage={user.profileImage}
         />
+      )}
+      
+      {/* Collapsed Footer - Show when betting deck is collapsed */}
+      {isBettingCollapsed && (
+        <>
+          <CollapsedFooter
+            onExpandBetting={() => setIsBettingCollapsed(false)}
+            onToggleMute={() => setIsMuted(!isMuted)}
+            isMuted={isMuted}
+          />
+          <style jsx global>{`
+            :root {
+              --footer-height: 72px; /* Height of collapsed footer */
+            }
+          `}</style>
+        </>
+      )}
+      {!isBettingCollapsed && (
+        <style jsx global>{`
+          :root {
+            --footer-height: 0px;
+          }
+        `}</style>
       )}
     </div>
   );

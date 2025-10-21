@@ -32,7 +32,7 @@ export function useMiniKitAuth() {
         console.log('[MiniKit Auth] Fetching user data from Base app...');
         
         // The MiniApp SDK provides user data through the context
-        const context = await sdk.context.get();
+        const context = await sdk.context;
         console.log('[MiniKit Auth] Context received:', context);
 
         if (context?.user) {

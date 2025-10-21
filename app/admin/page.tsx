@@ -93,7 +93,7 @@ export default function AdminPage() {
     // Only fetch data after wallet is connected
     if (isConnected && address) {
       console.log('Wallet connected, fetching data. Address:', address);
-      fetchStreamConfig();
+    fetchStreamConfig();
       fetchBettingSession();
     } else {
       console.log('Waiting for wallet connection. Connected:', isConnected, 'Address:', address);
