@@ -189,7 +189,7 @@ export class DepositVerificationService {
         return {
           found: true,
           confirmations,
-          status: receipt.status || false,
+          status: Boolean(receipt.status),
           amount: Number(treasuryTransfer.args.value) / 1e6,
           from: treasuryTransfer.args.from
         };
@@ -198,7 +198,7 @@ export class DepositVerificationService {
       return {
         found: true,
         confirmations,
-        status: receipt.status || false
+        status: Boolean(receipt.status)
       };
 
     } catch (error) {
