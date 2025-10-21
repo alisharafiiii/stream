@@ -149,7 +149,7 @@ export default function AdminPage() {
         
         // Fetch user profiles for display names
         const userIds = data.map((bet: UserBets) => bet.userId);
-        const uniqueUserIds = [...new Set(userIds)];
+        const uniqueUserIds = [...new Set(userIds)] as string[];
         
         const profileMap = new Map<string, UserProfile>();
         for (const userId of uniqueUserIds) {
