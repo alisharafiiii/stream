@@ -28,6 +28,29 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
     }
   }, [streamUrl]);
 
+  // Force play splash video on mobile
+  useEffect(() => {
+    if (showSplash && splashVideoRef.current) {
+      const playVideo = async () => {
+        try {
+          // Try multiple times to ensure autoplay works
+          splashVideoRef.current?.play().catch(() => {
+            // If autoplay fails, try again after a small delay
+            setTimeout(() => {
+              splashVideoRef.current?.play().catch(() => {});
+            }, 100);
+          });
+        } catch (error) {
+          console.log('Splash video autoplay failed:', error);
+        }
+      };
+      
+      // Try to play immediately and after DOM settles
+      playVideo();
+      setTimeout(playVideo, 500);
+    }
+  }, [showSplash]);
+
   useEffect(() => {
     // Listen for YouTube player messages (for debugging)
     const handleMessage = (event: MessageEvent) => {
@@ -235,12 +258,17 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
           <video
             ref={splashVideoRef}
             className={styles.splashVideo}
-            src="/splash.mp4"
             autoPlay
             muted
             loop
             playsInline
-          />
+            controls={false}
+            poster="/clicknpray-preview.png"
+            {...{'webkit-playsinline': 'true'} as any}
+          >
+            <source src="/splash.mp4" type="video/mp4" />
+            <source src="/splash.mp4" type="video/webm" />
+          </video>
           <div className={styles.playPrompt}>Tap to start stream</div>
         </div>
       ) : (

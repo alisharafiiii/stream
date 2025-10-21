@@ -139,6 +139,7 @@
   height: 100%;
   transform: translate(-50%, -50%);
   object-fit: cover;
+  background: url('/clicknpray-preview.png') center/cover no-repeat;
 }
 
 .playPrompt {
