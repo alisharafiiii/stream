@@ -92,7 +92,18 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
                 
                 if (response.ok) {
                   const updatedUser = await response.json();
-                  onBalanceUpdate(updatedUser.balance);
+                  console.log('[Base Pay] Balance updated:', updatedUser);
+                  
+                  // Force refresh user data to ensure UI updates
+                  const refreshResponse = await fetch(`/api/user/${user.fid}`);
+                  if (refreshResponse.ok) {
+                    const refreshedUser = await refreshResponse.json();
+                    console.log('[Base Pay] Refreshed user data:', refreshedUser);
+                    onBalanceUpdate(refreshedUser.balance);
+                  } else {
+                    onBalanceUpdate(updatedUser.balance);
+                  }
+                  
                   setShowDeposit(false);
                   setDepositAmount("");
                   setStatusMessage("");

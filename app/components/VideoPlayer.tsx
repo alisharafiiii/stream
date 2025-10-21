@@ -60,9 +60,14 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
         attempts++;
         
         if (iframeRef.current?.contentWindow) {
-          // Send a sequence of commands to ensure autoplay (keep muted)
-          const commands = [
+          // Send a sequence of commands to ensure autoplay
+          // Only mute if the user hasn't explicitly unmuted
+          const commands = isMuted ? [
             '{"event":"command","func":"mute","args":""}',
+            '{"event":"command","func":"playVideo","args":""}'
+          ] : [
+            '{"event":"command","func":"setVolume","args":[100]}',
+            '{"event":"command","func":"unMute","args":""}',
             '{"event":"command","func":"playVideo","args":""}'
           ];
           
@@ -94,7 +99,7 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [streamUrl]);
+  }, [streamUrl, isMuted]);
 
   // Check if it's a YouTube URL and convert to embed format
   const toggleMute = () => {
@@ -209,7 +214,7 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
     <div className={styles.videoWrapper}>
       <iframe
         ref={iframeRef}
-        src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&showinfo=0&loop=1&enablejsapi=1&cc_load_policy=0&autohide=1&playerapiid=ytplayer&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`}
+        src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1&mute=${isMuted ? '1' : '0'}&playsinline=1&controls=0&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&showinfo=0&loop=1&enablejsapi=1&cc_load_policy=0&autohide=1&playerapiid=ytplayer&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`}
         className={styles.streamPlayer}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
         allowFullScreen
