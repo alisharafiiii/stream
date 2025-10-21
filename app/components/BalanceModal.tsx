@@ -248,6 +248,13 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
           
           <h2 className={styles.title}>DEPOSIT</h2>
           
+          <button 
+            className={styles.backButton}
+            onClick={() => setShowDeposit(false)}
+          >
+            ← Back
+          </button>
+          
           <div className={styles.inputContainer}>
             <input
               type="number"
