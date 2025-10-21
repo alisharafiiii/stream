@@ -220,20 +220,7 @@ export default function Home() {
     localStorage.setItem('streamUser', JSON.stringify(authenticatedUser));
   };
 
-  // Show splash screen immediately, even while loading
-  if (showSplash) {
-    return <SplashScreen />;
-  }
-
-  if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loading}>Loading...</div>
-      </div>
-    );
-  }
-
-  // Mobile browser debug info
+  // Mobile browser debug info - Must be before any returns
   useEffect(() => {
     if (typeof window !== 'undefined') {
       console.log('Mobile Browser Debug:', {
@@ -246,6 +233,19 @@ export default function Home() {
       });
     }
   }, [streamConfig, user, isBettingCollapsed, showAuth]);
+
+  // Show splash screen immediately, even while loading
+  if (showSplash) {
+    return <SplashScreen />;
+  }
+
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loading}>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
