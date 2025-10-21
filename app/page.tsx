@@ -234,6 +234,7 @@ export default function Home() {
                 setUser(prev => prev ? { ...prev, balance: newBalance } : null);
               }}
               onToggleCollapse={setIsBettingCollapsed}
+              isCollapsed={isBettingCollapsed}
             />
           )}
         </>

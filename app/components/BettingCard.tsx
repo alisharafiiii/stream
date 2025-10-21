@@ -26,9 +26,10 @@ interface BettingCardProps {
   userBalance: number;
   onBalanceUpdate: (newBalance: number) => void;
   onToggleCollapse?: (isCollapsed: boolean) => void;
+  isCollapsed?: boolean;
 }
 
-export default function BettingCard({ userId, userBalance, onBalanceUpdate, onToggleCollapse }: BettingCardProps) {
+export default function BettingCard({ userId, userBalance, onBalanceUpdate, onToggleCollapse, isCollapsed: controlledCollapsed }: BettingCardProps) {
   const [session, setSession] = useState<BettingSession | null>(null);
   const [userBets, setUserBets] = useState<UserBets>({ leftAmount: 0, rightAmount: 0 });
   const [betting, setBetting] = useState(false);
@@ -38,7 +39,17 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
   const [processedSessionId, setProcessedSessionId] = useState<string | null>(null);
   const [resultPayout, setResultPayout] = useState<number>(0);
   const [savedUserBets, setSavedUserBets] = useState<UserBets>({ leftAmount: 0, rightAmount: 0 });
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [localCollapsed, setLocalCollapsed] = useState(false);
+  
+  // Use controlled state if provided, otherwise use local state
+  const isCollapsed = controlledCollapsed !== undefined ? controlledCollapsed : localCollapsed;
+  
+  const setIsCollapsed = (collapsed: boolean) => {
+    if (controlledCollapsed === undefined) {
+      setLocalCollapsed(collapsed);
+    }
+    onToggleCollapse?.(collapsed);
+  };
   const [expandedButton, setExpandedButton] = useState<'left' | 'right' | null>(null);
 
   // Fetch current session and user bets
