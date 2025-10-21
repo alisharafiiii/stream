@@ -39,7 +39,21 @@ export default function Home() {
   const [showAuth, setShowAuth] = useState(false);
   const [isBettingCollapsed, setIsBettingCollapsed] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
-  const [isMuted, setIsMuted] = useState(true); // Start muted for autoplay
+  const [isMuted, setIsMuted] = useState(() => {
+    // Check localStorage for saved mute preference
+    if (typeof window !== 'undefined') {
+      const savedMute = localStorage.getItem('streamMuted');
+      return savedMute === null ? true : savedMute === 'true';
+    }
+    return true; // Default to muted for autoplay
+  });
+
+  // Save mute preference
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('streamMuted', isMuted.toString());
+    }
+  }, [isMuted]);
 
   useEffect(() => {
     console.log('🎬 App mounted, showSplash:', showSplash);

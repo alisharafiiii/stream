@@ -3,7 +3,7 @@ import { redis } from './redis';
 
 // USDC contract details on Base
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
-const TREASURY_ADDRESS = process.env.TREASURY_ADDRESS || process.env.NEXT_PUBLIC_TREASURY_ADDRESS || '0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D';
+const TREASURY_ADDRESS = process.env.TREASURY_ADDRESS || process.env.NEXT_PUBLIC_TREASURY_ADDRESS || '0x00081fd198A649c4DBF4B3AB6E9f8dd611f92611';
 
 // ABI for USDC Transfer event
 const USDC_ABI = [

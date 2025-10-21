@@ -41,7 +41,7 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
       
       if (isInBaseApp) {
         // Use Base Pay with real USDC
-        const treasuryAddress = process.env.NEXT_PUBLIC_TREASURY_ADDRESS || "0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D";
+        const treasuryAddress = process.env.NEXT_PUBLIC_TREASURY_ADDRESS || "0x00081fd198A649c4DBF4B3AB6E9f8dd611f92611";
         
         setStatusMessage('Initiating Base Pay...');
         
@@ -127,7 +127,7 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
         // Browser: For both guest and wallet users, connect wallet and send USDC
         if (typeof window !== 'undefined' && (window as Window & { ethereum?: EthereumProvider }).ethereum) {
           try {
-            const treasuryAddress = process.env.NEXT_PUBLIC_TREASURY_ADDRESS || "0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D";
+            const treasuryAddress = process.env.NEXT_PUBLIC_TREASURY_ADDRESS || "0x00081fd198A649c4DBF4B3AB6E9f8dd611f92611";
             
             // Request wallet connection
             const ethereum = (window as Window & { ethereum?: EthereumProvider }).ethereum!;

@@ -14,7 +14,7 @@ export default function TreasuryMonitor({ treasuryAddress }: TreasuryMonitorProp
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState<ethers.TransactionResponse[]>([]);
   
-  const address = treasuryAddress || process.env.NEXT_PUBLIC_TREASURY_ADDRESS || "0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D";
+  const address = treasuryAddress || process.env.NEXT_PUBLIC_TREASURY_ADDRESS || "0x00081fd198A649c4DBF4B3AB6E9f8dd611f92611";
   
   useEffect(() => {
     if (!address || address === "demo") return;
