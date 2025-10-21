@@ -15,6 +15,7 @@ function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideC
   const [localMuted, setLocalMuted] = useState(true); // Local state for when not controlled
   const [showSplash, setShowSplash] = useState(true);
   const [isChangingMute, setIsChangingMute] = useState(false); // Visual feedback
+  const [playerReady, setPlayerReady] = useState(false); // Track if player is ready
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const splashVideoRef = useRef<HTMLVideoElement>(null);
@@ -164,6 +165,8 @@ function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideC
       // Also try on iframe load
       if (iframeRef.current) {
         iframeRef.current.onload = () => {
+          console.log('📺 iframe loaded, marking player as ready');
+          setPlayerReady(true);
           setTimeout(forceYouTubePlay, 500);
         };
       }
@@ -192,12 +195,33 @@ function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideC
     }
   }, [isMuted]);
 
-  // Attempt #7: Enhanced mute toggle with state verification
+  // Attempt #8: Fix actual sound state sync issues
   const toggleMute = () => {
-    const newMutedState = !isMuted;
-    
     // Show visual feedback
     setIsChangingMute(true);
+    
+    if (iframeRef.current?.contentWindow) {
+      // IMPORTANT: YouTube player is ALWAYS muted on load (mute=1 in URL)
+      // So actual state might be out of sync with our UI state
+      
+      if (!playerReady) {
+        console.log('⚠️ Player not ready yet, queuing toggle');
+        // If player not ready, just update UI state
+        const newMutedState = !isMuted;
+        if (onMuteChange) {
+          onMuteChange(newMutedState);
+        } else {
+          setLocalMuted(newMutedState);
+        }
+        setIsChangingMute(false);
+        return;
+      }
+      
+      // For first click when no sound (but UI shows unmuted), we need to actually unmute
+      const shouldUnmute = isMuted || !playerReady;
+      const newMutedState = !isMuted;
+      
+      console.log(`🎵 [Attempt #8] Toggle: UI shows ${isMuted ? 'muted' : 'unmuted'}, action: ${shouldUnmute ? 'unmute' : 'mute'}`);
     
     if (iframeRef.current?.contentWindow) {
       // Create a function to send commands reliably
@@ -216,9 +240,9 @@ function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideC
         send();
       };
       
-      if (isMuted) {
-        // Unmuting - Attempt #7 improvements
-        console.log('🔊 [Attempt #7] Unmuting YouTube player...');
+      if (shouldUnmute) {
+        // Unmuting - Attempt #8 with proper state handling
+        console.log('🔊 [Attempt #8] Unmuting YouTube player...');
         
         // First, ensure player is playing
         sendCommand('{"event":"command","func":"playVideo","args":""}', 2, 50);
@@ -239,9 +263,15 @@ function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideC
         }, 1000);
         
       } else {
-        // Muting - simpler as it usually works
-        console.log('🔇 [Attempt #7] Muting YouTube player...');
-        sendCommand('{"event":"command","func":"mute","args":""}', 3, 100);
+        // Muting - need to actually send mute command
+        console.log('🔇 [Attempt #8] Muting YouTube player...');
+        // Send mute command multiple times to ensure it works
+        sendCommand('{"event":"command","func":"mute","args":""}', 5, 100);
+        
+        // Also try setting volume to 0 as backup
+        setTimeout(() => {
+          sendCommand('{"event":"command","func":"setVolume","args":[0]}', 3, 100);
+        }, 300);
       }
     } else {
       console.warn('🚫 iframe not ready for mute toggle');

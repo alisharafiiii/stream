@@ -3,7 +3,16 @@
 ## Overview
 This document tracks all attempts to fix the sound/mute button issues in the Click n Pray miniapp.
 
-## Issues Reported by User
+## Current Issues (Updated)
+1. **No sound by default** - Stream plays muted even though button shows unmuted
+2. **Requires 2 clicks** - Need to click sound button twice to actually get sound
+3. **Mute doesn't work** - Icon changes to mute but sound continues playing
+
+## Fixed Issues ✅
+1. ✅ "everytime i toggle the voice the stream resets" - FIXED by removing dynamic URL parameters
+2. ✅ Stream freezing when clicking voice button - FIXED
+
+## Original Issues Reported
 1. "no sound in the stream" 
 2. "still no sound"
 3. "everytime i toggle the voice the stream resets (it stops and i have to play it again)"
@@ -154,3 +163,34 @@ useEffect(() => {
 - Better command sequencing
 
 **Result**: Testing in progress - most reliable attempt yet
+
+## ✅ Attempt #8: Proper State Synchronization
+**Date**: Current
+**Problem**: 
+1. No sound by default (player muted but UI shows unmuted)
+2. Requires 2 clicks to activate sound
+3. Mute doesn't work (icon changes but sound continues)
+
+**Root Cause**: State mismatch between UI and actual YouTube player
+- YouTube iframe ALWAYS loads muted (mute=1 in URL)
+- UI was showing unmuted state based on localStorage
+- First click was just syncing states, not actually unmuting
+
+**Solution**:
+1. **Always start with isMuted=true** to match YouTube player
+   ```typescript
+   const [isMuted, setIsMuted] = useState(() => {
+     return true; // Always match YouTube's initial muted state
+   });
+   ```
+2. **Track player ready state** to handle commands properly
+3. **Enhanced mute command** with volume=0 as backup
+4. **Proper state detection** - check if we need to unmute regardless of UI state
+
+**Key Changes**:
+- UI now correctly shows muted on load (matches reality)
+- First click actually unmutes (no more 2-click issue)
+- Mute command enhanced with 5 retries + volume=0 backup
+- Added playerReady tracking for better command timing
+
+**Result**: Should fix all three remaining issues

@@ -40,12 +40,10 @@ export default function Home() {
   const [isBettingCollapsed, setIsBettingCollapsed] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [isMuted, setIsMuted] = useState(() => {
-    // Check localStorage for saved mute preference
-    if (typeof window !== 'undefined') {
-      const savedMute = localStorage.getItem('streamMuted');
-      return savedMute === null ? true : savedMute === 'true';
-    }
-    return true; // Default to muted for autoplay
+    // IMPORTANT: YouTube player ALWAYS starts muted (mute=1 in iframe URL)
+    // So we must start with isMuted=true to match actual player state
+    // User preference is ignored on first load to prevent state mismatch
+    return true; // Always start muted to match YouTube player
   });
 
   // Save mute preference
