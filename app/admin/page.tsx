@@ -188,7 +188,7 @@ export default function AdminPage() {
     let confirmed = false;
     try {
       confirmed = confirm('Are you sure you want to delete this session? This cannot be undone.');
-    } catch (e) {
+    } catch (_) {
       // If confirm is blocked, proceed with a console warning
       console.warn('Confirm dialog blocked, proceeding with delete');
       confirmed = true;
@@ -215,7 +215,7 @@ export default function AdminPage() {
         
         try {
           alert('Session deleted successfully');
-        } catch (e) {
+        } catch (_) {
           console.warn('Alert blocked, showing in console only');
         }
         
@@ -234,7 +234,7 @@ export default function AdminPage() {
         
         try {
           alert(errorMsg);
-        } catch (e) {
+        } catch (_) {
           console.warn('Alert blocked, showing in console only');
         }
       }
@@ -466,7 +466,7 @@ export default function AdminPage() {
     let confirmed = false;
     try {
       confirmed = confirm(`Are you sure you want to declare ${winner.toUpperCase()} as the winner? This will process all payouts.`);
-    } catch (e) {
+    } catch (_) {
       // If confirm is blocked, proceed with a console warning
       console.warn('Confirm dialog blocked, proceeding with action');
       confirmed = true;
@@ -496,7 +496,7 @@ export default function AdminPage() {
         
         try {
           alert(message);
-        } catch (e) {
+        } catch (_) {
           console.warn('Alert blocked, showing in console only');
         }
         
@@ -512,7 +512,7 @@ export default function AdminPage() {
         
         try {
           alert(errorMsg);
-        } catch (e) {
+        } catch (_) {
           console.warn('Alert blocked, showing in console only');
         }
       }
