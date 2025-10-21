@@ -14,7 +14,6 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
   const [error, setError] = useState(false);
   const [localMuted, setLocalMuted] = useState(true); // Local state for when not controlled
   const [showSplash, setShowSplash] = useState(true);
-  const [streamStarted, setStreamStarted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const splashVideoRef = useRef<HTMLVideoElement>(null);
@@ -227,7 +226,6 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
 
   const handleSplashClick = () => {
     setShowSplash(false);
-    setStreamStarted(true);
   };
 
   return (
