@@ -95,6 +95,18 @@ export default function Home() {
       setShowSplash(false);
     }, 2500);
     
+    // Android WebView fix - force repaint
+    if (typeof window !== 'undefined' && /Android/i.test(navigator.userAgent)) {
+      console.log('Android detected - applying fixes');
+      // Force a repaint after components mount
+      setTimeout(() => {
+        document.body.style.display = 'none';
+        // eslint-disable-next-line no-unused-expressions
+        document.body.offsetHeight; // Trigger reflow
+        document.body.style.display = '';
+      }, 100);
+    }
+    
     return () => clearTimeout(splashTimer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

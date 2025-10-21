@@ -44,7 +44,9 @@ export async function generateMetadata(): Promise<Metadata> {
       width: 'device-width',
       initialScale: 1,
       maximumScale: 1,
+      minimumScale: 1,
       userScalable: false,
+      viewportFit: 'cover',
     },
     other: {
       "fc:frame": "vNext",
