@@ -460,7 +460,14 @@ export default function AdminPage() {
   };
 
   const resolveSession = async (winner: 'left' | 'right') => {
-    if (!bettingSession || bettingSession.status === 'resolved') return;
+    // Add visual feedback immediately
+    document.body.style.backgroundColor = winner === 'left' ? '#fee' : '#eef';
+    setTimeout(() => { document.body.style.backgroundColor = ''; }, 100);
+    
+    if (!bettingSession || bettingSession.status === 'resolved') {
+      alert('No session to resolve or session already resolved');
+      return;
+    }
 
     // Use try-catch for confirm in case it's blocked in wallet browser
     let confirmed = false;
@@ -812,12 +819,8 @@ export default function AdminPage() {
                 {bettingSession.status === 'frozen' && (
                   <>
                     <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('Left Wins button clicked');
-                        resolveSession('left');
-                      }}
+                      type="button"
+                      onClick={() => resolveSession('left')}
                       disabled={resolvingSession}
                       className={`${styles.button} ${styles.primary}`}
                       style={{ backgroundColor: '#ef4444', marginBottom: '0.5rem' }}
@@ -825,12 +828,8 @@ export default function AdminPage() {
                       {resolvingSession ? 'Processing...' : '👈 Left Wins'}
                     </button>
                     <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('Right Wins button clicked');
-                        resolveSession('right');
-                      }}
+                      type="button"
+                      onClick={() => resolveSession('right')}
                       disabled={resolvingSession}
                       className={`${styles.button} ${styles.primary}`}
                       style={{ backgroundColor: '#3b82f6', marginBottom: '0.5rem' }}
@@ -880,12 +879,8 @@ export default function AdminPage() {
                 
                 {/* Delete Session Button - Always show */}
                 <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Delete Session button clicked', bettingSession.id);
-                    deleteSession(bettingSession.id);
-                  }}
+                  type="button"
+                  onClick={() => deleteSession(bettingSession.id)}
                   className={`${styles.button}`}
                   style={{ backgroundColor: '#dc2626', color: 'white', marginBottom: '0.5rem' }}
                 >
