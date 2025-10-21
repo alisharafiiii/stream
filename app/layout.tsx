@@ -10,29 +10,35 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: "Click n Pray",
-    description: minikitConfig.miniapp.description,
+    description: "Click your side and pray for the win. Simple 2x payouts.",
+    applicationName: "Click n Pray",
     icons: {
-      icon: '/icon.png',
-      apple: '/icon.png',
+      icon: `${baseUrl}/icon.png`,
+      apple: `${baseUrl}/icon.png`,
     },
     manifest: '/manifest.json',
     openGraph: {
-      title: minikitConfig.miniapp.ogTitle,
-      description: minikitConfig.miniapp.ogDescription,
+      type: 'website',
+      siteName: 'Click n Pray',
+      title: "Click n Pray - Live Betting",
+      description: "Click your side and pray for the win. Simple 2x payouts. Max $10 per round.",
+      url: baseUrl,
       images: [
         {
-          url: minikitConfig.miniapp.ogImageUrl,
+          url: `${baseUrl}/clicknpray-preview.png`,
           width: 1200,
           height: 630,
-          alt: minikitConfig.miniapp.name,
+          alt: "Click n Pray",
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: minikitConfig.miniapp.ogTitle,
-      description: minikitConfig.miniapp.ogDescription,
-      images: [minikitConfig.miniapp.ogImageUrl],
+      site: '@clicknpray',
+      creator: '@clicknpray',
+      title: "Click n Pray - Live Betting",
+      description: "Click your side and pray for the win. Simple 2x payouts.",
+      images: [`${baseUrl}/clicknpray-preview.png`],
     },
     viewport: {
       width: 'device-width',
@@ -63,6 +69,12 @@ export async function generateMetadata(): Promise<Metadata> {
       "og:image:width": "1200",
       "og:image:height": "630",
       "og:image:alt": "Click n Pray - Live Betting",
+      // Additional meta tags for Base app
+      "application-name": "Click n Pray",
+      "apple-mobile-web-app-title": "Click n Pray",
+      "apple-mobile-web-app-capable": "yes",
+      "apple-mobile-web-app-status-bar-style": "black",
+      "mobile-web-app-capable": "yes",
     },
   };
 }
