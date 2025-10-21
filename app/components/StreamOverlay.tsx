@@ -20,7 +20,6 @@ interface StreamOverlayProps {
 
 export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: StreamOverlayProps) {
   const [viewerCount, setViewerCount] = useState(0);
-  const [youtubeViewers, setYoutubeViewers] = useState(0);
   const [showBalanceModal, setShowBalanceModal] = useState(false);
   
   console.log('StreamOverlay - user.fid:', user.fid, 'isGuest:', user.fid.startsWith('guest_'));
@@ -39,16 +38,14 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
   useEffect(() => {
     // Fetch initial viewer count
     fetchViewerCount();
-    fetchYoutubeViewers();
     
-    // Update viewer session every 30 seconds
-    const interval = setInterval(() => {
-      updateViewerSession();
-      fetchYoutubeViewers();
-    }, 30000);
-    
-    // Update session on mount
+    // Update viewer session once on mount (counts this user)
     updateViewerSession();
+    
+    // Update count every 30 seconds to get latest total
+    const interval = setInterval(() => {
+      fetchViewerCount();
+    }, 30000);
 
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,29 +79,6 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
     }
   };
   
-  const fetchYoutubeViewers = async () => {
-    try {
-      // Extract video ID from current page's stream URL if available
-      const streamUrl = (window as Window & { currentStreamUrl?: string }).currentStreamUrl || '';
-      let videoId = '';
-      
-      if (streamUrl.includes('youtube.com/embed/')) {
-        videoId = streamUrl.split('embed/')[1]?.split('?')[0];
-      } else if (streamUrl.includes('v=')) {
-        videoId = streamUrl.split('v=')[1]?.split('&')[0];
-      }
-      
-      if (videoId) {
-        const response = await fetch(`/api/youtube-viewers?videoId=${videoId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setYoutubeViewers(data.viewers || 0);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch YouTube viewers:', error);
-    }
-  };
 
   return (
     <>
@@ -119,7 +93,7 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
             </svg>
-            {(viewerCount + youtubeViewers).toLocaleString()}
+            {viewerCount.toLocaleString()}
           </div>
         </div>
         <div className={styles.userSection}>
