@@ -105,10 +105,6 @@ export default function WithdrawModal({ balance, onClose, onWithdraw }: Withdraw
                 {isProcessing ? "PROCESSING..." : "WITHDRAW"}
               </button>
             </div>
-            
-            <p className={styles.note}>
-              Funds will be sent to your connected wallet
-            </p>
           </>
         ) : (
           <div className={styles.success}>

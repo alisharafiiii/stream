@@ -25,7 +25,7 @@
   font-family: var(--font-pixel);
   animation: slideUp 0.3s ease-out;
   z-index: 3001; /* Match BalanceModal */
-  transform: scale(0.75) translateY(-10px); /* Match BalanceModal size and position */
+  transform: scale(0.75) translateY(-18px); /* Match BalanceModal size and position - moved up 18px (10+8) */
 }
 
 .closeButton {

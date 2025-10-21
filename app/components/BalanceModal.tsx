@@ -288,10 +288,6 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
           >
             {isProcessing ? "PROCESSING..." : "DEPOSIT USDC"}
           </button>
-          
-          <p className={styles.note}>
-            Real USDC on Base network. You&apos;ll be connected to Base Pay or your wallet.
-          </p>
         </div>
       </div>
     );
