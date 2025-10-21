@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { redis, REDIS_KEYS, UserProfile } from '@/lib/redis';
 import { fetchFarcasterProfile } from '@/lib/farcaster-api';
+import { handleBaseProfile, isBaseAppUser, getProfileImageUrl } from '@/lib/base-profile-api';
 
 // Extended User interface for API responses
 interface User extends Omit<UserProfile, 'createdAt' | 'lastSeen'> {
@@ -113,16 +114,32 @@ export async function POST(request: NextRequest) {
       let finalDisplayName = displayName;
       let finalProfileImage = profileImage;
 
+      // First, check if this is a Base app user with their own profile
+      const baseProfile = await handleBaseProfile({ fid, username, displayName, profileImage });
+      if (baseProfile && baseProfile.profileImage) {
+        console.log('[API] Using Base app profile image:', baseProfile.profileImage);
+        finalProfileImage = baseProfile.profileImage;
+      }
+      
       // If no username/displayName provided, try to fetch from Farcaster
-      if (!username || !displayName || !profileImage) {
-        console.log('[API] Missing user data, fetching from Farcaster for FID:', fid);
-        const farcasterData = await getFarcasterProfileData(fid);
-        console.log('[API] Farcaster data received:', farcasterData);
-        if (farcasterData) {
-          finalUsername = username || farcasterData.username;
-          finalDisplayName = displayName || farcasterData.displayName;
-          finalProfileImage = profileImage || farcasterData.profileImage;
-          console.log('[API] Final profile image after Farcaster fetch:', finalProfileImage);
+      if (!username || !displayName || (!profileImage && !baseProfile?.profileImage)) {
+        console.log('[API] Missing user data, checking if Base app user or fetching from Farcaster for FID:', fid);
+        
+        // Only fetch from Farcaster if not a Base app user
+        if (!isBaseAppUser(username)) {
+          const farcasterData = await getFarcasterProfileData(fid);
+          console.log('[API] Farcaster data received:', farcasterData);
+          if (farcasterData) {
+            finalUsername = username || farcasterData.username;
+            finalDisplayName = displayName || farcasterData.displayName;
+            
+            // Use getProfileImageUrl to determine the best image
+            finalProfileImage = getProfileImageUrl(
+              { fid, username: finalUsername, profileImage },
+              farcasterData.profileImage
+            );
+            console.log('[API] Final profile image after processing:', finalProfileImage);
+          }
         }
       }
 
@@ -130,7 +147,7 @@ export async function POST(request: NextRequest) {
         fid,
         username: finalUsername,
         displayName: finalDisplayName,
-        profileImage: finalProfileImage || `https://api.dicebear.com/7.x/personas/png?seed=${fid}`,
+        profileImage: finalProfileImage || getProfileImageUrl({ fid, username: finalUsername }),
         balance: existingProfile?.balance || balance || 0,
         createdAt: existingProfile?.createdAt || Date.now(),
         lastSeen: Date.now(),
