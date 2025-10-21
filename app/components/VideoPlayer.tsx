@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import styles from "./VideoPlayer.module.css";
 
 interface VideoPlayerProps {
@@ -10,7 +10,7 @@ interface VideoPlayerProps {
   hideControls?: boolean;
 }
 
-export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideControls = false }: VideoPlayerProps) {
+function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideControls = false }: VideoPlayerProps) {
   const [error, setError] = useState(false);
   const [localMuted, setLocalMuted] = useState(true); // Local state for when not controlled
   const [showSplash, setShowSplash] = useState(true);
@@ -370,3 +370,5 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
     </div>
   );
 }
+
+export default memo(VideoPlayer);

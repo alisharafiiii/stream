@@ -36,6 +36,7 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
   const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState("");
   const [showResult, setShowResult] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
   const [processedSessionId, setProcessedSessionId] = useState<string | null>(null);
   const [resultPayout, setResultPayout] = useState<number>(0);
   const [savedUserBets, setSavedUserBets] = useState<UserBets>({ leftAmount: 0, rightAmount: 0 });
@@ -150,13 +151,21 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
           // Show result
           console.log('🎰 Showing result overlay!');
           setShowResult(true);
+          setFadeOut(false);
           setProcessedSessionId(session.id);
           
-          // Auto-hide overlay after 3 seconds
+          // Start fade-out after 5 seconds
           setTimeout(() => {
-            console.log('🎰 Auto-hiding overlay');
-            setShowResult(false);
-          }, 3000);
+            console.log('🎰 Starting fade out');
+            setFadeOut(true);
+            
+            // Hide completely after fade-out animation
+            setTimeout(() => {
+              console.log('🎰 Hiding overlay');
+              setShowResult(false);
+              setFadeOut(false);
+            }, 500);
+          }, 5000);
         }
       } catch (error) {
         console.error('Failed to fetch resolved session bets:', error);
@@ -448,7 +457,16 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
 
       {/* Result Overlay */}
       {showResult && (
-        <div className={styles.resultOverlay} onClick={() => setShowResult(false)}>
+        <div 
+          className={`${styles.resultOverlay} ${fadeOut ? styles.fadeOut : ''}`} 
+          onClick={() => {
+            setFadeOut(true);
+            setTimeout(() => {
+              setShowResult(false);
+              setFadeOut(false);
+            }, 500);
+          }}
+        >
           <div 
             className={`${styles.resultContent} ${resultPayout > 0 ? styles.win : styles.lose}`}
             onClick={(e) => e.stopPropagation()}
@@ -517,7 +535,13 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
             )}
             <button 
               className={styles.resultButton}
-              onClick={() => setShowResult(false)}
+              onClick={() => {
+                setFadeOut(true);
+                setTimeout(() => {
+                  setShowResult(false);
+                  setFadeOut(false);
+                }, 500);
+              }}
             >
               Continue
             </button>
