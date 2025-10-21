@@ -100,9 +100,90 @@
   }
 }
 
+/* Container for centered content */
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--background);
+}
+
+/* Unauthorized/Auth screens */
+.unauthorized {
+  text-align: center;
+  padding: 2rem;
+  max-width: 400px;
+  width: 100%;
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.unauthorizedIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.unauthorizedTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  font-family: var(--font-pixel);
+  text-transform: uppercase;
+}
+
+.unauthorizedText {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.walletInfo {
+  font-family: monospace;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  margin: 1rem 0;
+  color: var(--accent-blue);
+}
+
+.backLink {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--accent-purple);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.backLink:hover {
+  transform: translateX(-4px);
+  text-decoration: underline;
+}
+
 /* Mobile responsiveness */
 @media (max-width: 640px) {
   .loadingText {
     font-size: 1.25rem;
+  }
+  
+  .unauthorized {
+    padding: 1.5rem;
+  }
+  
+  .unauthorizedIcon {
+    font-size: 3rem;
+  }
+  
+  .unauthorizedTitle {
+    font-size: 1.25rem;
+  }
+  
+  .unauthorizedText {
+    font-size: 0.875rem;
   }
 }

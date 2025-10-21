@@ -19,6 +19,14 @@ export default function AdminWallet({ onConnect }: AdminWalletProps) {
     setError(null);
 
     try {
+      // Log environment info for debugging
+      console.log('Wallet Connection Debug:', {
+        userAgent: navigator.userAgent,
+        hasEthereum: !!(window as Window & { ethereum?: EthereumProvider }).ethereum,
+        windowEthereum: (window as Window & { ethereum?: EthereumProvider }).ethereum,
+        isMobile: /Mobile|Android|iPhone/i.test(navigator.userAgent)
+      });
+      
       // Check for various wallet providers
       const ethereum = (window as Window & { ethereum?: EthereumProvider }).ethereum;
       
@@ -26,10 +34,14 @@ export default function AdminWallet({ onConnect }: AdminWalletProps) {
       const isMobileWallet = /Mobile|Android|iPhone/i.test(navigator.userAgent);
       
       if (ethereum) {
+        console.log('Wallet provider detected:', ethereum);
+        
         // Request account access
         const accounts = await ethereum.request({ 
           method: 'eth_requestAccounts' 
         }) as string[];
+        
+        console.log('Connected accounts:', accounts);
         
         if (accounts && accounts.length > 0) {
           // Switch to Base network if needed
@@ -61,24 +73,38 @@ export default function AdminWallet({ onConnect }: AdminWalletProps) {
           onConnect(accounts[0]);
         }
       } else if (isMobileWallet) {
-        // Mobile wallet detection
-        const deepLinks = {
-          metamask: `https://metamask.app.link/dapp/${window.location.href}`,
-          coinbase: `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(window.location.href)}`,
-          trust: `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(window.location.href)}`
-        };
+        // Check if we're already in a wallet browser
+        const userAgent = navigator.userAgent.toLowerCase();
+        const inWalletBrowser = 
+          userAgent.includes('metamask') ||
+          userAgent.includes('coinbasewallet') ||
+          userAgent.includes('trust') ||
+          userAgent.includes('imtoken') ||
+          (window as Window & { ethereum?: EthereumProvider }).ethereum;
         
-        setError("No wallet detected. Opening wallet options...");
-        
-        // Show wallet options
-        const choice = window.confirm(
-          "No wallet detected. Would you like to open MetaMask? (Cancel for Coinbase Wallet)"
-        );
-        
-        if (choice) {
-          window.location.href = deepLinks.metamask;
+        if (inWalletBrowser) {
+          // We're in a wallet browser but ethereum is not available yet
+          setError("Wallet detected but not ready. Please refresh the page or check wallet permissions.");
         } else {
-          window.location.href = deepLinks.coinbase;
+          // Mobile browser without wallet - show options
+          const deepLinks = {
+            metamask: `https://metamask.app.link/dapp/${window.location.href}`,
+            coinbase: `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(window.location.href)}`,
+            trust: `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(window.location.href)}`
+          };
+          
+          setError("No wallet detected. Opening wallet options...");
+          
+          // Show wallet options
+          const choice = window.confirm(
+            "No wallet detected. Would you like to open MetaMask? (Cancel for Coinbase Wallet)"
+          );
+          
+          if (choice) {
+            window.location.href = deepLinks.metamask;
+          } else {
+            window.location.href = deepLinks.coinbase;
+          }
         }
       } else {
         setError("No wallet found. Please install MetaMask, Coinbase Wallet, or another Web3 wallet.");
