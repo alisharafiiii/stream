@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 // import Image from "next/image";  // Commented out - using img tags for dicebear SVG URLs
 import styles from "./StreamOverlay.module.css";
+import Link from 'next/link';
 import BalanceModal from "./BalanceModal";
 
 interface StreamOverlayProps {
@@ -121,7 +122,7 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
           </div>
         </div>
         <div className={styles.userSection}>
-          <a 
+          <Link 
             href={`/profile/${user.fid}`}
             className={styles.profileLink}
             title="View profile"
@@ -158,7 +159,7 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
                 ? (user.username.endsWith('.base.eth') ? user.username : `${user.username}.base.eth`)
                 : user.displayName}
             </span>
-          </a>
+          </Link>
           <div
             className={styles.userBalance}
             onClick={() => setShowBalanceModal(true)}

@@ -35,11 +35,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Create comment with basename formatting
-    const displayUsername = username && !username.startsWith('0x') 
-      ? username 
+    // Remove any existing .base.eth before formatting
+    const cleanUsername = username ? username.replace(/\.base\.eth$/, '') : username;
+    const displayUsername = cleanUsername && !cleanUsername.startsWith('0x') 
+      ? cleanUsername 
       : userId.startsWith('0x') 
         ? `${userId.slice(0, 6)}...${userId.slice(-4)}`
-        : username;
+        : cleanUsername;
     
     const comment: Comment = {
       id: `comment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
