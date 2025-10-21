@@ -222,8 +222,7 @@ function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideC
       const newMutedState = !isMuted;
       
       console.log(`🎵 [Attempt #8] Toggle: UI shows ${isMuted ? 'muted' : 'unmuted'}, action: ${shouldUnmute ? 'unmute' : 'mute'}`);
-    
-    if (iframeRef.current?.contentWindow) {
+      
       // Create a function to send commands reliably
       const sendCommand = (command: string, retries = 5, delay = 100) => {
         let attempt = 0;
@@ -273,26 +272,27 @@ function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideC
           sendCommand('{"event":"command","func":"setVolume","args":[0]}', 3, 100);
         }, 300);
       }
+      
+      // Update state immediately for UI responsiveness
+      if (onMuteChange) {
+        onMuteChange(newMutedState);
+      } else {
+        setLocalMuted(newMutedState);
+      }
+      
+      // Save preference
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('streamMuted', String(newMutedState));
+      }
+      
+      // Hide feedback after commands are sent
+      setTimeout(() => {
+        setIsChangingMute(false);
+      }, 1500);
     } else {
       console.warn('🚫 iframe not ready for mute toggle');
-    }
-    
-    // Update state immediately for UI responsiveness
-    if (onMuteChange) {
-      onMuteChange(newMutedState);
-    } else {
-      setLocalMuted(newMutedState);
-    }
-    
-    // Save preference
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('streamMuted', String(newMutedState));
-    }
-    
-    // Hide feedback after commands are sent
-    setTimeout(() => {
       setIsChangingMute(false);
-    }, 1500);
+    }
   };
 
   const getEmbedUrl = (url: string) => {
