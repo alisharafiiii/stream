@@ -560,7 +560,7 @@
 .resultContent {
   background: transparent;
   border: none;
-  padding: 0;
+  padding: 2rem;
   max-width: none;
   width: 100%;
   height: 100%;
@@ -568,11 +568,11 @@
   animation: none;
   font-family: var(--font-pixel);
   text-transform: uppercase;
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .resultContent.win {
@@ -589,8 +589,10 @@
   font-size: 8rem;
   font-weight: 400;
   color: #00ff00;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
   text-transform: uppercase;
+  position: relative;
+  z-index: 50;
   text-shadow: 
     0 0 30px #00ff00,
     0 0 60px #00ff00,
@@ -668,20 +670,21 @@
 }
 
 .receipt {
-  background: rgba(0, 0, 0, 0.95);
+  background: rgba(0, 0, 0, 0.98);
   border: 4px dashed #00ff00;
   border-radius: 0;
   padding: 3rem 2rem;
-  margin: 3rem auto;
+  margin: 2rem auto;
   text-align: left;
   font-family: 'VT323', monospace;
   max-width: 500px;
+  position: relative;
+  z-index: 100;
   box-shadow: 
     inset 0 0 30px rgba(0, 255, 0, 0.2),
     0 0 50px rgba(0, 255, 0, 0.5);
   animation: subtle-pulse 3s ease-in-out 5;
   transform: perspective(1000px) rotateX(3deg);
-  position: relative;
 }
 
 .resultContent.win .receipt::before {
