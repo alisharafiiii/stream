@@ -156,36 +156,43 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
   const toggleMute = () => {
     const newMutedState = !isMuted;
     
-    // For Base app, we need to reload the iframe with different mute parameter
-    const isBaseApp = typeof window !== 'undefined' && 
-      (window.navigator.userAgent.toLowerCase().includes('base') || 
-       window.navigator.userAgent.toLowerCase().includes('coinbase'));
-    
-    if (isBaseApp && iframeRef.current) {
-      // In Base app, change the src to toggle mute
-      const currentSrc = iframeRef.current.src;
-      const newSrc = currentSrc.replace(
-        /mute=\d/, 
-        `mute=${newMutedState ? '1' : '0'}`
-      );
-      iframeRef.current.src = newSrc;
-    } else if (iframeRef.current?.contentWindow) {
-      // Browser: use postMessage
+    if (iframeRef.current?.contentWindow) {
       if (isMuted) {
-        console.log('🔊 Unmuting...');
+        // Unmuting
+        console.log('🔊 Unmuting YouTube player...');
+        
+        // Send multiple commands to ensure it works
         const commands = [
           '{"event":"command","func":"unMute","args":""}',
           '{"event":"command","func":"setVolume","args":[100]}'
         ];
-        commands.forEach((cmd, i) => {
-          setTimeout(() => {
-            iframeRef.current?.contentWindow?.postMessage(cmd, '*');
-          }, i * 100);
+        
+        // Send immediately and with delays
+        commands.forEach(cmd => {
+          iframeRef.current?.contentWindow?.postMessage(cmd, '*');
         });
+        
+        // Retry after short delays
+        setTimeout(() => {
+          commands.forEach(cmd => {
+            iframeRef.current?.contentWindow?.postMessage(cmd, '*');
+          });
+        }, 200);
+        
+        setTimeout(() => {
+          iframeRef.current?.contentWindow?.postMessage(commands[0], '*');
+        }, 500);
+        
       } else {
-        console.log('🔇 Muting...');
+        // Muting
+        console.log('🔇 Muting YouTube player...');
         const muteCommand = '{"event":"command","func":"mute","args":""}';
+        
+        // Send multiple times
         iframeRef.current.contentWindow.postMessage(muteCommand, '*');
+        setTimeout(() => {
+          iframeRef.current?.contentWindow?.postMessage(muteCommand, '*');
+        }, 100);
       }
     }
     
@@ -260,17 +267,29 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
           <video
             ref={splashVideoRef}
             className={styles.splashVideo}
-            autoPlay
-            muted
-            loop
-            playsInline
+            autoPlay={true}
+            muted={true}
+            loop={true}
+            playsInline={true}
             controls={false}
             poster="/clicknpray-preview.png"
+            preload="auto"
             {...({'webkit-playsinline': 'true'} as React.VideoHTMLAttributes<HTMLVideoElement>)}
           >
             <source src="/splash.mp4" type="video/mp4" />
-            <source src="/splash.mp4" type="video/webm" />
           </video>
+          <div className={styles.splashOverlay} style={{
+            backgroundImage: 'url(/clicknpray-preview.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            opacity: splashVideoRef.current?.readyState === 4 ? 0 : 1,
+            transition: 'opacity 0.3s'
+          }} />
           <div className={styles.playPrompt}>Tap to start stream</div>
         </div>
       ) : (
