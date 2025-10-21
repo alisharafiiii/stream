@@ -217,11 +217,11 @@ function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideC
         return;
       }
       
-      // For first click when no sound (but UI shows unmuted), we need to actually unmute
-      const shouldUnmute = isMuted || !playerReady;
+      // Determine what action to take based on current state
+      const shouldUnmute = isMuted; // If currently muted, we should unmute
       const newMutedState = !isMuted;
       
-      console.log(`🎵 [Attempt #8] Toggle: UI shows ${isMuted ? 'muted' : 'unmuted'}, action: ${shouldUnmute ? 'unmute' : 'mute'}`);
+      console.log(`🎵 [Attempt #9] Toggle: Current state is ${isMuted ? 'muted' : 'unmuted'}, action: ${shouldUnmute ? 'unmute' : 'mute'}`);
       
       // Create a function to send commands reliably
       const sendCommand = (command: string, retries = 5, delay = 100) => {
@@ -262,15 +262,26 @@ function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideC
         }, 1000);
         
       } else {
-        // Muting - need to actually send mute command
-        console.log('🔇 [Attempt #8] Muting YouTube player...');
-        // Send mute command multiple times to ensure it works
-        sendCommand('{"event":"command","func":"mute","args":""}', 5, 100);
+        // Muting - Attempt #9 with more aggressive approach
+        console.log('🔇 [Attempt #9] Muting YouTube player...');
         
-        // Also try setting volume to 0 as backup
+        // First, immediately set volume to 0
+        sendCommand('{"event":"command","func":"setVolume","args":[0]}', 3, 50);
+        
+        // Then send mute command multiple times
         setTimeout(() => {
-          sendCommand('{"event":"command","func":"setVolume","args":[0]}', 3, 100);
-        }, 300);
+          sendCommand('{"event":"command","func":"mute","args":""}', 7, 100);
+        }, 100);
+        
+        // Final volume 0 to ensure silence
+        setTimeout(() => {
+          sendCommand('{"event":"command","func":"setVolume","args":[0]}', 3, 50);
+        }, 500);
+        
+        // One more mute attempt
+        setTimeout(() => {
+          sendCommand('{"event":"command","func":"mute","args":""}', 3, 100);
+        }, 800);
       }
       
       // Update state immediately for UI responsiveness

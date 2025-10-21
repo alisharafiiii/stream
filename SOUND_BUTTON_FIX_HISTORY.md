@@ -194,3 +194,26 @@ useEffect(() => {
 - Added playerReady tracking for better command timing
 
 **Result**: Should fix all three remaining issues
+
+## ✅ Attempt #9: Fix Mute Logic Error
+**Date**: Current
+**Problem**: Mute button not working after unmuting
+
+**Root Cause**: Logic error in shouldUnmute calculation
+- Was: `const shouldUnmute = isMuted || !playerReady;`
+- When unmuted (isMuted=false), this evaluated to true, causing unmute instead of mute!
+
+**Solution**:
+1. **Fixed logic**: `const shouldUnmute = isMuted;`
+   - Simple and correct: if muted, unmute; if unmuted, mute
+2. **More aggressive mute strategy**:
+   - Set volume to 0 immediately (3 retries)
+   - Send mute command 7 times
+   - Set volume to 0 again after 500ms
+   - Final mute command after 800ms
+3. **Order of operations for mute**:
+   - Volume 0 first (immediate silence)
+   - Then mute commands (proper state)
+   - Volume 0 again (ensure silence)
+
+**Result**: Mute function should now work properly
