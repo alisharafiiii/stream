@@ -184,11 +184,20 @@ export default function AdminPage() {
   };
 
   const deleteSession = async (sessionId: string) => {
-    if (!confirm('Are you sure you want to delete this session? This cannot be undone.')) {
-      return;
+    // Use try-catch for confirm in case it's blocked in wallet browser
+    let confirmed = false;
+    try {
+      confirmed = confirm('Are you sure you want to delete this session? This cannot be undone.');
+    } catch (e) {
+      // If confirm is blocked, proceed with a console warning
+      console.warn('Confirm dialog blocked, proceeding with delete');
+      confirmed = true;
     }
+    if (!confirmed) return;
 
     setDeletingSession(true);
+    console.log('Deleting session:', { sessionId, walletAddress: address });
+    
     try {
       const response = await fetch('/api/betting/session', {
         method: 'DELETE',
@@ -198,18 +207,36 @@ export default function AdminPage() {
           walletAddress: address,
         }),
       });
+      
+      console.log('Delete response status:', response.status);
 
       if (response.ok) {
-        alert('Session deleted successfully');
+        console.log('✅ Session deleted successfully');
+        
+        try {
+          alert('Session deleted successfully');
+        } catch (e) {
+          console.warn('Alert blocked, showing in console only');
+        }
+        
         // Refresh history
         fetchBettingHistory();
         // Clear current session if it was deleted
         if (bettingSession?.id === sessionId) {
           setBettingSession(null);
         }
+        // Refresh page to update UI
+        setTimeout(() => window.location.reload(), 1000);
       } else {
         const error = await response.json();
-        alert(`Failed to delete session: ${error.error}`);
+        const errorMsg = `Failed to delete session: ${error.error}`;
+        console.error('❌ ' + errorMsg);
+        
+        try {
+          alert(errorMsg);
+        } catch (e) {
+          console.warn('Alert blocked, showing in console only');
+        }
       }
     } catch (error) {
       console.error('Failed to delete session:', error);
@@ -435,10 +462,20 @@ export default function AdminPage() {
   const resolveSession = async (winner: 'left' | 'right') => {
     if (!bettingSession || bettingSession.status === 'resolved') return;
 
-    const confirmed = confirm(`Are you sure you want to declare ${winner.toUpperCase()} as the winner? This will process all payouts.`);
+    // Use try-catch for confirm in case it's blocked in wallet browser
+    let confirmed = false;
+    try {
+      confirmed = confirm(`Are you sure you want to declare ${winner.toUpperCase()} as the winner? This will process all payouts.`);
+    } catch (e) {
+      // If confirm is blocked, proceed with a console warning
+      console.warn('Confirm dialog blocked, proceeding with action');
+      confirmed = true;
+    }
     if (!confirmed) return;
 
     setResolvingSession(true);
+    console.log('Resolving session:', { sessionId: bettingSession.id, winner, walletAddress: address });
+    
     try {
       const response = await fetch('/api/betting/resolve', {
         method: 'POST',
@@ -449,16 +486,35 @@ export default function AdminPage() {
           walletAddress: address,
         }),
       });
+      
+      console.log('Resolve response status:', response.status);
 
       if (response.ok) {
         const result = await response.json();
-        alert(`Session resolved! Winner: ${winner.toUpperCase()}\nService fee: $${result.serviceFee.toFixed(2)}\nTotal payouts: $${result.totalPayouts.toFixed(2)} to ${result.payoutCount} winners`);
+        const message = `Session resolved! Winner: ${winner.toUpperCase()}\nService fee: $${result.serviceFee.toFixed(2)}\nTotal payouts: $${result.totalPayouts.toFixed(2)} to ${result.payoutCount} winners`;
+        console.log('✅ ' + message);
+        
+        try {
+          alert(message);
+        } catch (e) {
+          console.warn('Alert blocked, showing in console only');
+        }
+        
         setBettingSession(null);
         setAllBets([]);
         setShowAllBets(false);
+        // Refresh page to update UI
+        setTimeout(() => window.location.reload(), 1000);
       } else {
         const error = await response.json();
-        alert(`Failed to resolve session: ${error.error}`);
+        const errorMsg = `Failed to resolve session: ${error.error}`;
+        console.error('❌ ' + errorMsg);
+        
+        try {
+          alert(errorMsg);
+        } catch (e) {
+          console.warn('Alert blocked, showing in console only');
+        }
       }
     } catch (error) {
       console.error('Failed to resolve session:', error);
@@ -756,7 +812,12 @@ export default function AdminPage() {
                 {bettingSession.status === 'frozen' && (
                   <>
                     <button
-                      onClick={() => resolveSession('left')}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Left Wins button clicked');
+                        resolveSession('left');
+                      }}
                       disabled={resolvingSession}
                       className={`${styles.button} ${styles.primary}`}
                       style={{ backgroundColor: '#ef4444', marginBottom: '0.5rem' }}
@@ -764,7 +825,12 @@ export default function AdminPage() {
                       {resolvingSession ? 'Processing...' : '👈 Left Wins'}
                     </button>
                     <button
-                      onClick={() => resolveSession('right')}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Right Wins button clicked');
+                        resolveSession('right');
+                      }}
                       disabled={resolvingSession}
                       className={`${styles.button} ${styles.primary}`}
                       style={{ backgroundColor: '#3b82f6', marginBottom: '0.5rem' }}
@@ -814,7 +880,12 @@ export default function AdminPage() {
                 
                 {/* Delete Session Button - Always show */}
                 <button
-                  onClick={() => deleteSession(bettingSession.id)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Delete Session button clicked', bettingSession.id);
+                    deleteSession(bettingSession.id);
+                  }}
                   className={`${styles.button}`}
                   style={{ backgroundColor: '#dc2626', color: 'white', marginBottom: '0.5rem' }}
                 >
