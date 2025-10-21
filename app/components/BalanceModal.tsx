@@ -79,6 +79,8 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
                 // In production, you might want to add webhook verification
                 const newBalance = user.balance + amount;
                 
+                console.log('[Base Pay] Current balance:', user.balance, 'Adding:', amount, 'New balance:', newBalance);
+                
                 // Update balance in Redis
                 const response = await fetch('/api/user', {
                   method: 'PUT',
@@ -107,7 +109,16 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
                   setShowDeposit(false);
                   setDepositAmount("");
                   setStatusMessage("");
-                  alert(`Deposit successful! $${amount.toFixed(2)} USDC credited.`);
+                  
+                  // Force page reload for Base app to ensure all state updates
+                  if (typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase().includes('base')) {
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 1000);
+                  } else {
+                    alert(`Deposit successful! $${amount.toFixed(2)} USDC credited.`);
+                  }
+                  
                   paymentComplete = true;
                 } else {
                   const errorData = await response.json();

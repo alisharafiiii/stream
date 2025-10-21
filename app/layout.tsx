@@ -34,6 +34,12 @@ export async function generateMetadata(): Promise<Metadata> {
       description: minikitConfig.miniapp.ogDescription,
       images: [minikitConfig.miniapp.ogImageUrl],
     },
+    viewport: {
+      width: 'device-width',
+      initialScale: 1,
+      maximumScale: 1,
+      userScalable: false,
+    },
     other: {
       "fc:frame": "vNext",
       "fc:frame:image": `${baseUrl}/clicknpray-preview.png`,
