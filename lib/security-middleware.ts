@@ -57,7 +57,6 @@ export async function checkRateLimit(
 // Validate request origin
 export function validateOrigin(request: NextRequest): boolean {
   const origin = request.headers.get('origin');
-  const referer = request.headers.get('referer');
   
   // In production, check if request comes from allowed origins
   if (process.env.NODE_ENV === 'production') {
