@@ -122,7 +122,7 @@ export async function fetchFarcasterProfiles(fids: string[]): Promise<Map<string
           fid,
           username: `user${fid}`,
           displayName: `User ${fid}`,
-          pfpUrl: `https://i.imgur.com/default.png`,
+          pfpUrl: `https://api.dicebear.com/7.x/personas/png?seed=${fid}`,
         });
       });
       return profiles;
@@ -175,7 +175,7 @@ export async function fetchFarcasterProfiles(fids: string[]): Promise<Map<string
           fid,
           username: `user${fid}`,
           displayName: `User ${fid}`,
-          pfpUrl: `https://i.imgur.com/default.png`,
+          pfpUrl: `https://api.dicebear.com/7.x/personas/png?seed=${fid}`,
         });
       }
     });
