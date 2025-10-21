@@ -62,8 +62,11 @@ export function validateOrigin(request: NextRequest): boolean {
   if (process.env.NODE_ENV === 'production') {
     const allowedOrigins = [
       process.env.NEXT_PUBLIC_APP_URL,
+      'https://stream-production-7739.up.railway.app',
       'https://base.app',
-      'https://warpcast.com'
+      'https://warpcast.com',
+      'http://localhost:3000', // for development
+      'http://localhost:3001'
     ].filter(Boolean);
     
     if (origin && !allowedOrigins.some(allowed => origin.startsWith(allowed || ''))) {
