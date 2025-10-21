@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { pay } from "@base-org/account";
+import { pay, getPaymentStatus } from "@base-org/account";
 import styles from "./BalanceModal.module.css";
 import WithdrawModal from "./WithdrawModal";
 
@@ -42,18 +42,86 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
       if (isInBaseApp) {
         // Use Base Pay with real USDC
         const treasuryAddress = process.env.NEXT_PUBLIC_TREASURY_ADDRESS || "0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D";
-        const payment = await pay({
-          amount: amount.toFixed(2),
-          to: treasuryAddress,
-          // Users can select USDC in Base Pay interface
-        });
         
-        // Base Pay doesn't provide transaction hash immediately
-        // This flow needs to be updated to wait for transaction confirmation
-        if (payment) {
-          alert('Base Pay initiated. Please wait for transaction confirmation.');
-          // TODO: Implement proper Base Pay transaction tracking
-          setShowDeposit(false);
+        setStatusMessage('Initiating Base Pay...');
+        
+        try {
+          const payment = await pay({
+            amount: amount.toFixed(2),
+            to: treasuryAddress,
+            // Users can select USDC in Base Pay interface
+          });
+          
+          if (payment && payment.id) {
+            setStatusMessage('Payment initiated! Waiting for confirmation...');
+            
+            // Poll for payment status
+            let attempts = 0;
+            const maxAttempts = 30; // 2.5 minutes max
+            let paymentComplete = false;
+            
+            while (attempts < maxAttempts && !paymentComplete) {
+              attempts++;
+              
+              const status = await getPaymentStatus({ 
+                id: payment.id,
+                testnet: false // Using Base mainnet
+              });
+              
+              console.log(`Payment status check ${attempts}:`, status);
+              
+              if (status.status === 'completed' && status.transactionHash) {
+                // Now we have the transaction hash, verify it
+                setStatusMessage('Payment completed! Verifying deposit...');
+                
+                const response = await fetch('/api/user/deposit', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    userId: user.fid,
+                    amount: amount,
+                    transactionHash: status.transactionHash,
+                  }),
+                });
+                
+                if (response.ok) {
+                  const depositData = await response.json();
+                  onBalanceUpdate(depositData.newBalance);
+                  setShowDeposit(false);
+                  setDepositAmount("");
+                  setStatusMessage("");
+                  alert(`Deposit verified! ${depositData.verification.amount} USDC credited.`);
+                  paymentComplete = true;
+                } else {
+                  const errorData = await response.json();
+                  console.error('Deposit verification error:', errorData);
+                  setStatusMessage(`Error: ${errorData.error}`);
+                  setTimeout(() => setStatusMessage(""), 5000);
+                  break;
+                }
+              } else if (status.status === 'failed') {
+                setStatusMessage('Payment failed. Please try again.');
+                setTimeout(() => setStatusMessage(""), 5000);
+                break;
+              } else {
+                // Still pending
+                setStatusMessage(`Waiting for payment confirmation... (${attempts}/30)`);
+                await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+              }
+            }
+            
+            if (!paymentComplete && attempts >= maxAttempts) {
+              setStatusMessage('Payment timeout. Please check your transaction history.');
+              setTimeout(() => setStatusMessage(""), 10000);
+            }
+          } else {
+            setStatusMessage('Payment cancelled or failed to initiate.');
+            setTimeout(() => setStatusMessage(""), 5000);
+          }
+        } catch (error) {
+          console.error('Base Pay error:', error);
+          setStatusMessage('Base Pay error. Please try again.');
+          setTimeout(() => setStatusMessage(""), 5000);
         }
       } else {
         // Browser: For both guest and wallet users, connect wallet and send USDC

@@ -14,7 +14,7 @@ export default function TreasuryMonitor({ treasuryAddress }: TreasuryMonitorProp
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState<ethers.TransactionResponse[]>([]);
   
-  const address = treasuryAddress || process.env.NEXT_PUBLIC_TREASURY_ADDRESS;
+  const address = treasuryAddress || process.env.NEXT_PUBLIC_TREASURY_ADDRESS || "0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D";
   
   useEffect(() => {
     if (!address || address === "demo") return;
@@ -22,11 +22,7 @@ export default function TreasuryMonitor({ treasuryAddress }: TreasuryMonitorProp
     const fetchData = async () => {
       try {
         // Get balance
-        const provider = new ethers.JsonRpcProvider(
-          process.env.BASE_TESTNET === 'true' 
-            ? 'https://sepolia.base.org' 
-            : 'https://mainnet.base.org'
-        );
+        const provider = new ethers.JsonRpcProvider('https://mainnet.base.org');
         
         // Get ETH balance
         const balanceWei = await provider.getBalance(address);
@@ -108,7 +104,7 @@ export default function TreasuryMonitor({ treasuryAddress }: TreasuryMonitorProp
       
       <div className={styles.actions}>
         <a 
-          href={`https://${process.env.BASE_TESTNET === 'true' ? 'sepolia.' : ''}basescan.org/address/${address}`}
+          href={`https://basescan.org/address/${address}`}
           target="_blank"
           rel="noopener noreferrer"
           className={styles.link}
