@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { redis, REDIS_KEYS, UserProfile } from '@/lib/redis';
 import { fetchFarcasterProfile } from '@/lib/farcaster-api';
 import { handleBaseProfile, isBaseAppUser, getProfileImageUrl } from '@/lib/base-profile-api';
+import { getStoredBaseAppProfile } from '@/lib/base-app-api';
 
 // Extended User interface for API responses
 interface User extends Omit<UserProfile, 'createdAt' | 'lastSeen'> {
@@ -119,6 +120,16 @@ export async function POST(request: NextRequest) {
       if (baseProfile && baseProfile.profileImage) {
         console.log('[API] Using Base app profile image:', baseProfile.profileImage);
         finalProfileImage = baseProfile.profileImage;
+      }
+      
+      // Also check for stored Base app profile if no profile image provided
+      if ((!finalProfileImage || finalProfileImage.includes('dicebear')) && username?.endsWith('.base.eth')) {
+        console.log('[API] Checking for stored Base app profile for:', username);
+        const storedProfile = await getStoredBaseAppProfile(username);
+        if (storedProfile && storedProfile.profileImage) {
+          console.log('[API] Found stored Base app profile image:', storedProfile.profileImage);
+          finalProfileImage = storedProfile.profileImage;
+        }
       }
       
       // If no username/displayName provided, try to fetch from Farcaster

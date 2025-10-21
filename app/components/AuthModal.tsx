@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useUniversalAuth } from "../hooks/useUniversalAuth";
 import { useWalletAuth } from "../hooks/useWalletAuth";
+import { extractBaseAppProfile, storeBaseAppProfile } from "@/lib/base-app-api";
 import styles from "./AuthModal.module.css";
 import { pay, getPaymentStatus } from '@base-org/account';
 import { PAYMENT_CONFIG } from '../config/payment';
@@ -248,6 +249,15 @@ export default function AuthModal({ onComplete }: AuthModalProps) {
                 console.log('🎭 Base username:', authenticatedUser?.username);
                 console.log('🎭 Base profileImage:', authenticatedUser?.profileImage);
                 if (authenticatedUser) {
+                  // Try to extract Base app profile data if available
+                  const baseProfile = extractBaseAppProfile({ user: authenticatedUser });
+                  if (baseProfile && baseProfile.profileImage && authenticatedUser.username?.endsWith('.base.eth')) {
+                    console.log('[AuthModal] Base app profile detected:', baseProfile);
+                    // Store the Base app profile for future use
+                    await storeBaseAppProfile(baseProfile);
+                    // Use the Base app profile image
+                    authenticatedUser.profileImage = baseProfile.profileImage;
+                  }
                   createUserProfile(authenticatedUser);
                 }
               } else {

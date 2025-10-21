@@ -134,8 +134,18 @@ export function useUniversalAuth() {
     profileImage: (context.user as unknown as {profileImage?: string}).profileImage || 
                   (context.user as unknown as {avatar?: string}).avatar || 
                   (context.user as unknown as {pfpUrl?: string}).pfpUrl ||
+                  (context as unknown as {profileImage?: string})?.profileImage ||
+                  (context as unknown as {avatar?: string})?.avatar ||
+                  (context as unknown as {pfp?: string})?.pfp ||
                   `https://api.dicebear.com/7.x/personas/png?seed=${context.user.fid}`,
   } : null;
+  
+  // Log the full context to debug Base app profile data
+  useEffect(() => {
+    if (context) {
+      console.log('[useUniversalAuth] Full MiniKit context:', JSON.stringify(context, null, 2));
+    }
+  }, [context]);
 
   return {
     signIn,
