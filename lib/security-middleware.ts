@@ -57,6 +57,19 @@ export async function checkRateLimit(
 // Validate request origin
 export function validateOrigin(request: NextRequest): boolean {
   const origin = request.headers.get('origin');
+  const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
+  
+  // Allow wallet browsers (they might have different origins)
+  const isWalletBrowser = userAgent.includes('metamask') || 
+                         userAgent.includes('coinbasewallet') || 
+                         userAgent.includes('trust') ||
+                         userAgent.includes('imtoken') ||
+                         userAgent.includes('wallet');
+  
+  if (isWalletBrowser) {
+    console.log(`[Security] Allowing wallet browser request from origin: ${origin}`);
+    return true;
+  }
   
   // In production, check if request comes from allowed origins
   if (process.env.NODE_ENV === 'production') {
@@ -68,6 +81,11 @@ export function validateOrigin(request: NextRequest): boolean {
       'http://localhost:3000', // for development
       'http://localhost:3001'
     ].filter(Boolean);
+    
+    // Also allow if no origin header (same-origin requests)
+    if (!origin) {
+      return true;
+    }
     
     if (origin && !allowedOrigins.some(allowed => origin.startsWith(allowed || ''))) {
       console.warn(`[Security] Blocked request from unauthorized origin: ${origin}`);

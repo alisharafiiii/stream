@@ -820,10 +820,17 @@ export default function AdminPage() {
                   <>
                     <button
                       type="button"
-                      onClick={() => resolveSession('left')}
+                      onTouchStart={() => {
+                        console.log('LEFT WINS TOUCHED');
+                        resolveSession('left');
+                      }}
+                      onMouseDown={() => {
+                        console.log('LEFT WINS MOUSE DOWN');
+                        resolveSession('left');
+                      }}
                       disabled={resolvingSession}
                       className={`${styles.button} ${styles.primary}`}
-                      style={{ backgroundColor: '#ef4444', marginBottom: '0.5rem' }}
+                      style={{ backgroundColor: '#ef4444', marginBottom: '0.5rem', position: 'relative', zIndex: 9999 }}
                     >
                       {resolvingSession ? 'Processing...' : '👈 Left Wins'}
                     </button>
