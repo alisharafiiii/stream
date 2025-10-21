@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 1); /* Solid black background */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -17,14 +17,15 @@
   background: var(--card-bg);
   border: 2px solid var(--accent-purple);
   border-radius: 8px;
-  padding: 2rem;
-  max-width: 500px;
+  padding: 1.5rem; /* Reduced from 2rem */
+  max-width: 375px; /* Reduced from 500px (25% smaller) */
   width: 100%;
   position: relative;
   box-shadow: 0 0 30px rgba(153, 69, 255, 0.3);
   font-family: var(--font-pixel);
   animation: slideUp 0.3s ease-out;
   z-index: 3001; /* Ensure modal content is above overlay */
+  transform: scale(0.75); /* 25% smaller overall */
 }
 
 .closeButton {
@@ -53,8 +54,8 @@
 .title {
   color: white;
   text-align: center;
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
+  font-size: 1.5rem; /* Reduced for smaller modal */
+  margin-bottom: 1rem; /* Reduced spacing */
   letter-spacing: 2px;
   text-transform: uppercase;
   font-weight: bold;
