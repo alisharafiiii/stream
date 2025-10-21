@@ -6,10 +6,11 @@
   bottom: 0;
   background: rgba(0, 0, 0, 1); /* Solid black background */
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Changed from center to flex-start */
   justify-content: center;
   z-index: 3000; /* Match BalanceModal z-index */
   padding: 1rem;
+  padding-top: 15vh; /* Add top padding to position modal higher */
   animation: fadeIn 0.3s ease-in;
 }
 
@@ -24,7 +25,7 @@
   box-shadow: 0 0 30px rgba(153, 69, 255, 0.3);
   font-family: var(--font-pixel);
   z-index: 3001; /* Match BalanceModal */
-  transform: scale(0.75) translateY(-60px); /* Match BalanceModal size and position - moved up 60px to avoid comments */
+  transform: scale(0.75); /* Match BalanceModal size */
   animation: modalAppear 0.3s ease-out;
 }
 
@@ -286,11 +287,11 @@
 @keyframes modalAppear {
   from {
     opacity: 0;
-    transform: scale(0.75) translateY(-60px) scale(0.9);
+    transform: scale(0.65);
   }
   to {
     opacity: 1;
-    transform: scale(0.75) translateY(-60px) scale(1);
+    transform: scale(0.75);
   }
 }
 
