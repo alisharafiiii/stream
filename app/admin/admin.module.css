@@ -6,14 +6,19 @@
   color: var(--foreground);
   width: 100%;
   overflow-x: hidden;
+  overflow-y: auto; /* Enable vertical scrolling */
   position: relative;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 .adminHeader {
   background: var(--card-bg);
   border-bottom: 2px solid var(--card-border);
   padding: 1rem 2rem;
-  position: relative;
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0;
+  z-index: 100;
   overflow: hidden;
 }
 
@@ -42,6 +47,7 @@
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
+  padding-bottom: 100px; /* Extra padding at bottom for mobile */
 }
 
 .tabs {
@@ -451,8 +457,23 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .adminContainer {
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+  
   .adminHeader {
     padding: 0.75rem 1rem;
+    flex-shrink: 0;
+  }
+  
+  .adminContent {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
   }
   
   .adminTitle {

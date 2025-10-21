@@ -36,6 +36,21 @@
     max-width: 100vw;
     overflow-x: hidden;
   }
+  
+  /* Allow scrolling on admin pages */
+  html:has(.adminContainer),
+  body:has(.adminContainer) {
+    overflow: auto;
+    height: auto;
+  }
+  
+  /* Fallback for browsers without :has() support */
+  @supports not selector(:has(*)) {
+    html, body {
+      overflow: auto;
+      height: auto;
+    }
+  }
 
   body {
     color: var(--foreground);
@@ -52,6 +67,14 @@
     margin: 0;
     padding: 0;
     overflow: hidden;
+  }
+  
+  /* Override for admin pages to allow scrolling */
+  body:has(.adminContainer) {
+    height: auto;
+    overflow: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
   
   /* Android WebView height fix */
