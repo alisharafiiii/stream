@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import styles from "./StreamOverlay.module.css";
 import Link from 'next/link';
 import BalanceModal from "./BalanceModal";
+import { sanitizeProfileImageUrl, handleImageError } from '@/lib/image-utils';
 
 interface StreamOverlayProps {
   user: {
@@ -127,33 +128,15 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
             className={styles.profileLink}
             title="View profile"
           >
-            {user.profileImage ? (
-              <>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={user.profileImage} 
-                  alt={user.displayName}
-                  className={styles.profilePic}
-                  width={32}
-                  height={32}
-                  onError={(e) => {
-                    console.error('[StreamOverlay] Profile image failed to load:', user.profileImage);
-                    e.currentTarget.src = `https://api.dicebear.com/7.x/personas/png?seed=${user.fid}`;
-                  }}
-                />
-              </>
-            ) : (
-              <>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                src={`https://api.dicebear.com/7.x/personas/png?seed=${user.fid}`}
-                alt={user.displayName}
-                className={styles.profilePic}
-                  width={32}
-                  height={32}
-                />
-              </>
-            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={sanitizeProfileImageUrl(user.profileImage, user.fid)} 
+              alt={user.displayName}
+              className={styles.profilePic}
+              width={32}
+              height={32}
+              onError={(e) => handleImageError(e, user.fid)}
+            />
             <span className={styles.displayName}>
               {user.username && !user.username.startsWith('0x') 
                 ? (user.username.endsWith('.base.eth') ? user.username : `${user.username}.base.eth`)

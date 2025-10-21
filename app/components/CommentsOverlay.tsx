@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import styles from './CommentsOverlay.module.css';
 import { Comment } from '@/lib/types/comment';
+import { sanitizeProfileImageUrl, handleImageError } from '@/lib/image-utils';
 
 export default function CommentsOverlay() {
   const [comments, setComments] = useState<Comment[]>([]);
@@ -83,12 +84,10 @@ export default function CommentsOverlay() {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
-            src={comment.profileImage} 
+            src={sanitizeProfileImageUrl(comment.profileImage, comment.userId)} 
             alt={comment.username}
             className={styles.profilePic}
-            onError={(e) => {
-              e.currentTarget.src = `https://api.dicebear.com/7.x/personas/png?seed=${comment.userId}`;
-            }}
+            onError={(e) => handleImageError(e, comment.userId)}
           />
           <div className={styles.content}>
             <span className={styles.username}>

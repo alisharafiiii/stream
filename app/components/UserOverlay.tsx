@@ -2,6 +2,7 @@
 import { useState } from "react";
 import styles from "./UserOverlay.module.css";
 import WithdrawModal from "./WithdrawModal";
+import { sanitizeProfileImageUrl, handleImageError } from '@/lib/image-utils';
 
 interface UserOverlayProps {
   user: {
@@ -52,16 +53,16 @@ export default function UserOverlay({ user, onBalanceUpdate }: UserOverlayProps)
               alt={user.displayName} 
               className={styles.avatar}
               onError={(e) => {
-                console.error('[UserOverlay] Profile image failed to load:', user.profileImage);
-                e.currentTarget.src = `https://api.dicebear.com/7.x/personas/png?seed=${user.fid}`;
+                handleImageError(e, user.fid);
               }}
             />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={`https://api.dicebear.com/7.x/personas/png?seed=${user.fid}`}
+              src={sanitizeProfileImageUrl(undefined, user.fid)}
               alt={user.displayName}
               className={styles.avatar}
+              onError={(e) => handleImageError(e, user.fid)}
             />
           )}
           <div className={styles.details}>
