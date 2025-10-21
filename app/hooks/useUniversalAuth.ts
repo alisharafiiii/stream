@@ -74,12 +74,12 @@ export function useUniversalAuth() {
             username: context?.user?.username || `user${fid}`,
             displayName: context?.user?.displayName || context?.user?.username || `User ${fid}`,
             // Check for profile image in context or result
-            profileImage: (context?.user as any)?.profileImage || 
-                         (context?.user as any)?.avatar || 
-                         (context?.user as any)?.pfpUrl ||
-                         (result as any)?.profileImage ||
-                         (result as any)?.avatar ||
-                         (result as any)?.pfpUrl ||
+            profileImage: (context?.user as unknown as {profileImage?: string})?.profileImage || 
+                         (context?.user as unknown as {avatar?: string})?.avatar || 
+                         (context?.user as unknown as {pfpUrl?: string})?.pfpUrl ||
+                         (result as unknown as {profileImage?: string})?.profileImage ||
+                         (result as unknown as {avatar?: string})?.avatar ||
+                         (result as unknown as {pfpUrl?: string})?.pfpUrl ||
                          `https://api.dicebear.com/7.x/personas/png?seed=${fid}`,
           };
           
@@ -131,9 +131,9 @@ export function useUniversalAuth() {
     username: context.user.username || `user${context.user.fid}`,
     displayName: context.user.displayName || context.user.username || `User ${context.user.fid}`,
     // Use profile image from context if available (Base app users have custom avatars)
-    profileImage: (context.user as any).profileImage || 
-                  (context.user as any).avatar || 
-                  (context.user as any).pfpUrl ||
+    profileImage: (context.user as unknown as {profileImage?: string}).profileImage || 
+                  (context.user as unknown as {avatar?: string}).avatar || 
+                  (context.user as unknown as {pfpUrl?: string}).pfpUrl ||
                   `https://api.dicebear.com/7.x/personas/png?seed=${context.user.fid}`,
   } : null;
 

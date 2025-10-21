@@ -52,7 +52,7 @@ export default function Home() {
     } else {
       sessionStorage.setItem('hasVisitedBefore', 'true');
     }
-  }, [setMiniAppReady, isMiniAppReady]);
+  }, [setMiniAppReady, isMiniAppReady, showSplash]);
 
   useEffect(() => {
     console.log('🎬 Initial load effect running');

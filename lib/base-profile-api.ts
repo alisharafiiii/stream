@@ -12,7 +12,12 @@ interface BaseProfile {
  * Handles Base app profile data
  * Base app profiles come with their own profile pictures uploaded through Base app
  */
-export async function handleBaseProfile(authData: any): Promise<BaseProfile | null> {
+export async function handleBaseProfile(authData: {
+  fid: string;
+  username: string;
+  displayName: string;
+  profileImage?: string;
+}): Promise<BaseProfile | null> {
   try {
     // When users authenticate through Base app, they provide profile data
     if (authData.profileImage && !authData.profileImage.includes('dicebear')) {
