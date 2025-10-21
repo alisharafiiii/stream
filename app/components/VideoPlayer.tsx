@@ -27,6 +27,22 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
   }, [streamUrl]);
 
   useEffect(() => {
+    // Listen for YouTube player messages (for debugging)
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin.includes('youtube.com') && event.data) {
+        try {
+          const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+          if (data.event === 'infoDelivery' && data.info) {
+            console.log('YouTube Player Info:', data.info);
+          }
+        } catch {
+          // Ignore non-JSON messages
+        }
+      }
+    };
+    
+    window.addEventListener('message', handleMessage);
+    
     // Try to play video when component mounts
     if (videoRef.current) {
       videoRef.current.play().catch((e) => {
@@ -73,6 +89,11 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
         };
       }
     }
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
   }, [streamUrl]);
 
   // Check if it's a YouTube URL and convert to embed format
@@ -80,21 +101,48 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
     const newMutedState = !isMuted;
     
     if (iframeRef.current?.contentWindow) {
-      const command = isMuted 
-        ? '{"event":"command","func":"unMute","args":""}'
-        : '{"event":"command","func":"mute","args":""}';
-      
-      // Send command multiple times to ensure it works
-      iframeRef.current.contentWindow.postMessage(command, '*');
-      setTimeout(() => {
-        iframeRef.current?.contentWindow?.postMessage(command, '*');
-      }, 100);
-      setTimeout(() => {
-        iframeRef.current?.contentWindow?.postMessage(command, '*');
-      }, 300);
-      
-      // Log for debugging
-      console.log('🔊 Sound toggled:', isMuted ? 'Unmuting' : 'Muting');
+      // More robust unmute/mute approach
+      if (isMuted) {
+        // Unmuting - try multiple approaches
+        console.log('🔊 Attempting to unmute YouTube player...');
+        
+        // First, set volume to ensure it's not 0
+        const volumeCommand = '{"event":"command","func":"setVolume","args":[100]}';
+        iframeRef.current.contentWindow.postMessage(volumeCommand, '*');
+        
+        // Then unmute
+        const unmuteCommand = '{"event":"command","func":"unMute","args":""}';
+        
+        // Send commands multiple times with delays
+        setTimeout(() => {
+          iframeRef.current?.contentWindow?.postMessage(unmuteCommand, '*');
+        }, 50);
+        
+        setTimeout(() => {
+          iframeRef.current?.contentWindow?.postMessage(volumeCommand, '*');
+          iframeRef.current?.contentWindow?.postMessage(unmuteCommand, '*');
+        }, 150);
+        
+        setTimeout(() => {
+          iframeRef.current?.contentWindow?.postMessage(unmuteCommand, '*');
+        }, 300);
+        
+        // Final attempt with volume
+        setTimeout(() => {
+          iframeRef.current?.contentWindow?.postMessage(volumeCommand, '*');
+          iframeRef.current?.contentWindow?.postMessage(unmuteCommand, '*');
+        }, 500);
+        
+      } else {
+        // Muting
+        console.log('🔇 Muting YouTube player...');
+        const muteCommand = '{"event":"command","func":"mute","args":""}';
+        
+        iframeRef.current.contentWindow.postMessage(muteCommand, '*');
+        setTimeout(() => {
+          iframeRef.current?.contentWindow?.postMessage(muteCommand, '*');
+        }, 100);
+      }
     }
     
     // Update state
