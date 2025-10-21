@@ -225,20 +225,42 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
     );
   }
 
+  const handleSplashClick = () => {
+    setShowSplash(false);
+    setStreamStarted(true);
+  };
+
   return (
     <div className={styles.videoWrapper}>
-      <iframe
-        ref={iframeRef}
-        src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&showinfo=0&loop=1&enablejsapi=1&cc_load_policy=0&autohide=1&playerapiid=ytplayer&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`}
-        className={styles.streamPlayer}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-        allowFullScreen
-        title={title}
-        loading="eager"
-        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
-      />
-      <div className={styles.clickBlocker} aria-hidden="true" />
-      {!hideControls && (
+      {showSplash ? (
+        <div className={styles.splashContainer} onClick={handleSplashClick}>
+          <video
+            ref={splashVideoRef}
+            className={styles.splashVideo}
+            src="/splash.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+          <div className={styles.playPrompt}>Tap to start stream</div>
+        </div>
+      ) : (
+        <>
+          <iframe
+            ref={iframeRef}
+            src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&showinfo=0&loop=1&enablejsapi=1&cc_load_policy=0&autohide=1&playerapiid=ytplayer&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`}
+            className={styles.streamPlayer}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+            allowFullScreen
+            title={title}
+            loading="eager"
+            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
+          />
+          <div className={styles.clickBlocker} aria-hidden="true" />
+        </>
+      )}
+      {!hideControls && !showSplash && (
         <button 
           className={styles.muteButton}
           onClick={toggleMute}
