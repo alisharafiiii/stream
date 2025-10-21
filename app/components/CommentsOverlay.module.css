@@ -91,13 +91,30 @@
   line-height: 1.3;
 }
 
-/* Fade out older comments - first comments in array are older */
-.comment:nth-child(-n+3) {
-  opacity: 0.6;
+/* Progressive fade for comments as they move up */
+/* With justify-content: flex-end, last-child is newest (bottom) */
+.comment:last-child {
+  opacity: 1; /* Newest comment - 100% */
 }
 
-.comment:nth-child(-n+2) {
-  opacity: 0.3;
+.comment:nth-last-child(2) {
+  opacity: 0.8; /* Second newest - 80% */
+}
+
+.comment:nth-last-child(3) {
+  opacity: 0.6; /* Third newest - 60% */
+}
+
+.comment:nth-last-child(4) {
+  opacity: 0.4; /* Fourth newest - 40% */
+}
+
+.comment:nth-last-child(5) {
+  opacity: 0.2; /* Fifth newest - 20% */
+}
+
+.comment:nth-last-child(n+6) {
+  opacity: 0; /* Older comments - 0% (invisible) */
 }
 
 /* Mobile optimizations */

@@ -113,10 +113,7 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
           // Check if user had bets in this resolved session
           const userBetTotal = resolvedSessionBets.leftAmount + resolvedSessionBets.rightAmount;
           
-          // TEMPORARY: Force show overlay for testing
-          const FORCE_SHOW_OVERLAY = true;
-          
-          if (userBetTotal === 0 && !FORCE_SHOW_OVERLAY) {
+          if (userBetTotal === 0) {
             console.log('🎰 No bets in resolved session, skipping overlay');
             setProcessedSessionId(session.id);
             return;
@@ -144,11 +141,11 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
           setShowResult(true);
           setProcessedSessionId(session.id);
           
-          // Auto-hide overlay after 10 seconds
+          // Auto-hide overlay after 3 seconds
           setTimeout(() => {
             console.log('🎰 Auto-hiding overlay');
             setShowResult(false);
-          }, 10000);
+          }, 3000);
         }
       } catch (error) {
         console.error('Failed to fetch resolved session bets:', error);

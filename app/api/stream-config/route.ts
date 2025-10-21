@@ -21,7 +21,7 @@ export async function GET() {
     
     // If not in Redis, return defaults
     const defaultConfig: StreamConfig = {
-      streamUrl: process.env.DEFAULT_STREAM_URL || '',
+      streamUrl: process.env.DEFAULT_STREAM_URL || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       isLive: process.env.DEFAULT_STREAM_LIVE === 'true' || false,
       title: process.env.DEFAULT_STREAM_TITLE || 'Live Stream'
     };
@@ -35,7 +35,7 @@ export async function GET() {
     
     // Fallback to defaults if Redis fails
     const fallbackConfig: StreamConfig = {
-      streamUrl: process.env.DEFAULT_STREAM_URL || '',
+      streamUrl: process.env.DEFAULT_STREAM_URL || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       isLive: false,
       title: process.env.DEFAULT_STREAM_TITLE || 'Live Stream'
     };
