@@ -44,7 +44,36 @@ export function extractBaseAppProfile(context: unknown): BaseAppProfile | null {
     // The Base app context might have profile data in various formats
     // We need to check multiple possible locations
     
-    const user = context?.user;
+    const contextObj = context as { 
+      user?: {
+        fid?: string | number;
+        id?: string | number;
+        username?: string;
+        basename?: string;
+        displayName?: string;
+        display_name?: string;
+        name?: string;
+        profileImage?: string;
+        profile_image?: string;
+        profilePicture?: string;
+        profile_picture?: string;
+        avatar?: string;
+        avatarUrl?: string;
+        avatar_url?: string;
+        pfp?: string;
+        pfpUrl?: string;
+        pfp_url?: string;
+        image?: string;
+        imageUrl?: string;
+        image_url?: string;
+      };
+      profileImage?: string;
+      profile_image?: string;
+      avatar?: string;
+      pfp?: string;
+    };
+    
+    const user = contextObj?.user;
     if (!user) return null;
 
     // Log the entire context to understand its structure
@@ -70,10 +99,10 @@ export function extractBaseAppProfile(context: unknown): BaseAppProfile | null {
         user.image ||
         user.imageUrl ||
         user.image_url ||
-        (context.profileImage) ||
-        (context.profile_image) ||
-        (context.avatar) ||
-        (context.pfp) ||
+        contextObj.profileImage ||
+        contextObj.profile_image ||
+        contextObj.avatar ||
+        contextObj.pfp ||
         undefined
     };
 
