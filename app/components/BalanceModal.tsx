@@ -318,18 +318,6 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
           </button>
         </div>
         
-        <div className={styles.info}>
-          <h3>How it works:</h3>
-          <p><strong>Deposit:</strong> Send real USDC via Base Pay or wallet</p>
-          <p><strong>Withdraw:</strong> Receive USDC to your wallet address</p>
-          <p className={styles.warning}>
-            Live Features:
-            <br/>• Real USDC deposits & withdrawals
-            <br/>• Base network (low fees)
-            <br/>• Daily limit: $100
-            <br/>• Per transaction: $50
-          </p>
-        </div>
       </div>
     </div>
   );
