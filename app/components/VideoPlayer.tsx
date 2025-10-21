@@ -16,6 +16,7 @@ function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideC
   const [showSplash, setShowSplash] = useState(true);
   const [isChangingMute, setIsChangingMute] = useState(false); // Visual feedback
   const [playerReady, setPlayerReady] = useState(false); // Track if player is ready
+  const [forceReload, setForceReload] = useState(0); // Force iframe reload
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const splashVideoRef = useRef<HTMLVideoElement>(null);
@@ -262,35 +263,31 @@ function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideC
         }, 1000);
         
       } else {
-        // Muting - Attempt #10: Try pause/play approach for stubborn YouTube player
-        console.log('🔇 [Attempt #10] Muting YouTube player with pause/play trick...');
+        // Muting - Attempt #11: Direct player state manipulation
+        console.log('🔇 [Attempt #11] Trying direct player state approach...');
         
-        // Strategy: Pause, mute, then resume - forces YouTube to respect mute state
+        // Try to get player state first
+        sendCommand('{"event":"command","func":"getPlayerState","args":""}', 1, 0);
         
-        // Step 1: Pause the video
-        sendCommand('{"event":"command","func":"pauseVideo","args":""}', 2, 50);
-        
-        // Step 2: While paused, set volume to 0 and mute
+        // Method 1: Use seekTo to force state refresh (keeps playing position)
         setTimeout(() => {
-          sendCommand('{"event":"command","func":"setVolume","args":[0]}', 3, 50);
-          sendCommand('{"event":"command","func":"mute","args":""}', 3, 50);
-        }, 200);
+          sendCommand('{"event":"command","func":"seekTo","args":[0, false]}', 1, 0);
+        }, 50);
         
-        // Step 3: Send mute command again
+        // Method 2: Set volume to 0 BEFORE mute (most reliable)
+        setTimeout(() => {
+          sendCommand('{"event":"command","func":"setVolume","args":[0]}', 5, 50);
+        }, 100);
+        
+        // Method 3: Try mute after volume is 0
         setTimeout(() => {
           sendCommand('{"event":"command","func":"mute","args":""}', 5, 100);
         }, 400);
         
-        // Step 4: Resume playing (now muted)
+        // Method 4: Force another volume 0 to ensure silence
         setTimeout(() => {
-          sendCommand('{"event":"command","func":"playVideo","args":""}', 2, 50);
+          sendCommand('{"event":"command","func":"setVolume","args":[0]}', 3, 50);
         }, 700);
-        
-        // Step 5: Final mute enforcement
-        setTimeout(() => {
-          sendCommand('{"event":"command","func":"mute","args":""}', 3, 100);
-          sendCommand('{"event":"command","func":"setVolume","args":[0]}', 2, 50);
-        }, 1000);
       }
       
       // Update state immediately for UI responsiveness
