@@ -40,8 +40,11 @@ export function useMiniKitAuth() {
             fid: String(context.user.fid),
             username: context.user.username || `user${context.user.fid}`,
             displayName: context.user.displayName || context.user.username || `User ${context.user.fid}`,
-            // IMPORTANT: Capture the profile image from Base app
-            profileImage: context.user.profileImage || context.user.avatar || context.user.pfpUrl
+            // IMPORTANT: Capture the profile image from Base app if available
+            profileImage: (context.user as unknown as {profileImage?: string}).profileImage || 
+                         (context.user as unknown as {avatar?: string}).avatar || 
+                         (context.user as unknown as {pfpUrl?: string}).pfpUrl ||
+                         undefined
           };
 
           console.log('[MiniKit Auth] Base user data:', baseUser);
@@ -75,7 +78,10 @@ export function useMiniKitAuth() {
           username: authResult.user.username || `user${authResult.user.fid}`,
           displayName: authResult.user.displayName || authResult.user.username,
           // Capture profile image from auth result
-          profileImage: authResult.user.profileImage || authResult.user.avatar || authResult.user.pfpUrl
+          profileImage: (authResult.user as unknown as {profileImage?: string}).profileImage || 
+                       (authResult.user as unknown as {avatar?: string}).avatar || 
+                       (authResult.user as unknown as {pfpUrl?: string}).pfpUrl ||
+                       undefined
         };
 
         setUser(baseUser);
