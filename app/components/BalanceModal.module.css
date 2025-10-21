@@ -8,7 +8,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1500; /* Higher than betting deck (1100) */
+  z-index: 3000; /* Much higher than all other elements */
   padding: 1rem;
   animation: fadeIn 0.3s ease-in;
 }
@@ -24,6 +24,7 @@
   box-shadow: 0 0 30px rgba(153, 69, 255, 0.3);
   font-family: var(--font-pixel);
   animation: slideUp 0.3s ease-out;
+  z-index: 3001; /* Ensure modal content is above overlay */
 }
 
 .closeButton {
