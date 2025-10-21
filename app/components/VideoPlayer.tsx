@@ -226,15 +226,26 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
       return `https://youtube.com/embed/${videoId}`;
     }
     
+    // Facebook Live support
+    if (url.includes("facebook.com") && url.includes("/videos/")) {
+      // If it's already a plugin URL, return as is
+      if (url.includes("/plugins/video.php")) return url;
+      
+      // Convert regular Facebook video URL to embed
+      const encodedUrl = encodeURIComponent(url);
+      return `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=false&width=1280`;
+    }
+    
     return url;
   };
 
   const embedUrl = getEmbedUrl(streamUrl);
   const isYouTube = embedUrl.includes("youtube.com/embed");
   const isTwitch = embedUrl.includes("twitch.tv");
+  const isFacebook = embedUrl.includes("facebook.com/plugins/video.php");
 
   // For non-iframe compatible streams, show video element
-  if (error && !isYouTube && !isTwitch) {
+  if (error && !isYouTube && !isTwitch && !isFacebook) {
     return (
       <div className={styles.videoWrapper}>
         <video
