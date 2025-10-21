@@ -101,8 +101,8 @@ export default function Home() {
       // Force a repaint after components mount
       setTimeout(() => {
         document.body.style.display = 'none';
-        // eslint-disable-next-line no-unused-expressions
-        document.body.offsetHeight; // Trigger reflow
+        // Force reflow by reading offsetHeight
+        const _ = document.body.offsetHeight;
         document.body.style.display = '';
       }, 100);
     }
