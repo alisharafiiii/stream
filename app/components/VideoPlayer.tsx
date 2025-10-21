@@ -220,7 +220,6 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
         allowFullScreen
         title={title}
         loading="eager"
-        style={{ aspectRatio: '16/9' }}
         sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
       />
       <div className={styles.clickBlocker} aria-hidden="true" />
