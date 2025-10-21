@@ -7,7 +7,7 @@
   height: 45vh; /* Fixed height */
   max-height: 400px;
   pointer-events: none;
-  z-index: 999; /* Just below floating toggle button */
+  z-index: 1002; /* Above stream container but below modals */
   display: flex;
   flex-direction: column; /* Normal column direction */
   justify-content: flex-end; /* Align items to bottom */

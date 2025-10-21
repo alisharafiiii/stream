@@ -233,6 +233,20 @@ export default function Home() {
     );
   }
 
+  // Mobile browser debug info
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      console.log('Mobile Browser Debug:', {
+        userAgent: navigator.userAgent,
+        isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+        streamConfig,
+        user,
+        isBettingCollapsed,
+        showAuth
+      });
+    }
+  }, [streamConfig, user, isBettingCollapsed, showAuth]);
+
   return (
     <div className={styles.page}>
       
@@ -251,23 +265,24 @@ export default function Home() {
               onMuteChange={setIsMuted}
               hideControls={isBettingCollapsed} // Hide mute button when footer is shown
             />
-            {user && (
-              <StreamOverlay 
-                user={{
-                  fid: user.fid,
-                  displayName: user.displayName,
-                  username: user.username,
-                  profileImage: user.profileImage,
-                  balance: user.balance
-                }} 
-                onBalanceUpdate={(newBalance) => {
-                  setUser(prev => prev ? { ...prev, balance: newBalance } : null);
-                  localStorage.setItem('streamUser', JSON.stringify({ ...user, balance: newBalance }));
-                }}
-                isLive={streamConfig.isLive}
-              />
-            )}
           </div>
+          {/* StreamOverlay - Show with default values if no user (for mobile browser visibility) */}
+          <StreamOverlay 
+            user={user || {
+              fid: 'guest',
+              displayName: 'Guest',
+              username: 'guest',
+              profileImage: undefined,
+              balance: 0
+            }} 
+            onBalanceUpdate={(newBalance) => {
+              if (user) {
+                setUser(prev => prev ? { ...prev, balance: newBalance } : null);
+                localStorage.setItem('streamUser', JSON.stringify({ ...user, balance: newBalance }));
+              }
+            }}
+            isLive={streamConfig.isLive}
+          />
           {/* Betting Card - Outside streamContainer for true fixed positioning */}
           {user && (
             <BettingCard
@@ -298,11 +313,18 @@ export default function Home() {
         />
       )}
       
-      {/* Collapsed Footer - Show when betting deck is collapsed */}
-      {isBettingCollapsed && (
+      {/* Collapsed Footer - Show when betting deck is collapsed OR no user logged in */}
+      {(isBettingCollapsed || !user) && (
         <>
           <CollapsedFooter
-            onExpandBetting={() => setIsBettingCollapsed(false)}
+            onExpandBetting={() => {
+              if (!user) {
+                // If no user, show auth modal
+                setShowAuth(true);
+              } else {
+                setIsBettingCollapsed(false);
+              }
+            }}
             onToggleMute={() => setIsMuted(!isMuted)}
             isMuted={isMuted}
           />

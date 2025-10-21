@@ -6,12 +6,15 @@
   width: 100%;
   background: #000000;
   padding: 1rem;
-  z-index: 20;
+  z-index: 1050; /* Increased to ensure visibility on mobile browsers */
   animation: fadeIn 0.3s ease-in;
   pointer-events: none;
   border-bottom: 2px solid var(--accent-purple);
   -webkit-transform: translateZ(0); /* Force GPU acceleration */
   transform: translateZ(0);
+  /* Mobile browser fixes */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .overlay > * {
@@ -326,6 +329,11 @@
 @media (max-width: 640px) {
   .overlay {
     padding: 0.75rem;
+    position: fixed; /* Ensure fixed positioning on mobile */
+    top: 0;
+    width: 100%;
+    width: 100vw; /* Full viewport width */
+    background: #000000; /* Solid background */
   }
   
   .header {
