@@ -216,4 +216,33 @@ useEffect(() => {
    - Then mute commands (proper state)
    - Volume 0 again (ensure silence)
 
-**Result**: Mute function should now work properly
+**Result**: ❌ FAILED - Mute icon changes but sound continues playing
+
+## 🔧 Attempt #10: Pause/Play Trick for Stubborn YouTube Player
+**Date**: Current
+**Problem**: Mute commands being ignored by YouTube player
+
+**Theory**: YouTube player might be ignoring mute commands while actively playing
+
+**New Strategy**: Force YouTube to respect mute by pausing first
+1. **Pause the video** (2 retries)
+2. **While paused, mute and set volume to 0** (200ms delay)
+3. **Send more mute commands** (5 retries at 400ms)
+4. **Resume playing** (at 700ms - now should be muted)
+5. **Final mute enforcement** (at 1 second)
+
+**Command Sequence**:
+```
+0ms:    pauseVideo
+200ms:  setVolume(0) + mute
+400ms:  mute (5x)
+700ms:  playVideo
+1000ms: mute + setVolume(0)
+```
+
+**Why This Might Work**:
+- YouTube player may only accept state changes when paused
+- Pause/play cycle forces player to re-evaluate audio state
+- Multiple mute points during the pause state
+
+**Result**: Testing in progress

@@ -262,26 +262,35 @@ function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideC
         }, 1000);
         
       } else {
-        // Muting - Attempt #9 with more aggressive approach
-        console.log('🔇 [Attempt #9] Muting YouTube player...');
+        // Muting - Attempt #10: Try pause/play approach for stubborn YouTube player
+        console.log('🔇 [Attempt #10] Muting YouTube player with pause/play trick...');
         
-        // First, immediately set volume to 0
-        sendCommand('{"event":"command","func":"setVolume","args":[0]}', 3, 50);
+        // Strategy: Pause, mute, then resume - forces YouTube to respect mute state
         
-        // Then send mute command multiple times
-        setTimeout(() => {
-          sendCommand('{"event":"command","func":"mute","args":""}', 7, 100);
-        }, 100);
+        // Step 1: Pause the video
+        sendCommand('{"event":"command","func":"pauseVideo","args":""}', 2, 50);
         
-        // Final volume 0 to ensure silence
+        // Step 2: While paused, set volume to 0 and mute
         setTimeout(() => {
           sendCommand('{"event":"command","func":"setVolume","args":[0]}', 3, 50);
-        }, 500);
+          sendCommand('{"event":"command","func":"mute","args":""}', 3, 50);
+        }, 200);
         
-        // One more mute attempt
+        // Step 3: Send mute command again
+        setTimeout(() => {
+          sendCommand('{"event":"command","func":"mute","args":""}', 5, 100);
+        }, 400);
+        
+        // Step 4: Resume playing (now muted)
+        setTimeout(() => {
+          sendCommand('{"event":"command","func":"playVideo","args":""}', 2, 50);
+        }, 700);
+        
+        // Step 5: Final mute enforcement
         setTimeout(() => {
           sendCommand('{"event":"command","func":"mute","args":""}', 3, 100);
-        }, 800);
+          sendCommand('{"event":"command","func":"setVolume","args":[0]}', 2, 50);
+        }, 1000);
       }
       
       // Update state immediately for UI responsiveness
