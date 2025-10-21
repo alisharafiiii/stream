@@ -33,6 +33,8 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
     if (showSplash && splashVideoRef.current) {
       const playVideo = async () => {
         try {
+          if (!splashVideoRef.current) return;
+          
           // For Base app, we need to set attributes before playing
           splashVideoRef.current.setAttribute('playsinline', 'true');
           splashVideoRef.current.setAttribute('webkit-playsinline', 'true');
