@@ -66,9 +66,9 @@ export default function UserOverlay({ user, onBalanceUpdate }: UserOverlayProps)
           )}
           <div className={styles.details}>
             <div className={styles.name}>
-              {user.username && !user.username.startsWith('0x') 
-                ? `${user.username}.base.eth` 
-                : user.displayName}
+            {user.username && !user.username.startsWith('0x') 
+              ? (user.username.endsWith('.base.eth') ? user.username : `${user.username}.base.eth`)
+              : user.displayName}
             </div>
             <div 
               className={styles.balance}

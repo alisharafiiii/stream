@@ -155,7 +155,7 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
             )}
             <span className={styles.displayName}>
               {user.username && !user.username.startsWith('0x') 
-                ? `${user.username}.base.eth` 
+                ? (user.username.endsWith('.base.eth') ? user.username : `${user.username}.base.eth`)
                 : user.displayName}
             </span>
           </a>

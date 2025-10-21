@@ -93,7 +93,7 @@ export default function CommentsOverlay() {
           <div className={styles.content}>
             <span className={styles.username}>
               {comment.username && !comment.username.startsWith('0x') 
-                ? `${comment.username}.base.eth` 
+                ? (comment.username.endsWith('.base.eth') ? comment.username : `${comment.username}.base.eth`)
                 : comment.username}
             </span>
             <span className={styles.message}>{comment.message}</span>
