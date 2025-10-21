@@ -24,7 +24,7 @@
   box-shadow: 0 0 30px rgba(153, 69, 255, 0.3);
   font-family: var(--font-pixel);
   z-index: 3001; /* Ensure modal content is above overlay */
-  transform: scale(0.75) translateY(-18px); /* 25% smaller overall and moved up 18px (10+8) */
+  transform: scale(0.75) translateY(-60px); /* 25% smaller overall and moved up 60px to avoid comments */
   animation: modalAppear 0.3s ease-out;
 }
 
@@ -337,11 +337,11 @@
 @keyframes modalAppear {
   from {
     opacity: 0;
-    transform: scale(0.75) translateY(-18px) scale(0.9);
+    transform: scale(0.75) translateY(-60px) scale(0.9);
   }
   to {
     opacity: 1;
-    transform: scale(0.75) translateY(-18px) scale(1);
+    transform: scale(0.75) translateY(-60px) scale(1);
   }
 }
 
