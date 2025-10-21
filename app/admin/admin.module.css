@@ -175,11 +175,19 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-right: 0.5rem;
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+  touch-action: manipulation; /* Improve touch responsiveness */
+  user-select: none; /* Prevent text selection on tap */
 }
 
 .button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 20px rgba(153, 69, 255, 0.4);
+}
+
+.button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(153, 69, 255, 0.3);
 }
 
 .secondary {
@@ -193,12 +201,51 @@
   color: black;
 }
 
+.secondary:active {
+  background: var(--accent-blue);
+  color: black;
+  transform: translateY(0);
+}
+
 .primary {
   background: var(--accent-purple);
 }
 
 .primary:hover {
   box-shadow: 0 4px 20px rgba(153, 69, 255, 0.6);
+}
+
+.primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(153, 69, 255, 0.4);
+}
+
+/* Button group for action buttons */
+.buttonGroup {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.buttonGroup button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+/* Mobile button fixes */
+@media (max-width: 768px) {
+  .buttonGroup {
+    gap: 0.25rem;
+  }
+  
+  .buttonGroup button {
+    flex: 1;
+    min-width: 120px;
+    font-size: 0.875rem;
+    padding: 0.6rem 0.8rem;
+  }
 }
 
 .success {
@@ -526,6 +573,9 @@
     font-size: 0.875rem;
     padding: 0.5rem 0.75rem;
     min-width: auto;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
   }
   
   .prizePoolContainer {

@@ -310,6 +310,23 @@ export default function AdminPage() {
 
       if (response.ok) {
         console.log(`Stream ${newIsLive ? 'started' : 'stopped'} and saved!`);
+        
+        // Reset viewer count when going live
+        if (newIsLive) {
+          try {
+            await fetch('/api/viewer-count', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'reset' }),
+            });
+            console.log('Viewer count reset');
+          } catch (error) {
+            console.error('Failed to reset viewer count:', error);
+          }
+        }
+        
+        // Force page refresh to update UI
+        window.location.reload();
       } else {
         const error = await response.json();
         alert(`Failed to update stream status: ${error.error}`);

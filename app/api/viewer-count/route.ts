@@ -18,7 +18,13 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { sessionId } = await request.json()
+    const { sessionId, action } = await request.json()
+    
+    // Handle viewer count reset
+    if (action === 'reset') {
+      await redis.del(VIEWER_SESSIONS_SET)
+      return NextResponse.json({ viewerCount: 0, message: 'Viewer count reset' })
+    }
     
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 })
