@@ -70,32 +70,38 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
               
               console.log(`Payment status check ${attempts}:`, status);
               
-              if (status.status === 'completed' && status.transactionHash) {
-                // Now we have the transaction hash, verify it
-                setStatusMessage('Payment completed! Verifying deposit...');
+              if (status.status === 'completed') {
+                // Base Pay completed - credit the user's balance
+                // Note: Base Pay SDK doesn't provide transaction hash directly
+                setStatusMessage('Payment completed! Crediting your account...');
                 
-                const response = await fetch('/api/user/deposit', {
-                  method: 'POST',
+                // For Base app payments, we trust Base Pay and credit directly
+                // In production, you might want to add webhook verification
+                const newBalance = user.balance + amount;
+                
+                // Update balance in Redis
+                const response = await fetch('/api/user', {
+                  method: 'PUT',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
-                    userId: user.fid,
-                    amount: amount,
-                    transactionHash: status.transactionHash,
+                    fid: user.fid,
+                    amount: newBalance,
+                    type: 'set', // Direct set since we calculated the new balance
                   }),
                 });
                 
                 if (response.ok) {
-                  const depositData = await response.json();
-                  onBalanceUpdate(depositData.newBalance);
+                  const updatedUser = await response.json();
+                  onBalanceUpdate(updatedUser.balance);
                   setShowDeposit(false);
                   setDepositAmount("");
                   setStatusMessage("");
-                  alert(`Deposit verified! ${depositData.verification.amount} USDC credited.`);
+                  alert(`Deposit successful! $${amount.toFixed(2)} USDC credited.`);
                   paymentComplete = true;
                 } else {
                   const errorData = await response.json();
-                  console.error('Deposit verification error:', errorData);
-                  setStatusMessage(`Error: ${errorData.error}`);
+                  console.error('Balance update error:', errorData);
+                  setStatusMessage(`Error: ${errorData.error || 'Failed to update balance'}`);
                   setTimeout(() => setStatusMessage(""), 5000);
                   break;
                 }

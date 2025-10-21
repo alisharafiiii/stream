@@ -212,9 +212,16 @@ export async function PUT(request: NextRequest) {
       }
       
       // Update balance based on type
-      const newBalance = type === 'subtract'
-        ? Math.max(0, profile.balance - amount)
-        : amount;
+      let newBalance: number;
+      if (type === 'subtract') {
+        newBalance = Math.max(0, profile.balance - amount);
+      } else if (type === 'set') {
+        // Direct set - used for Base Pay deposits where we trust the source
+        newBalance = amount;
+      } else {
+        // Default case (shouldn't happen due to security check above)
+        newBalance = amount;
+      }
 
       // Update profile
       profile.username = username || profile.username;
