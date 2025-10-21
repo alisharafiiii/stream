@@ -96,28 +96,15 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
                   const updatedUser = await response.json();
                   console.log('[Base Pay] Balance updated:', updatedUser);
                   
-                  // Force refresh user data to ensure UI updates
-                  const refreshResponse = await fetch(`/api/user/${user.fid}`);
-                  if (refreshResponse.ok) {
-                    const refreshedUser = await refreshResponse.json();
-                    console.log('[Base Pay] Refreshed user data:', refreshedUser);
-                    onBalanceUpdate(refreshedUser.balance);
-                  } else {
-                    onBalanceUpdate(updatedUser.balance);
-                  }
+                  // Update the balance immediately
+                  onBalanceUpdate(newBalance);
                   
                   setShowDeposit(false);
                   setDepositAmount("");
                   setStatusMessage("");
                   
-                  // Force page reload for Base app to ensure all state updates
-                  if (typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase().includes('base')) {
-                    setTimeout(() => {
-                      window.location.reload();
-                    }, 1000);
-                  } else {
-                    alert(`Deposit successful! $${amount.toFixed(2)} USDC credited.`);
-                  }
+                  // Show success message
+                  alert(`Deposit successful! $${amount.toFixed(2)} USDC credited.`);
                   
                   paymentComplete = true;
                 } else {
