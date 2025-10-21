@@ -36,7 +36,7 @@ export default function AuthModal({ onComplete }: AuthModalProps) {
         fid: authUser.fid,
         username: authUser.username,
         displayName: authUser.displayName,
-        profileImage: authUser.profileImage?.includes('dicebear') ? undefined : authUser.profileImage,
+        profileImage: authUser.profileImage,
       }, false); // Skip topup
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -248,20 +248,14 @@ export default function AuthModal({ onComplete }: AuthModalProps) {
                 console.log('🎭 Base username:', authenticatedUser?.username);
                 console.log('🎭 Base profileImage:', authenticatedUser?.profileImage);
                 if (authenticatedUser) {
-                  createUserProfile({
-                    ...authenticatedUser,
-                    profileImage: authenticatedUser.profileImage?.includes('dicebear') ? undefined : authenticatedUser.profileImage,
-                  });
+                  createUserProfile(authenticatedUser);
                 }
               } else {
                   // Use wallet connection in browser
                   const walletUser = await connectWallet();
                   console.log('Wallet auth result:', walletUser);
                   if (walletUser) {
-                    createUserProfile({
-                      ...walletUser,
-                      profileImage: walletUser.profileImage?.includes('dicebear') ? undefined : walletUser.profileImage,
-                    });
+                    createUserProfile(walletUser);
                   }
                 }
               }}
