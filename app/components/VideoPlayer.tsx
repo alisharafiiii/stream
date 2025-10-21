@@ -16,7 +16,6 @@ function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideC
   const [showSplash, setShowSplash] = useState(true);
   const [isChangingMute, setIsChangingMute] = useState(false); // Visual feedback
   const [playerReady, setPlayerReady] = useState(false); // Track if player is ready
-  const [forceReload, setForceReload] = useState(0); // Force iframe reload
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const splashVideoRef = useRef<HTMLVideoElement>(null);
