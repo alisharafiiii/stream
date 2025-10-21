@@ -187,18 +187,20 @@ export default function Home() {
               }
             }, 500);
           } else {
-            setShowAuth(true);
+            // User not found in DB, but don't force auth
+            console.log('User not found in DB, continuing as guest');
           }
         } else {
-          setShowAuth(true);
+          // Invalid response, but don't force auth
+          console.log('Invalid user response, continuing as guest');
         }
       } catch {
-        // Retry once after a short delay
-        setTimeout(() => checkExistingUser(), 1000);
+        console.log('Error checking existing user, continuing without auth');
+        // Don't show auth modal on error, let users watch as guests
       }
     } else {
-      // No FID, show auth modal
-      setShowAuth(true);
+      // No FID, but don't force auth - users can watch as guests
+      console.log('No FID found, user can continue as guest');
     }
   };
 
