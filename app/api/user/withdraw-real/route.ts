@@ -1,12 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { redis, REDIS_KEYS, UserProfile } from '@/lib/redis';
 import { USDCWithdrawalService } from '@/lib/usdc-withdrawal-service';
+import { 
+  checkRateLimit, 
+  validateOrigin, 
+  validateAmount,
+  logSuspiciousActivity 
+} from '@/lib/security-middleware';
+import { ethers } from 'ethers';
 
 // Daily withdrawal limits
 const MAX_WITHDRAWAL_PER_DAY = 100; // $100
 const MAX_WITHDRAWAL_PER_TX = 50;   // $50
+const MIN_WITHDRAWAL_AMOUNT = 1;    // $1 minimum
 
 export async function POST(request: NextRequest) {
+  // Security: Validate origin
+  if (!validateOrigin(request)) {
+    return NextResponse.json({ error: 'Unauthorized origin' }, { status: 403 });
+  }
+  
   try {
     const body = await request.json();
     const { fid, amount, walletAddress } = body;
@@ -15,10 +28,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
     }
     
-    // Check withdrawal limits
-    if (amount > MAX_WITHDRAWAL_PER_TX) {
+    // Security: Prevent guest users from withdrawing
+    if (fid.startsWith('guest_') || fid.startsWith('browser_')) {
+      await logSuspiciousActivity(request, 'guest_withdrawal_attempt', { fid, amount, walletAddress });
+      return NextResponse.json({ error: 'Guest users cannot withdraw funds' }, { status: 403 });
+    }
+    
+    // Security: Validate wallet address
+    if (!ethers.isAddress(walletAddress)) {
+      await logSuspiciousActivity(request, 'invalid_wallet_address', { fid, walletAddress });
+      return NextResponse.json({ error: 'Invalid wallet address' }, { status: 400 });
+    }
+    
+    // Security: Check rate limit
+    const rateLimit = await checkRateLimit(request, 'withdraw', fid);
+    if (!rateLimit.allowed) {
+      await logSuspiciousActivity(request, 'rate_limit_exceeded', { fid, endpoint: 'withdraw-real' });
       return NextResponse.json({ 
-        error: `Maximum withdrawal per transaction is $${MAX_WITHDRAWAL_PER_TX}` 
+        error: 'Too many withdrawal attempts. Please try again later.',
+        retryAfter: rateLimit.resetIn 
+      }, { status: 429 });
+    }
+    
+    // Security: Validate amount
+    if (!validateAmount(amount, MIN_WITHDRAWAL_AMOUNT, MAX_WITHDRAWAL_PER_TX)) {
+      await logSuspiciousActivity(request, 'invalid_withdrawal_amount', { fid, amount });
+      return NextResponse.json({ 
+        error: `Amount must be between $${MIN_WITHDRAWAL_AMOUNT} and $${MAX_WITHDRAWAL_PER_TX}` 
       }, { status: 400 });
     }
     

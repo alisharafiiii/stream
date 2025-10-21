@@ -1,16 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { BettingService } from '@/lib/betting-service'
 import { redis, REDIS_KEYS, UserProfile } from '@/lib/redis'
+import { validateOrigin, logSuspiciousActivity } from '@/lib/security-middleware'
+import { isAdminWallet } from '@/lib/admin-auth'
 
 // POST resolve betting session and process payouts (admin only)
 export async function POST(request: NextRequest) {
+  // Security: Validate origin
+  if (!validateOrigin(request)) {
+    return NextResponse.json({ error: 'Unauthorized origin' }, { status: 403 })
+  }
+  
   try {
     const body = await request.json()
     const { sessionId, winner, walletAddress } = body
     
-    // Verify admin wallet
-    const ADMIN_WALLETS = ['0xAbD4BB1Ba7C9a57C40598604A7ad0E5d105AD54D', '0x37ed24e7c7311836fd01702a882937138688c1a9']
-    if (!walletAddress || !ADMIN_WALLETS.includes(walletAddress.toLowerCase())) {
+    // Verify admin wallet using centralized check
+    if (!walletAddress || !isAdminWallet(walletAddress)) {
+      await logSuspiciousActivity(request, 'unauthorized_admin_attempt', { walletAddress, endpoint: 'betting/resolve' })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
     

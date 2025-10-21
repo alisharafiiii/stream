@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { BettingService } from '@/lib/betting-service'
 import { redis, REDIS_KEYS, UserProfile } from '@/lib/redis'
+import { checkRateLimit, validateOrigin, validateAmount, logSuspiciousActivity } from '@/lib/security-middleware'
 
 // POST place a bet
 export async function POST(request: NextRequest) {
+  // Security: Validate origin
+  if (!validateOrigin(request)) {
+    return NextResponse.json({ error: 'Unauthorized origin' }, { status: 403 })
+  }
+  
   try {
     const body = await request.json()
     const { sessionId, userId, option, amount } = body
@@ -21,6 +27,22 @@ export async function POST(request: NextRequest) {
     
     if (amount <= 0) {
       return NextResponse.json({ error: 'Amount must be positive' }, { status: 400 })
+    }
+    
+    // Security: Check rate limit
+    const rateLimit = await checkRateLimit(request, 'bet', userId)
+    if (!rateLimit.allowed) {
+      await logSuspiciousActivity(request, 'rate_limit_exceeded', { userId, endpoint: 'betting/place' })
+      return NextResponse.json({ 
+        error: 'Too many bets. Please slow down.',
+        retryAfter: rateLimit.resetIn 
+      }, { status: 429 })
+    }
+    
+    // Security: Validate bet amount (min $0.01, max $10)
+    if (!validateAmount(amount, 0.01, 10)) {
+      await logSuspiciousActivity(request, 'invalid_bet_amount', { userId, amount })
+      return NextResponse.json({ error: 'Bet amount must be between $0.01 and $10' }, { status: 400 })
     }
     
     // Check user balance
