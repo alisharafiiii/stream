@@ -8,12 +8,16 @@
   color: white;
   transition: all 0.3s ease;
   position: fixed;
-  bottom: max(0px, env(safe-area-inset-bottom));
+  bottom: 0;
+  bottom: constant(safe-area-inset-bottom); /* iOS 11.0 */
+  bottom: env(safe-area-inset-bottom); /* iOS 11.2+ */
   left: 0;
   right: 0;
   z-index: 1100; /* Higher than comments overlay (999) */
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
   margin: 0;
+  -webkit-transform: translateZ(0); /* Force GPU acceleration */
+  transform: translateZ(0);
 }
 
 .bettingCard::before {

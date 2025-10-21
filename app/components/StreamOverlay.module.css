@@ -10,6 +10,8 @@
   animation: fadeIn 0.3s ease-in;
   pointer-events: none;
   border-bottom: 2px solid var(--accent-purple);
+  -webkit-transform: translateZ(0); /* Force GPU acceleration */
+  transform: translateZ(0);
 }
 
 .overlay > * {

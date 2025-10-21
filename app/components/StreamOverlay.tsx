@@ -46,10 +46,21 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
     const interval = setInterval(() => {
       fetchViewerCount();
     }, 30000);
+    
+    // Add random viewers every 5 minutes while live
+    let randomViewerInterval: NodeJS.Timeout | null = null;
+    if (isLive) {
+      randomViewerInterval = setInterval(() => {
+        addRandomViewers();
+      }, 5 * 60 * 1000); // 5 minutes
+    }
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (randomViewerInterval) clearInterval(randomViewerInterval);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isLive]);
   
   const fetchViewerCount = async () => {
     try {
@@ -76,6 +87,33 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
       }
     } catch (error) {
       console.error('Failed to update viewer session:', error);
+    }
+  };
+  
+  const addRandomViewers = async () => {
+    try {
+      // Generate 1-3 random viewers
+      const numNewViewers = 1 + Math.floor(Math.random() * 3); // 1, 2, or 3
+      
+      // Create fake session IDs and add them
+      for (let i = 0; i < numNewViewers; i++) {
+        const fakeSessionId = `bot_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        
+        const response = await fetch('/api/viewer-count', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: fakeSessionId }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setViewerCount(data.viewerCount);
+        }
+      }
+      
+      console.log(`Added ${numNewViewers} random viewers`);
+    } catch (error) {
+      console.error('Failed to add random viewers:', error);
     }
   };
   
