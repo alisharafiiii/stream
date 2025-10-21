@@ -40,6 +40,9 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
          window.navigator.userAgent.toLowerCase().includes('coinbase'));
       
       if (isInBaseApp) {
+        console.log('[Base App Deposit] Starting Base Pay flow for amount:', amount);
+        console.log('[Base App Deposit] Current user balance:', user.balance);
+        
         // Use Base Pay with real USDC
         const treasuryAddress = process.env.NEXT_PUBLIC_TREASURY_ADDRESS || "0x00081fd198A649c4DBF4B3AB6E9f8dd611f92611";
         
@@ -96,15 +99,26 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
                   const updatedUser = await response.json();
                   console.log('[Base Pay] Balance updated:', updatedUser);
                   
-                  // Update the balance immediately
-                  onBalanceUpdate(newBalance);
+                  // Update the balance immediately - use the server response
+                  const finalBalance = updatedUser.balance || newBalance;
+                  onBalanceUpdate(finalBalance);
+                  
+                  // Also update the parent component's user state
+                  if ((window as any).updateUserBalance) {
+                    (window as any).updateUserBalance(finalBalance);
+                  }
                   
                   setShowDeposit(false);
                   setDepositAmount("");
                   setStatusMessage("");
                   
-                  // Show success message
-                  alert(`Deposit successful! $${amount.toFixed(2)} USDC credited.`);
+                  // Show success and close modal
+                  alert(`Deposit successful! $${amount.toFixed(2)} USDC credited. New balance: $${finalBalance.toFixed(2)}`);
+                  
+                  // Close the modal to force parent re-render
+                  setTimeout(() => {
+                    onClose();
+                  }, 500);
                   
                   paymentComplete = true;
                 } else {
