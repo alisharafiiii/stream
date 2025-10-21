@@ -37,7 +37,17 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [isBettingCollapsed, setIsBettingCollapsed] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
+  // Check if we're returning from another page to skip splash
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const isReturning = sessionStorage.getItem('hasVisitedBefore');
+      if (isReturning) {
+        return false; // Skip splash if returning
+      }
+      sessionStorage.setItem('hasVisitedBefore', 'true');
+    }
+    return true;
+  });
 
   useEffect(() => {
     console.log('🎬 App mounted, showSplash:', showSplash);
@@ -51,11 +61,14 @@ export default function Home() {
     fetchStreamConfig();
     checkExistingUser();
     
-    // Hide splash screen after 2.5 seconds
-    const splashTimer = setTimeout(() => {
-      console.log('🎬 Hiding splash screen');
-      setShowSplash(false);
-    }, 2500);
+    // Hide splash screen after 2.5 seconds (only if showing)
+    let splashTimer: NodeJS.Timeout;
+    if (showSplash) {
+      splashTimer = setTimeout(() => {
+        console.log('🎬 Hiding splash screen');
+        setShowSplash(false);
+      }, 2500);
+    }
     
     return () => clearTimeout(splashTimer);
     // eslint-disable-next-line react-hooks/exhaustive-deps

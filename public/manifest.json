@@ -1,0 +1,21 @@
+{
+  "name": "Click n Pray",
+  "short_name": "Click n Pray",
+  "description": "Live betting platform. Click your side and pray for the win.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#9945FF",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

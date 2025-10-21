@@ -9,12 +9,13 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = "https://stream-production-7739.up.railway.app";
 
   return {
-    title: minikitConfig.miniapp.name,
+    title: "Click n Pray",
     description: minikitConfig.miniapp.description,
     icons: {
       icon: '/icon.png',
       apple: '/icon.png',
     },
+    manifest: '/manifest.json',
     openGraph: {
       title: minikitConfig.miniapp.ogTitle,
       description: minikitConfig.miniapp.ogDescription,
