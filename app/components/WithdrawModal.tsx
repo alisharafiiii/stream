@@ -53,11 +53,18 @@ export default function WithdrawModal({ balance, onClose, onWithdraw }: Withdraw
   };
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <button className={styles.closeButton} onClick={onClose}>×</button>
         
         <h2 className={styles.title}>WITHDRAW</h2>
+        
+        <button 
+          className={styles.backButton}
+          onClick={onClose}
+        >
+          ← Back
+        </button>
         
         <div className={styles.balanceInfo}>
           <span className={styles.label}>AVAILABLE</span>

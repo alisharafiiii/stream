@@ -4,11 +4,11 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 1); /* Solid black background */
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 3000; /* Match BalanceModal z-index */
   padding: 1rem;
   animation: fadeIn 0.3s ease-in;
 }
@@ -17,13 +17,15 @@
   background: var(--card-bg);
   border: 2px solid var(--accent-purple);
   border-radius: 8px;
-  padding: 2rem;
-  max-width: 500px;
+  padding: 1.5rem; /* Match BalanceModal */
+  max-width: 375px; /* Match BalanceModal */
   width: 100%;
   position: relative;
   box-shadow: 0 0 30px rgba(153, 69, 255, 0.3);
   font-family: var(--font-pixel);
   animation: slideUp 0.3s ease-out;
+  z-index: 3001; /* Match BalanceModal */
+  transform: scale(0.75) translateY(-10px); /* Match BalanceModal size and position */
 }
 
 .closeButton {
@@ -52,8 +54,8 @@
 .title {
   color: white;
   text-align: center;
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
+  font-size: 1.5rem; /* Match BalanceModal */
+  margin-bottom: 1rem; /* Match BalanceModal */
   letter-spacing: 2px;
   text-transform: uppercase;
   font-weight: bold;
@@ -285,6 +287,31 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.backButton {
+  background: transparent;
+  border: 2px solid var(--accent-purple);
+  color: var(--accent-purple);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: var(--font-pixel);
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.backButton:hover {
+  background: var(--accent-purple);
+  color: white;
+  transform: translateX(-2px);
 }
 
 @keyframes pulse {
