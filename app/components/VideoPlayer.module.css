@@ -10,23 +10,14 @@
 
 .streamPlayer {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 177.77vh; /* 16:9 aspect ratio based on height */
-  height: 100%;
-  max-width: 100%;
-  max-height: 56.25vw; /* 16:9 aspect ratio based on width */
-  transform: translate(-50%, -50%);
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
   border: none;
-}
-
-/* Mobile portrait - fill screen width */
-@media (max-width: 768px) and (orientation: portrait) {
-  .streamPlayer {
-    width: 100%;
-    height: 56.25vw; /* 16:9 ratio */
-    max-height: 100vh;
-  }
+  /* This will make the video fill the entire container */
+  min-width: 100%;
+  min-height: 100%;
 }
 
 /* Click blocker to prevent YouTube interaction */
