@@ -28,26 +28,38 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
     }
   }, [streamUrl]);
 
-  // Force play splash video on mobile
+  // Force play splash video on mobile and Base app
   useEffect(() => {
     if (showSplash && splashVideoRef.current) {
       const playVideo = async () => {
         try {
-          // Try multiple times to ensure autoplay works
-          splashVideoRef.current?.play().catch(() => {
-            // If autoplay fails, try again after a small delay
-            setTimeout(() => {
-              splashVideoRef.current?.play().catch(() => {});
-            }, 100);
-          });
+          // For Base app, we need to set attributes before playing
+          splashVideoRef.current.setAttribute('playsinline', 'true');
+          splashVideoRef.current.setAttribute('webkit-playsinline', 'true');
+          splashVideoRef.current.muted = true;
+          splashVideoRef.current.defaultMuted = true;
+          splashVideoRef.current.volume = 0;
+          
+          // Try to play
+          const playPromise = splashVideoRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise.catch((error) => {
+              console.log('Autoplay prevented:', error);
+              // If autoplay fails, show the poster and allow manual start
+            });
+          }
         } catch (error) {
-          console.log('Splash video autoplay failed:', error);
+          console.log('Splash video error:', error);
         }
       };
       
-      // Try to play immediately and after DOM settles
-      playVideo();
-      setTimeout(playVideo, 500);
+      // Base app needs a delay to properly load video
+      setTimeout(playVideo, 100);
+      
+      // Also handle video load event
+      if (splashVideoRef.current) {
+        splashVideoRef.current.onloadeddata = playVideo;
+      }
     }
   }, [showSplash]);
 
@@ -142,48 +154,36 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
   const toggleMute = () => {
     const newMutedState = !isMuted;
     
-    if (iframeRef.current?.contentWindow) {
-      // More robust unmute/mute approach
+    // For Base app, we need to reload the iframe with different mute parameter
+    const isBaseApp = typeof window !== 'undefined' && 
+      (window.navigator.userAgent.toLowerCase().includes('base') || 
+       window.navigator.userAgent.toLowerCase().includes('coinbase'));
+    
+    if (isBaseApp && iframeRef.current) {
+      // In Base app, change the src to toggle mute
+      const currentSrc = iframeRef.current.src;
+      const newSrc = currentSrc.replace(
+        /mute=\d/, 
+        `mute=${newMutedState ? '1' : '0'}`
+      );
+      iframeRef.current.src = newSrc;
+    } else if (iframeRef.current?.contentWindow) {
+      // Browser: use postMessage
       if (isMuted) {
-        // Unmuting - try multiple approaches
-        console.log('🔊 Attempting to unmute YouTube player...');
-        
-        // First, set volume to ensure it's not 0
-        const volumeCommand = '{"event":"command","func":"setVolume","args":[100]}';
-        iframeRef.current.contentWindow.postMessage(volumeCommand, '*');
-        
-        // Then unmute
-        const unmuteCommand = '{"event":"command","func":"unMute","args":""}';
-        
-        // Send commands multiple times with delays
-        setTimeout(() => {
-          iframeRef.current?.contentWindow?.postMessage(unmuteCommand, '*');
-        }, 50);
-        
-        setTimeout(() => {
-          iframeRef.current?.contentWindow?.postMessage(volumeCommand, '*');
-          iframeRef.current?.contentWindow?.postMessage(unmuteCommand, '*');
-        }, 150);
-        
-        setTimeout(() => {
-          iframeRef.current?.contentWindow?.postMessage(unmuteCommand, '*');
-        }, 300);
-        
-        // Final attempt with volume
-        setTimeout(() => {
-          iframeRef.current?.contentWindow?.postMessage(volumeCommand, '*');
-          iframeRef.current?.contentWindow?.postMessage(unmuteCommand, '*');
-        }, 500);
-        
+        console.log('🔊 Unmuting...');
+        const commands = [
+          '{"event":"command","func":"unMute","args":""}',
+          '{"event":"command","func":"setVolume","args":[100]}'
+        ];
+        commands.forEach((cmd, i) => {
+          setTimeout(() => {
+            iframeRef.current?.contentWindow?.postMessage(cmd, '*');
+          }, i * 100);
+        });
       } else {
-        // Muting
-        console.log('🔇 Muting YouTube player...');
+        console.log('🔇 Muting...');
         const muteCommand = '{"event":"command","func":"mute","args":""}';
-        
         iframeRef.current.contentWindow.postMessage(muteCommand, '*');
-        setTimeout(() => {
-          iframeRef.current?.contentWindow?.postMessage(muteCommand, '*');
-        }, 100);
       }
     }
     
@@ -275,12 +275,13 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
         <>
           <iframe
             ref={iframeRef}
-            src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&showinfo=0&loop=1&enablejsapi=1&cc_load_policy=0&autohide=1`}
+            src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1&mute=${isMuted ? '1' : '0'}&playsinline=1&controls=0&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&showinfo=0&loop=1&enablejsapi=1&cc_load_policy=0&autohide=1&widget_referrer=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
             className={styles.streamPlayer}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
             allowFullScreen
             title={title}
             loading="eager"
+            style={{ visibility: showSplash ? 'hidden' : 'visible' }}
           />
           <div className={styles.clickBlocker} aria-hidden="true" />
         </>
