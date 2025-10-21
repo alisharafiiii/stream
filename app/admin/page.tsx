@@ -73,6 +73,7 @@ export default function AdminPage() {
   const [bettingHistory, setBettingHistory] = useState<BettingSession[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [deletingSession, setDeletingSession] = useState(false);
+  const [userProfiles, setUserProfiles] = useState<Map<string, UserProfile>>(new Map());
   
   // User management states
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -145,6 +146,24 @@ export default function AdminPage() {
         const data = await response.json();
         setAllBets(data);
         setShowAllBets(true);
+        
+        // Fetch user profiles for display names
+        const userIds = data.map((bet: UserBets) => bet.userId);
+        const uniqueUserIds = [...new Set(userIds)];
+        
+        const profileMap = new Map<string, UserProfile>();
+        for (const userId of uniqueUserIds) {
+          try {
+            const profileResponse = await fetch(`/api/user?fid=${userId}`);
+            if (profileResponse.ok) {
+              const profile = await profileResponse.json();
+              profileMap.set(userId, profile);
+            }
+          } catch (error) {
+            console.error(`Failed to fetch profile for ${userId}:`, error);
+          }
+        }
+        setUserProfiles(profileMap);
       }
     } catch (error) {
       console.error('Failed to fetch all bets:', error);
@@ -800,20 +819,32 @@ export default function AdminPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {allBets.map((bet) => (
-                        <tr key={bet.userId} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                          <td style={{ padding: '0.5rem' }}>{bet.userId}</td>
-                          <td style={{ padding: '0.5rem', textAlign: 'right' }}>
-                            {formatAmount(bet.leftAmount)}
-                          </td>
-                          <td style={{ padding: '0.5rem', textAlign: 'right' }}>
-                            {formatAmount(bet.rightAmount)}
-                          </td>
-                          <td style={{ padding: '0.5rem', textAlign: 'right', fontWeight: '600' }}>
-                            {formatAmount(bet.leftAmount + bet.rightAmount)}
-                          </td>
-                        </tr>
-                      ))}
+                      {allBets.map((bet) => {
+                        const profile = userProfiles.get(bet.userId);
+                        const displayName = profile ? 
+                          (profile.username || profile.displayName || `User ${bet.userId}`) : 
+                          `User ${bet.userId}`;
+                        
+                        return (
+                          <tr key={bet.userId} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                            <td style={{ padding: '0.5rem' }}>
+                              {displayName}
+                              {profile?.username && <span style={{ fontSize: '0.8rem', color: '#666', marginLeft: '0.5rem' }}>
+                                (.base.eth)
+                              </span>}
+                            </td>
+                            <td style={{ padding: '0.5rem', textAlign: 'right' }}>
+                              {formatAmount(bet.leftAmount)}
+                            </td>
+                            <td style={{ padding: '0.5rem', textAlign: 'right' }}>
+                              {formatAmount(bet.rightAmount)}
+                            </td>
+                            <td style={{ padding: '0.5rem', textAlign: 'right', fontWeight: '600' }}>
+                              {formatAmount(bet.leftAmount + bet.rightAmount)}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

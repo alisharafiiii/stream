@@ -234,6 +234,7 @@ export default function Home() {
         <>
           <div className={`${styles.streamContainer} ${isBettingCollapsed ? styles.fullscreen : ''}`}>
             <VideoPlayer 
+              key="main-stream-player" // Prevent re-renders
               streamUrl={streamConfig.streamUrl} 
               title={streamConfig.title}
               isMuted={isMuted}

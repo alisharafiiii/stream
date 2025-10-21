@@ -35,32 +35,71 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
         try {
           if (!splashVideoRef.current) return;
           
-          // For Base app, we need to set attributes before playing
+          // Reset video to ensure clean state
+          splashVideoRef.current.pause();
+          splashVideoRef.current.currentTime = 0;
+          
+          // Set all required attributes for mobile/miniapp
           splashVideoRef.current.setAttribute('playsinline', 'true');
           splashVideoRef.current.setAttribute('webkit-playsinline', 'true');
+          splashVideoRef.current.setAttribute('x5-playsinline', 'true');
+          splashVideoRef.current.setAttribute('x5-video-player-type', 'h5');
+          splashVideoRef.current.setAttribute('x5-video-player-fullscreen', 'false');
           splashVideoRef.current.muted = true;
           splashVideoRef.current.defaultMuted = true;
           splashVideoRef.current.volume = 0;
+          splashVideoRef.current.autoplay = true;
           
-          // Try to play
-          const playPromise = splashVideoRef.current.play();
-          if (playPromise !== undefined) {
-            playPromise.catch((error) => {
-              console.log('Autoplay prevented:', error);
-              // If autoplay fails, show the poster and allow manual start
-            });
-          }
+          // Load the video first
+          splashVideoRef.current.load();
+          
+          // Try multiple play attempts
+          const attemptPlay = async () => {
+            try {
+              if (!splashVideoRef.current) return;
+              const playPromise = splashVideoRef.current.play();
+              if (playPromise !== undefined) {
+                await playPromise;
+                console.log('Splash video playing successfully');
+              }
+            } catch (error) {
+              console.log('Play attempt failed:', error);
+              // Try again after a short delay
+              setTimeout(attemptPlay, 500);
+            }
+          };
+          
+          // Start play attempts
+          attemptPlay();
         } catch (error) {
           console.log('Splash video error:', error);
         }
       };
       
-      // Base app needs a delay to properly load video
-      setTimeout(playVideo, 100);
+      // Multiple initialization attempts for better compatibility
+      playVideo();
+      setTimeout(playVideo, 200);
+      setTimeout(playVideo, 500);
       
-      // Also handle video load event
+      // Also handle video events
       if (splashVideoRef.current) {
-        splashVideoRef.current.onloadeddata = playVideo;
+        splashVideoRef.current.onloadedmetadata = playVideo;
+        splashVideoRef.current.oncanplay = playVideo;
+        
+        // For iOS/Safari - sometimes needs user interaction simulation
+        const touchHandler = () => {
+          if (splashVideoRef.current && splashVideoRef.current.paused) {
+            splashVideoRef.current.play().catch(() => {});
+          }
+        };
+        
+        document.addEventListener('touchstart', touchHandler, { once: true });
+        document.addEventListener('click', touchHandler, { once: true });
+        
+        return () => {
+          document.removeEventListener('touchstart', touchHandler);
+          document.removeEventListener('click', touchHandler);
+        };
       }
     }
   }, [showSplash]);
