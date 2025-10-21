@@ -47,24 +47,12 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
           // Users can select USDC in Base Pay interface
         });
         
-        // Update balance after successful payment
+        // Base Pay doesn't provide transaction hash immediately
+        // This flow needs to be updated to wait for transaction confirmation
         if (payment) {
-          const response = await fetch('/api/user', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              fid: user.fid,
-              amount: amount,
-              type: 'add',
-              transactionId: payment,
-            }),
-          });
-          
-          if (response.ok) {
-            const userData = await response.json();
-            onBalanceUpdate(userData.balance);
-            setShowDeposit(false);
-          }
+          alert('Base Pay initiated. Please wait for transaction confirmation.');
+          // TODO: Implement proper Base Pay transaction tracking
+          setShowDeposit(false);
         }
       } else {
         // Browser: For both guest and wallet users, connect wallet and send USDC
@@ -128,28 +116,34 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
               }],
             }) as string;
             
-            // Wait for confirmation and update balance
+            // Wait for confirmation and verify deposit
             if (txHash) {
-              const response = await fetch('/api/user', {
-                method: 'PUT',
+              alert(`Transaction submitted: ${txHash}. Waiting for confirmation...`);
+              
+              // Wait for transaction to be mined (at least 2 confirmations)
+              await new Promise(resolve => setTimeout(resolve, 30000)); // Wait 30 seconds
+              
+              // Call the secure deposit endpoint with verification
+              const response = await fetch('/api/user/deposit', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  fid: user.fid,
+                  userId: user.fid,
                   amount: amount,
-                  type: 'add',
-                  transactionId: txHash,
+                  transactionHash: txHash,
                 }),
               });
               
               if (response.ok) {
-                const userData = await response.json();
-                onBalanceUpdate(userData.balance);
+                const depositData = await response.json();
+                onBalanceUpdate(depositData.newBalance);
                 setShowDeposit(false);
-                alert('Deposit successful!');
+                setDepositAmount("");
+                alert(`Deposit verified! ${depositData.verification.amount} USDC credited.`);
               } else {
-                const error = await response.text();
-                console.error('Deposit API error:', error);
-                alert('Failed to record deposit. Please contact support.');
+                const errorData = await response.json();
+                console.error('Deposit verification error:', errorData);
+                alert(`Deposit verification failed: ${errorData.error}\n\nTransaction: ${txHash}`);
               }
             }
           } catch (error) {

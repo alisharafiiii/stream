@@ -202,10 +202,17 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
 
+      // SECURITY: Block direct balance additions - must use /api/user/deposit
+      if (type === 'add') {
+        console.error('[API] Blocked direct balance addition attempt:', { fid, amount, transactionId });
+        return NextResponse.json(
+          { error: 'Direct balance additions not allowed. Use /api/user/deposit for deposits.' },
+          { status: 403 }
+        );
+      }
+      
       // Update balance based on type
-      const newBalance = type === 'add' 
-        ? (profile.balance + amount)
-        : type === 'subtract'
+      const newBalance = type === 'subtract'
         ? Math.max(0, profile.balance - amount)
         : amount;
 
