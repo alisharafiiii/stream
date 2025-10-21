@@ -352,6 +352,19 @@
   }
 }
 
+.statusMessage {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: rgba(153, 69, 255, 0.1);
+  border: 1px solid var(--accent-purple);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  text-align: center;
+  font-family: var(--font-pixel);
+  animation: fadeIn 0.3s ease-in;
+}
+
 .backButton {
   background: transparent;
   border: 2px solid var(--accent-purple);

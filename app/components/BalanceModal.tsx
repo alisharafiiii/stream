@@ -26,6 +26,7 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
   const [showDeposit, setShowDeposit] = useState(false);
   const [depositAmount, setDepositAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
 
   const handleDeposit = async () => {
     const amount = parseFloat(depositAmount);
@@ -118,32 +119,69 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
             
             // Wait for confirmation and verify deposit
             if (txHash) {
-              alert(`Transaction submitted: ${txHash}. Waiting for confirmation...`);
+              setStatusMessage(`Transaction submitted! Hash: ${txHash.slice(0, 10)}...`);
               
-              // Wait for transaction to be mined (at least 2 confirmations)
-              await new Promise(resolve => setTimeout(resolve, 30000)); // Wait 30 seconds
+              // Poll for transaction status
+              let attempts = 0;
+              const maxAttempts = 30; // 30 attempts = ~2.5 minutes max
+              let depositSuccess = false;
               
-              // Call the secure deposit endpoint with verification
-              const response = await fetch('/api/user/deposit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  userId: user.fid,
-                  amount: amount,
-                  transactionHash: txHash,
-                }),
-              });
+              while (attempts < maxAttempts && !depositSuccess) {
+                attempts++;
+                
+                // Check transaction status
+                const statusResponse = await fetch(`/api/user/deposit/status?tx=${txHash}`);
+                const statusData = await statusResponse.json();
+                
+                console.log(`Deposit status check ${attempts}:`, statusData);
+                
+                if (statusData.status === 'ready') {
+                  setStatusMessage('Transaction confirmed! Verifying deposit...');
+                  
+                  // Transaction has enough confirmations, proceed with deposit
+                  const response = await fetch('/api/user/deposit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      userId: user.fid,
+                      amount: amount,
+                      transactionHash: txHash,
+                    }),
+                  });
+                  
+                  if (response.ok) {
+                    const depositData = await response.json();
+                    onBalanceUpdate(depositData.newBalance);
+                    setShowDeposit(false);
+                    setDepositAmount("");
+                    setStatusMessage("");
+                    alert(`Deposit verified! ${depositData.verification.amount} USDC credited.`);
+                    depositSuccess = true;
+                  } else {
+                    const errorData = await response.json();
+                    console.error('Deposit verification error:', errorData);
+                    setStatusMessage(`Error: ${errorData.error}`);
+                    setTimeout(() => setStatusMessage(""), 5000);
+                    break;
+                  }
+                } else if (statusData.status === 'failed') {
+                  setStatusMessage('Transaction failed. Please try again.');
+                  setTimeout(() => setStatusMessage(""), 5000);
+                  break;
+                } else if (statusData.status === 'invalid') {
+                  setStatusMessage('No USDC transfer found. Please send USDC to treasury.');
+                  setTimeout(() => setStatusMessage(""), 5000);
+                  break;
+                } else {
+                  // Still pending, wait and check again
+                  setStatusMessage(`Waiting for confirmations... (${statusData.confirmations || 0}/2)`);
+                  await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+                }
+              }
               
-              if (response.ok) {
-                const depositData = await response.json();
-                onBalanceUpdate(depositData.newBalance);
-                setShowDeposit(false);
-                setDepositAmount("");
-                alert(`Deposit verified! ${depositData.verification.amount} USDC credited.`);
-              } else {
-                const errorData = await response.json();
-                console.error('Deposit verification error:', errorData);
-                alert(`Deposit verification failed: ${errorData.error}\n\nTransaction: ${txHash}`);
+              if (!depositSuccess && attempts >= maxAttempts) {
+                setStatusMessage('Timeout. Check BaseScan or contact support.');
+                setTimeout(() => setStatusMessage(""), 10000);
               }
             }
           } catch (error) {
@@ -165,6 +203,8 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
       }
     } catch (error) {
       console.error('Deposit failed:', error);
+      setStatusMessage('Deposit failed. Please try again.');
+      setTimeout(() => setStatusMessage(""), 5000);
     } finally {
       setIsProcessing(false);
     }
@@ -282,6 +322,12 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
           >
             {isProcessing ? "PROCESSING..." : "DEPOSIT USDC"}
           </button>
+          
+          {statusMessage && (
+            <div className={styles.statusMessage}>
+              {statusMessage}
+            </div>
+          )}
         </div>
       </div>
     );
