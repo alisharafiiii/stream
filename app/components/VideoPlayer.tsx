@@ -14,6 +14,7 @@ function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideC
   const [error, setError] = useState(false);
   const [localMuted, setLocalMuted] = useState(true); // Local state for when not controlled
   const [showSplash, setShowSplash] = useState(true);
+  const [isChangingMute, setIsChangingMute] = useState(false); // Visual feedback
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const splashVideoRef = useRef<HTMLVideoElement>(null);
@@ -191,56 +192,77 @@ function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideC
     }
   }, [isMuted]);
 
-  // Check if it's a YouTube URL and convert to embed format
+  // Attempt #7: Enhanced mute toggle with state verification
   const toggleMute = () => {
     const newMutedState = !isMuted;
     
+    // Show visual feedback
+    setIsChangingMute(true);
+    
     if (iframeRef.current?.contentWindow) {
+      // Create a function to send commands reliably
+      const sendCommand = (command: string, retries = 5, delay = 100) => {
+        let attempt = 0;
+        const send = () => {
+          if (attempt < retries && iframeRef.current?.contentWindow) {
+            console.log(`🎵 Sending command (attempt ${attempt + 1}/${retries}):`, command);
+            iframeRef.current.contentWindow.postMessage(command, '*');
+            attempt++;
+            if (attempt < retries) {
+              setTimeout(send, delay);
+            }
+          }
+        };
+        send();
+      };
+      
       if (isMuted) {
-        // Unmuting
-        console.log('🔊 Unmuting YouTube player...');
+        // Unmuting - Attempt #7 improvements
+        console.log('🔊 [Attempt #7] Unmuting YouTube player...');
         
-        // Send multiple commands to ensure it works
-        const commands = [
-          '{"event":"command","func":"unMute","args":""}',
-          '{"event":"command","func":"setVolume","args":[100]}'
-        ];
+        // First, ensure player is playing
+        sendCommand('{"event":"command","func":"playVideo","args":""}', 2, 50);
         
-        // Send immediately and with delays
-        commands.forEach(cmd => {
-          iframeRef.current?.contentWindow?.postMessage(cmd, '*');
-        });
-        
-        // Retry after short delays
+        // Then unmute with multiple retries
         setTimeout(() => {
-          commands.forEach(cmd => {
-            iframeRef.current?.contentWindow?.postMessage(cmd, '*');
-          });
-        }, 200);
+          sendCommand('{"event":"command","func":"unMute","args":""}', 5, 150);
+        }, 100);
         
+        // Set volume to max after unmuting
         setTimeout(() => {
-          iframeRef.current?.contentWindow?.postMessage(commands[0], '*');
+          sendCommand('{"event":"command","func":"setVolume","args":[100]}', 3, 100);
         }, 500);
         
-      } else {
-        // Muting
-        console.log('🔇 Muting YouTube player...');
-        const muteCommand = '{"event":"command","func":"mute","args":""}';
-        
-        // Send multiple times
-        iframeRef.current.contentWindow.postMessage(muteCommand, '*');
+        // Final unmute attempt
         setTimeout(() => {
-          iframeRef.current?.contentWindow?.postMessage(muteCommand, '*');
-        }, 100);
+          sendCommand('{"event":"command","func":"unMute","args":""}', 2, 100);
+        }, 1000);
+        
+      } else {
+        // Muting - simpler as it usually works
+        console.log('🔇 [Attempt #7] Muting YouTube player...');
+        sendCommand('{"event":"command","func":"mute","args":""}', 3, 100);
       }
+    } else {
+      console.warn('🚫 iframe not ready for mute toggle');
     }
     
-    // Update state
+    // Update state immediately for UI responsiveness
     if (onMuteChange) {
       onMuteChange(newMutedState);
     } else {
       setLocalMuted(newMutedState);
     }
+    
+    // Save preference
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('streamMuted', String(newMutedState));
+    }
+    
+    // Hide feedback after commands are sent
+    setTimeout(() => {
+      setIsChangingMute(false);
+    }, 1500);
   };
 
   const getEmbedUrl = (url: string) => {
@@ -359,12 +381,13 @@ function VideoPlayer({ streamUrl, title, isMuted: muteState, onMuteChange, hideC
       )}
       {!hideControls && !showSplash && (
         <button 
-          className={styles.muteButton}
+          className={`${styles.muteButton} ${isChangingMute ? styles.changing : ''}`}
           onClick={toggleMute}
+          disabled={isChangingMute}
           aria-label={isMuted ? "Unmute" : "Mute"}
-          title={isMuted ? "Click to unmute" : "Click to mute"}
+          title={isChangingMute ? "Changing..." : (isMuted ? "Click to unmute" : "Click to mute")}
         >
-          {isMuted ? '🔇' : '🔊'}
+          {isChangingMute ? '⏳' : (isMuted ? '🔇' : '🔊')}
         </button>
       )}
     </div>

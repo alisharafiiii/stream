@@ -103,6 +103,16 @@
   transform: scale(0.95);
 }
 
+.muteButton.changing {
+  opacity: 0.6;
+  animation: pulse 0.8s ease-in-out infinite;
+  cursor: wait;
+}
+
+.muteButton:disabled {
+  cursor: not-allowed;
+}
+
 /* Pulse animation when muted to draw attention */
 @keyframes pulse-mute {
   0% {
