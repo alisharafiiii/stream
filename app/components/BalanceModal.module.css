@@ -10,7 +10,7 @@
   justify-content: center;
   z-index: 3000; /* Much higher than all other elements */
   padding: 1rem;
-  padding-top: 15vh; /* Add top padding to position modal higher */
+  padding-top: 8vh; /* Position modal in upper portion of screen */
   animation: fadeIn 0.3s ease-in;
 }
 

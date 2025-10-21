@@ -265,7 +265,8 @@ export default function Home() {
           />
           <style jsx global>{`
             :root {
-              --footer-height: 72px; /* Height of collapsed footer */
+                     --footer-height: 72px; /* Height of collapsed footer */
+                     --betting-deck-height: 160px; /* Height of expanded betting deck */
             }
           `}</style>
         </>
@@ -273,7 +274,7 @@ export default function Home() {
       {!isBettingCollapsed && (
         <style jsx global>{`
           :root {
-            --footer-height: 0px;
+            --footer-height: var(--betting-deck-height, 160px); /* Use betting deck height when expanded */
           }
         `}</style>
       )}

@@ -39,7 +39,7 @@ export async function fetchBaseAppProfile(username: string): Promise<BaseAppProf
  * Extracts Base app profile data from authentication context
  * This should be called when users first authenticate through Base app
  */
-export function extractBaseAppProfile(context: any): BaseAppProfile | null {
+export function extractBaseAppProfile(context: unknown): BaseAppProfile | null {
   try {
     // The Base app context might have profile data in various formats
     // We need to check multiple possible locations
@@ -97,7 +97,7 @@ export function extractBaseAppProfile(context: any): BaseAppProfile | null {
 export async function storeBaseAppProfile(profile: BaseAppProfile): Promise<void> {
   try {
     // Store in Redis with a specific key pattern for Base app profiles
-    const { redis, REDIS_KEYS } = await import('./redis');
+    const { redis } = await import('./redis');
     
     const key = `base_app_profile:${profile.username}`;
     await redis.set(key, profile);

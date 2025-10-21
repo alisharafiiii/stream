@@ -1,6 +1,6 @@
 .overlay {
   position: fixed;
-  bottom: calc(90px + var(--footer-height, 0px)); /* Adjust for collapsed footer */
+  bottom: var(--footer-height, 0px); /* Start from the edge of the footer */
   left: 12px;
   width: 300px;
   max-width: calc(100vw - 100px); /* Leave space for FAB */
@@ -120,7 +120,7 @@
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .overlay {
-    bottom: calc(85px + var(--footer-height, 0px)); /* Adjust for collapsed footer on mobile */
+    bottom: var(--footer-height, 0px); /* Start from the edge of the footer on mobile */
     left: 8px;
     width: 260px;
     height: 40vh;
