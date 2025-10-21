@@ -58,7 +58,8 @@ export default function Home() {
   // Global function for balance updates from Base Pay
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      (window as any).updateUserBalance = (newBalance: number) => {
+      const windowWithBalance = window as Window & { updateUserBalance?: (balance: number) => void };
+      windowWithBalance.updateUserBalance = (newBalance: number) => {
         console.log('[Global] Updating user balance to:', newBalance);
         setUser(prev => {
           if (!prev) return null;

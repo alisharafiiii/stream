@@ -104,8 +104,9 @@ export default function BalanceModal({ user, onClose, onBalanceUpdate }: Balance
                   onBalanceUpdate(finalBalance);
                   
                   // Also update the parent component's user state
-                  if ((window as any).updateUserBalance) {
-                    (window as any).updateUserBalance(finalBalance);
+                  const windowWithBalance = window as Window & { updateUserBalance?: (balance: number) => void };
+                  if (windowWithBalance.updateUserBalance) {
+                    windowWithBalance.updateUserBalance(finalBalance);
                   }
                   
                   setShowDeposit(false);
