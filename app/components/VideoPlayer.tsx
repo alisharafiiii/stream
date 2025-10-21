@@ -264,7 +264,7 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
             playsInline
             controls={false}
             poster="/clicknpray-preview.png"
-            {...{'webkit-playsinline': 'true'} as any}
+            {...({'webkit-playsinline': 'true'} as React.VideoHTMLAttributes<HTMLVideoElement>)}
           >
             <source src="/splash.mp4" type="video/mp4" />
             <source src="/splash.mp4" type="video/webm" />
