@@ -76,11 +76,6 @@
   height: 100%;
 }
 
-.streamContainer.fullscreen .videoWrapper {
-  padding-bottom: 0 !important;
-  height: 100% !important;
-}
-
 @keyframes pulse {
   0%, 100% {
     opacity: 1;

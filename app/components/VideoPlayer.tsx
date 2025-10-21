@@ -228,16 +228,6 @@ export default function VideoPlayer({ streamUrl, title, isMuted: muteState, onMu
         ref={iframeRef}
         src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&showinfo=0&loop=1&enablejsapi=1&cc_load_policy=0&autohide=1&playerapiid=ytplayer&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`}
         className={styles.streamPlayer}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          objectFit: 'contain',
-          transform: 'none',
-          zoom: 1
-        }}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
         allowFullScreen
         title={title}
