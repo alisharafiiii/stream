@@ -73,7 +73,14 @@ export function useUniversalAuth() {
             fid: String(fid),
             username: context?.user?.username || `user${fid}`,
             displayName: context?.user?.displayName || context?.user?.username || `User ${fid}`,
-            profileImage: `https://api.dicebear.com/7.x/personas/png?seed=${fid}`,
+            // Check for profile image in context or result
+            profileImage: (context?.user as any)?.profileImage || 
+                         (context?.user as any)?.avatar || 
+                         (context?.user as any)?.pfpUrl ||
+                         (result as any)?.profileImage ||
+                         (result as any)?.avatar ||
+                         (result as any)?.pfpUrl ||
+                         `https://api.dicebear.com/7.x/personas/png?seed=${fid}`,
           };
           
           return authUser;
@@ -118,11 +125,16 @@ export function useUniversalAuth() {
   }, [isInBaseApp, signInMiniKit, signInBrowser]);
 
   // Convert context user to AuthUser type if available
+  // IMPORTANT: Check if context provides profile image from Base app
   const currentUser: AuthUser | null = context?.user ? {
     fid: String(context.user.fid),
     username: context.user.username || `user${context.user.fid}`,
     displayName: context.user.displayName || context.user.username || `User ${context.user.fid}`,
-    profileImage: `https://api.dicebear.com/7.x/personas/png?seed=${context.user.fid}`,
+    // Use profile image from context if available (Base app users have custom avatars)
+    profileImage: (context.user as any).profileImage || 
+                  (context.user as any).avatar || 
+                  (context.user as any).pfpUrl ||
+                  `https://api.dicebear.com/7.x/personas/png?seed=${context.user.fid}`,
   } : null;
 
   return {
