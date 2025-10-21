@@ -463,3 +463,27 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Mobile wallet hint */
+.mobileHint {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(153, 69, 255, 0.1);
+  border: 1px solid var(--accent-purple);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.mobileHint p {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.mobileHint ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.mobileHint li {
+  margin: 0.25rem 0;
+}
