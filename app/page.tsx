@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import dynamic from "next/dynamic";
 import styles from "./page.module.css";
-import "./android-fix.css"; // Android-specific fixes
 import VideoPlayer from "./components/VideoPlayer";
 import StreamOverlay from "./components/StreamOverlay";
 import BettingCard from "./components/BettingCard";

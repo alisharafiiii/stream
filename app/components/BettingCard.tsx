@@ -274,7 +274,7 @@ export default function BettingCard({ userId, userBalance, onBalanceUpdate, onTo
     <>
       {/* Floating toggle button removed - now in CollapsedFooter */}
       
-      <div className={`${styles.bettingCard} ${isCollapsed ? styles.collapsed : ''} bettingCard`}>
+      <div className={`${styles.bettingCard} ${isCollapsed ? styles.collapsed : ''}`}>
         <div className={styles.header}>
         <div className={styles.headerContent}>
           <h3 className={styles.question}>{session.question}</h3>

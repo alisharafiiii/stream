@@ -121,7 +121,7 @@ export default function StreamOverlay({ user, onBalanceUpdate, isLive = true }: 
   return (
     <>
       {/* Header Overlay */}
-      <div className={`${styles.overlay} ${styles.header} overlay`}>
+      <div className={`${styles.overlay} ${styles.header}`}>
         <div className={styles.streamInfo}>
       <div className={styles.live}>
         {isLive && <span className={styles.liveDot}></span>}
