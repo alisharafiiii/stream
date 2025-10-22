@@ -1,8 +1,8 @@
-# Mobile Admin Panel Fix 📱
+# Mobile Admin Panel CSS Fix 📱
 
 ## Issues Fixed
 
-The admin panel was not loading properly in mobile wallet browsers. This has been fixed with comprehensive mobile optimizations.
+The admin panel had CSS and scrolling issues on mobile devices.
 
 ## 1. ✅ Added Missing CSS Classes
 **Problem**: Admin page was using `pageStyles.container` and `pageStyles.unauthorized` that didn't exist
@@ -20,13 +20,8 @@ The admin panel was not loading properly in mobile wallet browsers. This has bee
 - Made tabs scrollable on mobile
 - Reduced padding and font sizes for mobile
 
-## 3. ✅ Improved Wallet Detection
-**Problem**: Wallet connection failing in mobile wallet browsers
-**Solution**:
-- Added better wallet browser detection (MetaMask, Coinbase, Trust, ImToken)
-- Added debug logging for wallet connection issues
-- Improved error messages for mobile users
-- Better handling of wallet browser environments
+## 3. ✅ Note About Wallet Browser Issues
+**Important**: If admin buttons (Left Wins, Right Wins, Delete Session) don't work in wallet browsers, see `ADMIN_WALLET_BROWSER_FIX_FINAL.md` for the actual solution. It's not a mobile CSS issue but an API security validation issue.
 
 ## 4. ✅ Mobile-Specific Fixes
 - Fixed button sizes and spacing for touch targets

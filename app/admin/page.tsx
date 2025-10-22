@@ -460,27 +460,23 @@ export default function AdminPage() {
   };
 
   const resolveSession = async (winner: 'left' | 'right') => {
-    // Create error display div
-    const errorDiv = document.createElement('div');
-    errorDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:white;padding:20px;z-index:99999;font-size:16px;';
-    errorDiv.textContent = `CLICKED: ${winner} wins - Starting...`;
-    document.body.appendChild(errorDiv);
-    
-    try {
-      if (!bettingSession || bettingSession.status === 'resolved') {
-        errorDiv.textContent = 'ERROR: No session or already resolved';
-        return;
-      }
+    if (!bettingSession || bettingSession.status === 'resolved') return;
 
-      // Skip confirm for now to test
-      errorDiv.textContent = `Processing ${winner} wins...`;
-      
-      setResolvingSession(true);
-      console.log('Resolving session:', { sessionId: bettingSession.id, winner, walletAddress: address });
+    // Use try-catch for confirm in case it's blocked in wallet browser
+    let confirmed = false;
+    try {
+      confirmed = confirm(`Are you sure you want to declare ${winner.toUpperCase()} as the winner? This will process all payouts.`);
+    } catch {
+      // If confirm is blocked, proceed with a console warning
+      console.warn('Confirm dialog blocked, proceeding with action');
+      confirmed = true;
+    }
+    if (!confirmed) return;
+
+    setResolvingSession(true);
+    console.log('Resolving session:', { sessionId: bettingSession.id, winner, walletAddress: address });
     
     try {
-      errorDiv.textContent = `Calling API for ${winner}...`;
-      
       const response = await fetch('/api/betting/resolve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -491,7 +487,6 @@ export default function AdminPage() {
         }),
       });
       
-      errorDiv.textContent = `API Response: ${response.status} ${response.statusText}`;
       console.log('Resolve response status:', response.status);
 
       if (response.ok) {
@@ -523,17 +518,13 @@ export default function AdminPage() {
       }
     } catch (error) {
       console.error('Failed to resolve session:', error);
-      errorDiv.textContent = `ERROR: ${error instanceof Error ? error.message : String(error)}`;
-      errorDiv.style.background = 'darkred';
-      // Keep error visible
+      try {
+        alert('Failed to resolve session');
+      } catch {
+        console.warn('Alert blocked');
+      }
     } finally {
       setResolvingSession(false);
-      // Remove error div after 5 seconds
-      setTimeout(() => errorDiv.remove(), 5000);
-    }
-    } catch (outerError) {
-      errorDiv.textContent = `OUTER ERROR: ${outerError instanceof Error ? outerError.message : String(outerError)}`;
-      errorDiv.style.background = 'purple';
     }
   };
 
@@ -826,17 +817,10 @@ export default function AdminPage() {
                   <>
                     <button
                       type="button"
-                      onClick={() => {
-                        const div = document.createElement('div');
-                        div.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:yellow;color:black;padding:10px;z-index:99999;';
-                        div.textContent = 'LEFT BUTTON CLICKED!';
-                        document.body.appendChild(div);
-                        setTimeout(() => div.remove(), 2000);
-                        resolveSession('left');
-                      }}
+                      onClick={() => resolveSession('left')}
                       disabled={resolvingSession}
                       className={`${styles.button} ${styles.primary}`}
-                      style={{ backgroundColor: '#ef4444', marginBottom: '0.5rem', position: 'relative', zIndex: 9999 }}
+                      style={{ backgroundColor: '#ef4444', marginBottom: '0.5rem' }}
                     >
                       {resolvingSession ? 'Processing...' : '👈 Left Wins'}
                     </button>
