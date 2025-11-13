@@ -41,7 +41,6 @@ export default function V2Page() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [userBalance, setUserBalance] = useState(0);
   const [showPlayButton, setShowPlayButton] = useState(true);
-  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const commentsRef = useRef<HTMLDivElement>(null);
 
@@ -93,19 +92,21 @@ export default function V2Page() {
 
   const videoId = getVideoId(streamUrl);
 
-  // Get embed URL - only called after user clicks play
+  // Get embed URL
   const getEmbedUrl = () => {
     if (!videoId) return '';
     
-    // Load with autoplay and current mute state
+    // Show controls initially so users can click YouTube's play button
     return `https://www.youtube.com/embed/${videoId}?` +
-      'autoplay=1&' +
-      `mute=${isMuted ? 1 : 0}&` +
-      'controls=0&' +
+      'autoplay=0&' + // No autoplay, user must click
+      'mute=0&' + // Start unmuted
+      `controls=${showPlayButton ? 1 : 0}&` + // Show controls until playing
       'modestbranding=1&' +
       'rel=0&' +
       'showinfo=0&' +
-      'playsinline=1';
+      'playsinline=1&' +
+      'enablejsapi=1&' +
+      'origin=' + (typeof window !== 'undefined' ? encodeURIComponent(window.location.origin) : '');
   };
 
   // Load stream config and betting round
@@ -140,23 +141,57 @@ export default function V2Page() {
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
-    // Only reload iframe if video is already loaded
-    if (isVideoLoaded && iframeRef.current) {
-      const currentSrc = iframeRef.current.src;
-      const newSrc = currentSrc.replace(/mute=\d/, `mute=${!isMuted ? 1 : 0}`);
-      if (newSrc !== currentSrc) {
-        iframeRef.current.src = newSrc;
-      }
+    // Use postMessage to control mute without reloading
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      const message = {
+        event: 'command',
+        func: isMuted ? 'unMute' : 'mute',
+        args: []
+      };
+      iframeRef.current.contentWindow.postMessage(JSON.stringify(message), 'https://www.youtube.com');
     }
   };
 
-  const handlePlayClick = () => {
-    console.log('Play button clicked - loading video');
-    // Load the video and hide the button
-    setIsVideoLoaded(true);
-    setShowPlayButton(false);
-    setIsMuted(false);
-  };
+  // Listen for YouTube player state changes
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Only accept messages from YouTube
+      if (event.origin !== 'https://www.youtube.com') return;
+      
+      try {
+        const data = JSON.parse(event.data);
+        // Check if video started playing
+        if (data.event === 'onStateChange' && data.info === 1) {
+          console.log('Video started playing, hiding controls');
+          setShowPlayButton(false);
+          // Reload iframe to hide controls
+          if (iframeRef.current) {
+            const currentSrc = iframeRef.current.src;
+            const newSrc = currentSrc.replace('controls=1', 'controls=0');
+            if (newSrc !== currentSrc) {
+              iframeRef.current.src = newSrc;
+            }
+          }
+        }
+      } catch {
+        // Not a YouTube message, ignore
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  // Fallback: hide purple button after 10 seconds
+  useEffect(() => {
+    if (showPlayButton) {
+      const timer = setTimeout(() => {
+        console.log('Auto-hiding purple button after timeout');
+        setShowPlayButton(false);
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [showPlayButton]);
 
 
   // Get button height based on number of options (to keep footer same size)
@@ -178,11 +213,18 @@ export default function V2Page() {
 
   return (
     <div style={{ 
-      position: 'relative',
+      position: 'fixed',
+      top: 0,
+      left: 0,
       height: '100vh',
       width: '100vw',
       backgroundColor: '#000',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      touchAction: 'none', // Prevent touch scrolling
+      userSelect: 'none', // Prevent text selection
+      WebkitUserSelect: 'none',
+      WebkitTouchCallout: 'none',
+      WebkitOverflowScrolling: 'touch'
     }}>
       {/* FULL SCREEN Stream */}
       <div style={{ 
@@ -201,40 +243,19 @@ export default function V2Page() {
           position: 'relative',
           backgroundColor: '#000'
         }}>
-          {/* Only load iframe after user clicks play */}
-          {isVideoLoaded ? (
-            <>
-              <iframe
-                ref={iframeRef}
-                src={getEmbedUrl()}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  border: 'none'
-                }}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-              
-              {/* Invisible overlay to block user interaction after video loads */}
-              <div style={{
-                position: 'absolute',
-                inset: 0,
-                pointerEvents: 'auto',
-                zIndex: 1
-              }} />
-            </>
-          ) : (
-            // Show YouTube thumbnail as placeholder
-            <div style={{
+          {/* YouTube iframe with controls visible until play starts */}
+          <iframe
+            ref={iframeRef}
+            key={`player-${showPlayButton ? 'with-controls' : 'no-controls'}`}
+            src={getEmbedUrl()}
+            style={{
               width: '100%',
               height: '100%',
-              backgroundImage: videoId ? `url(https://img.youtube.com/vi/${videoId}/maxresdefault.jpg)` : 'none',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundColor: '#000'
-            }} />
-          )}
+              border: 'none'
+            }}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
         </div>
       </div>
 
@@ -421,56 +442,37 @@ export default function V2Page() {
         </div>
       </div>
 
-      {/* Purple Play Button Overlay - Visual indicator, clicks pass through */}
+      {/* Purple Play Button - Visual overlay only, clicks pass through */}
       {showPlayButton && (
         <div
           style={{
             position: 'absolute',
-            inset: 0,
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '90px',
+            height: '90px',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(139, 92, 246, 0.8)',
+            border: '4px solid rgba(255, 255, 255, 0.9)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            boxShadow: '0 4px 20px rgba(139, 92, 246, 0.6), 0 0 40px rgba(139, 92, 246, 0.4)',
+            animation: 'playPulse 2s ease-in-out infinite',
             zIndex: 30,
-            pointerEvents: 'none', // Allow clicks to pass through to iframe
-            backgroundColor: 'rgba(0, 0, 0, 0.2)'
+            pointerEvents: 'none', // CRITICAL: Clicks pass through to YouTube
           }}
         >
-          <button
-            onClick={handlePlayClick}
-            style={{
-              width: '80px',
-              height: '80px',
-              borderRadius: '50%',
-              backgroundColor: '#8b5cf6',
-              border: '4px solid #fff',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 20px rgba(139, 92, 246, 0.6), 0 0 40px rgba(139, 92, 246, 0.4)',
-              transition: 'all 0.3s',
-              animation: 'playPulse 2s ease-in-out infinite',
-              pointerEvents: 'auto' // Button itself is clickable
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.1)';
-              e.currentTarget.style.boxShadow = '0 4px 24px rgba(139, 92, 246, 0.8), 0 0 60px rgba(139, 92, 246, 0.6)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = '0 4px 20px rgba(139, 92, 246, 0.6), 0 0 40px rgba(139, 92, 246, 0.4)';
-            }}
-          >
-            {/* Play triangle */}
-            <div style={{
-              width: 0,
-              height: 0,
-              borderLeft: '24px solid #fff',
-              borderTop: '16px solid transparent',
-              borderBottom: '16px solid transparent',
-              marginLeft: '6px'
-            }} />
-          </button>
+          {/* Play triangle */}
+          <div style={{
+            width: 0,
+            height: 0,
+            borderLeft: '26px solid rgba(255, 255, 255, 0.9)',
+            borderTop: '18px solid transparent',
+            borderBottom: '18px solid transparent',
+            marginLeft: '6px'
+          }} />
         </div>
       )}
 
@@ -1188,27 +1190,26 @@ export default function V2Page() {
         </div>
       )}
 
-      {/* Comments Overlay - Positioned based on footer height */}
+      {/* Comments Overlay - Fixed position */}
       <div
         ref={commentsRef}
         className="comments-overlay"
         style={{
           position: 'fixed',
-          bottom: isDashboardOpen ? (selectedOption !== null ? '220px' : '170px') : '80px',
+          bottom: '180px', // Fixed position above dashboard
           left: '12px',
           width: '280px',
           maxWidth: 'calc(100vw - 100px)',
-          maxHeight: '400px',
+          maxHeight: '35vh',
           pointerEvents: 'none',
           zIndex: 15,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-end',
           gap: '6px',
-          overflowY: 'auto',
+          overflowY: 'hidden',
           overflowX: 'hidden',
-          paddingBottom: '10px',
-          transition: 'bottom 0.3s ease'
+          paddingBottom: '10px'
         }}
       >
         {comments.slice(-5).map((comment, index, arr) => (
@@ -1315,14 +1316,14 @@ export default function V2Page() {
         <div style={{
           position: 'fixed',
           right: '16px',
-          bottom: isDashboardOpen ? (selectedOption !== null ? '220px' : '170px') : '80px',
+          bottom: '50%', // Position higher on screen
+          transform: 'translateY(50%)',
           width: '260px',
           backgroundColor: '#111',
           border: '2px solid #8b5cf6',
           borderRadius: '8px',
           zIndex: 25,
           boxShadow: '0 0 16px rgba(139, 92, 246, 0.4)',
-          transition: 'bottom 0.3s ease',
           animation: 'slideUp 0.3s ease-out',
           pointerEvents: 'auto',
           padding: '8px'
