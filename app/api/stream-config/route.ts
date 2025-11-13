@@ -6,6 +6,7 @@ interface StreamConfig {
   streamUrl: string;
   isLive: boolean;
   title: string;
+  gameModeEnabled?: boolean;
   updatedAt?: string;
 }
 
@@ -23,7 +24,8 @@ export async function GET() {
     const defaultConfig: StreamConfig = {
       streamUrl: process.env.DEFAULT_STREAM_URL || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       isLive: process.env.DEFAULT_STREAM_LIVE === 'true' || false,
-      title: process.env.DEFAULT_STREAM_TITLE || 'Live Stream'
+      title: process.env.DEFAULT_STREAM_TITLE || 'Live Stream',
+      gameModeEnabled: false // Game mode disabled by default
     };
     
     // Save defaults to Redis for next time
@@ -48,7 +50,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { streamUrl, isLive, title, walletAddress } = body;
+    const { streamUrl, isLive, title, gameModeEnabled, walletAddress } = body;
 
     console.log('[API] Updating stream config:', { streamUrl, isLive, title });
 
@@ -63,6 +65,7 @@ export async function POST(request: NextRequest) {
       streamUrl: streamUrl || '',
       isLive: Boolean(isLive),
       title: title || 'Live Stream',
+      gameModeEnabled: Boolean(gameModeEnabled),
       updatedAt: new Date().toISOString()
     };
 

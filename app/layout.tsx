@@ -5,6 +5,9 @@ import { minikitConfig } from "@/minikit.config";
 import { RootProvider } from "./rootProvider";
 import "./globals.css";
 
+// Initialize game loop on server start
+// import './game-init'; // Disabled for V2
+
 export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = "https://stream-production-7739.up.railway.app";
 

@@ -36,6 +36,11 @@ export class BettingService {
     return await redis.get<BettingSession>(REDIS_KEYS.BETTING_SESSION(sessionId))
   }
 
+  // Get a specific betting session by ID
+  static async getSession(sessionId: string): Promise<BettingSession | null> {
+    return await redis.get<BettingSession>(REDIS_KEYS.BETTING_SESSION(sessionId))
+  }
+
   // Place a bet (supports multiple bets per user)
   static async placeBet(
     sessionId: string, 
@@ -193,8 +198,9 @@ export class BettingService {
     const losingPool = winner === 'left' ? session.rightPool : session.leftPool
     const serviceFee = losingPool + (totalPayouts * (session.serviceFeePercent / (100 - session.serviceFeePercent)))
 
-    // Save resolved session
-    await redis.set(REDIS_KEYS.BETTING_SESSION(sessionId), session)
+    // Save resolved session with payouts
+    const resolvedSession = { ...session, resolvedPayouts: payouts };
+    await redis.set(REDIS_KEYS.BETTING_SESSION(sessionId), resolvedSession)
     
     // Add to history
     await redis.lpush(REDIS_KEYS.BETTING_HISTORY(), sessionId)

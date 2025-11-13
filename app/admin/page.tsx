@@ -11,6 +11,7 @@ interface StreamConfig {
   streamUrl: string;
   isLive: boolean;
   title: string;
+  gameModeEnabled?: boolean;
 }
 
 interface BettingSession {
@@ -55,7 +56,8 @@ export default function AdminPage() {
   const [streamConfig, setStreamConfig] = useState<StreamConfig>({
     streamUrl: '',
     isLive: false,
-    title: 'Live Stream'
+    title: 'Live Stream',
+    gameModeEnabled: false
   });
   const [loading, setLoading] = useState(false); // Don't load until wallet connected
   const [saving, setSaving] = useState(false);
@@ -675,11 +677,25 @@ export default function AdminPage() {
                 value={streamConfig.streamUrl}
                 onChange={(e) => setStreamConfig(prev => ({ ...prev, streamUrl: e.target.value }))}
                 className={styles.input}
-                placeholder="Paste any YouTube or Twitch link"
-                required
+                placeholder="Paste any YouTube or Twitch link (optional)"
               />
               <small style={{ color: '#10b981', fontSize: '0.75rem', display: 'block', marginTop: '0.25rem' }}>
                 ✓ YouTube URLs are automatically converted to embed format
+              </small>
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={streamConfig.gameModeEnabled || false}
+                  onChange={(e) => setStreamConfig(prev => ({ ...prev, gameModeEnabled: e.target.checked }))}
+                  style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                />
+                <span>🩸 Enable Horror Deathmatch Game (when offline)</span>
+              </label>
+              <small style={{ color: '#8B0000', fontSize: '0.75rem', display: 'block', marginTop: '0.25rem', marginLeft: '28px' }}>
+                When stream is offline, users can watch and bet on automated character battles
               </small>
             </div>
 

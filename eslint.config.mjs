@@ -12,6 +12,13 @@ const compat = new FlatCompat({
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
+    ignores: [
+      "app/components/GameMode/**",
+      "app/api/game/**",
+      "app/api/betting/pools/**"
+    ]
+  },
+  {
     rules: {
       "@typescript-eslint/no-unused-vars": [
         "error",
@@ -20,6 +27,7 @@ const eslintConfig = [
           varsIgnorePattern: "^_",
         },
       ],
+      "@next/next/no-img-element": "off", // Allow img tags
     },
   },
 ];

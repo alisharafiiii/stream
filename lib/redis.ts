@@ -25,6 +25,10 @@ export const REDIS_KEYS = {
   
   // Stream configuration
   STREAM_CONFIG: () => 'stream:config',
+  
+  // Game mode configuration
+  GAME_CONFIG: () => 'game:config',
+  GAME_STATS_DAILY: () => 'game:stats:daily',
 }
 
 // Types

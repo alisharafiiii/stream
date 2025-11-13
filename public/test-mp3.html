@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test MP3 Sounds</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        button {
+            display: block;
+            margin: 10px 0;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Test MP3 Sound Files</h1>
+    <p>Click the buttons below to test if your sound files are working:</p>
+    
+    <button onclick="playSound('damage')">Test damage.mp3</button>
+    <button onclick="playSound('buzzsaw')">Test buzzsaw.mp3</button>
+    <button onclick="playSound('2buzzsaw')">Test 2buzzsaw.mp3</button>
+    <button onclick="playSound('health')">Test health.mp3</button>
+    <button onclick="playSound('speed')">Test speed.mp3</button>
+    <button onclick="playSound('dead')">Test dead.mp3</button>
+    <button onclick="playSound('leftplayer')">Test leftplayer.mp3</button>
+    <button onclick="playSound('rightplayer')">Test rightplayer.mp3</button>
+    <button onclick="playSound('hit')">Test hit.mp3</button>
+    
+    <div id="status" class="status"></div>
+    
+    <script>
+        function updateStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.innerHTML = message;
+            status.className = 'status ' + (isError ? 'error' : 'success');
+        }
+        
+        function playSound(soundName) {
+            const audio = new Audio(`/sounds/${soundName}.mp3`);
+            
+            audio.addEventListener('loadeddata', () => {
+                updateStatus(`✓ ${soundName}.mp3 loaded successfully!`);
+            });
+            
+            audio.addEventListener('error', (e) => {
+                updateStatus(`✗ Error loading ${soundName}.mp3 - Make sure file exists in /public/sounds/`, true);
+                console.error('Audio error:', e);
+            });
+            
+            audio.play()
+                .then(() => {
+                    updateStatus(`✓ Playing ${soundName}.mp3`);
+                })
+                .catch((e) => {
+                    updateStatus(`✗ Failed to play ${soundName}.mp3: ${e.message}`, true);
+                });
+        }
+        
+        // Test if sounds folder exists
+        fetch('/sounds/damage.mp3', { method: 'HEAD' })
+            .then(response => {
+                if (response.ok) {
+                    updateStatus('✓ /public/sounds/ folder is accessible');
+                } else {
+                    updateStatus('✗ Cannot access /public/sounds/ folder or damage.mp3 is missing', true);
+                }
+            })
+            .catch(() => {
+                updateStatus('✗ Cannot access /public/sounds/ folder', true);
+            });
+    </script>
+</body>
+</html>
