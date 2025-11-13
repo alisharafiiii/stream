@@ -40,7 +40,6 @@ export default function V2Page() {
   const [chatMessage, setChatMessage] = useState('');
   const [comments, setComments] = useState<Comment[]>([]);
   const [userBalance, setUserBalance] = useState(0);
-  const [showPlayButton, setShowPlayButton] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const commentsRef = useRef<HTMLDivElement>(null);
 
@@ -96,11 +95,11 @@ export default function V2Page() {
   const getEmbedUrl = () => {
     if (!videoId) return '';
     
-    // Show controls initially so users can click YouTube's play button
+    // Show controls so users can click YouTube's play button
     return `https://www.youtube.com/embed/${videoId}?` +
       'autoplay=0&' + // No autoplay, user must click
       'mute=0&' + // Start unmuted
-      `controls=${showPlayButton ? 1 : 0}&` + // Show controls until playing
+      'controls=1&' + // Always show controls
       'modestbranding=1&' +
       'rel=0&' +
       'showinfo=0&' +
@@ -152,46 +151,6 @@ export default function V2Page() {
     }
   };
 
-  // Listen for YouTube player state changes
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      // Only accept messages from YouTube
-      if (event.origin !== 'https://www.youtube.com') return;
-      
-      try {
-        const data = JSON.parse(event.data);
-        // Check if video started playing
-        if (data.event === 'onStateChange' && data.info === 1) {
-          console.log('Video started playing, hiding controls');
-          setShowPlayButton(false);
-          // Reload iframe to hide controls
-          if (iframeRef.current) {
-            const currentSrc = iframeRef.current.src;
-            const newSrc = currentSrc.replace('controls=1', 'controls=0');
-            if (newSrc !== currentSrc) {
-              iframeRef.current.src = newSrc;
-            }
-          }
-        }
-      } catch {
-        // Not a YouTube message, ignore
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
-
-  // Fallback: hide purple button after 10 seconds
-  useEffect(() => {
-    if (showPlayButton) {
-      const timer = setTimeout(() => {
-        console.log('Auto-hiding purple button after timeout');
-        setShowPlayButton(false);
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [showPlayButton]);
 
 
   // Get button height based on number of options (to keep footer same size)
@@ -243,10 +202,9 @@ export default function V2Page() {
           position: 'relative',
           backgroundColor: '#000'
         }}>
-          {/* YouTube iframe with controls visible until play starts */}
+          {/* YouTube iframe with controls always visible */}
           <iframe
             ref={iframeRef}
-            key={`player-${showPlayButton ? 'with-controls' : 'no-controls'}`}
             src={getEmbedUrl()}
             style={{
               width: '100%',
@@ -442,39 +400,6 @@ export default function V2Page() {
         </div>
       </div>
 
-      {/* Purple Play Button - Visual overlay only, clicks pass through */}
-      {showPlayButton && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '90px',
-            height: '90px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(139, 92, 246, 0.8)',
-            border: '4px solid rgba(255, 255, 255, 0.9)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 20px rgba(139, 92, 246, 0.6), 0 0 40px rgba(139, 92, 246, 0.4)',
-            animation: 'playPulse 2s ease-in-out infinite',
-            zIndex: 30,
-            pointerEvents: 'none', // CRITICAL: Clicks pass through to YouTube
-          }}
-        >
-          {/* Play triangle */}
-          <div style={{
-            width: 0,
-            height: 0,
-            borderLeft: '26px solid rgba(255, 255, 255, 0.9)',
-            borderTop: '18px solid transparent',
-            borderBottom: '18px solid transparent',
-            marginLeft: '6px'
-          }} />
-        </div>
-      )}
 
       {/* BOTTOM OVERLAY - Betting Dashboard */}
       <div style={{
@@ -1190,13 +1115,13 @@ export default function V2Page() {
         </div>
       )}
 
-      {/* Comments Overlay - Fixed position */}
+      {/* Comments Overlay - Moves with betting dashboard */}
       <div
         ref={commentsRef}
         className="comments-overlay"
         style={{
           position: 'fixed',
-          bottom: '180px', // Fixed position above dashboard
+          bottom: isDashboardOpen ? (selectedOption !== null ? '220px' : '170px') : '80px',
           left: '12px',
           width: '280px',
           maxWidth: 'calc(100vw - 100px)',
@@ -1209,7 +1134,8 @@ export default function V2Page() {
           gap: '6px',
           overflowY: 'hidden',
           overflowX: 'hidden',
-          paddingBottom: '10px'
+          paddingBottom: '10px',
+          transition: 'bottom 0.3s ease'
         }}
       >
         {comments.slice(-5).map((comment, index, arr) => (
@@ -1460,16 +1386,6 @@ export default function V2Page() {
           }
           50% {
             transform: scale(1.05);
-          }
-        }
-        @keyframes playPulse {
-          0%, 100% {
-            transform: scale(1);
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.6), 0 0 40px rgba(139, 92, 246, 0.4);
-          }
-          50% {
-            transform: scale(1.05);
-            box-shadow: 0 4px 24px rgba(139, 92, 246, 0.8), 0 0 60px rgba(139, 92, 246, 0.6);
           }
         }
       `}</style>
