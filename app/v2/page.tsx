@@ -13,31 +13,6 @@ interface BettingRound {
   options: BettingOption[];
 }
 
-// YouTube IFrame API types
-interface YTPlayer {
-  mute(): void;
-  unMute(): void;
-  playVideo(): void;
-}
-
-interface YTPlayerOptions {
-  videoId: string;
-  playerVars: Record<string, number | string>;
-}
-
-interface YTPlayerConstructor {
-  new (elementId: string, config: YTPlayerOptions): YTPlayer;
-}
-
-declare global {
-  interface Window {
-    YT: {
-      Player: YTPlayerConstructor;
-    };
-    onYouTubeIframeAPIReady: () => void;
-  }
-}
-
 interface Comment {
   id: number;
   username: string;
@@ -66,7 +41,8 @@ export default function V2Page() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [userBalance, setUserBalance] = useState(0);
   const [showPlayButton, setShowPlayButton] = useState(true);
-  const playerRef = useRef<YTPlayer | null>(null);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const commentsRef = useRef<HTMLDivElement>(null);
 
   const handleConnect = async () => {
@@ -117,6 +93,21 @@ export default function V2Page() {
 
   const videoId = getVideoId(streamUrl);
 
+  // Get embed URL - only called after user clicks play
+  const getEmbedUrl = () => {
+    if (!videoId) return '';
+    
+    // Load with autoplay and current mute state
+    return `https://www.youtube.com/embed/${videoId}?` +
+      'autoplay=1&' +
+      `mute=${isMuted ? 1 : 0}&` +
+      'controls=0&' +
+      'modestbranding=1&' +
+      'rel=0&' +
+      'showinfo=0&' +
+      'playsinline=1';
+  };
+
   // Load stream config and betting round
   useEffect(() => {
     const loadConfig = async () => {
@@ -147,51 +138,26 @@ export default function V2Page() {
     return () => clearInterval(interval);
   }, []);
 
-  // Load YouTube IFrame API
-  useEffect(() => {
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-    window.onYouTubeIframeAPIReady = () => {
-      playerRef.current = new window.YT.Player('youtube-player', {
-        videoId: videoId,
-        playerVars: {
-          autoplay: 1,
-          mute: 1,
-          controls: 0,
-          modestbranding: 1,
-          rel: 0,
-          showinfo: 0,
-          fs: 0,
-          disablekb: 1,
-          iv_load_policy: 3,
-          playsinline: 1
-        }
-      });
-    };
-  }, [videoId]);
-
   const toggleMute = () => {
-    if (playerRef.current) {
-      if (isMuted) {
-        playerRef.current.unMute();
-      } else {
-        playerRef.current.mute();
+    setIsMuted(!isMuted);
+    // Only reload iframe if video is already loaded
+    if (isVideoLoaded && iframeRef.current) {
+      const currentSrc = iframeRef.current.src;
+      const newSrc = currentSrc.replace(/mute=\d/, `mute=${!isMuted ? 1 : 0}`);
+      if (newSrc !== currentSrc) {
+        iframeRef.current.src = newSrc;
       }
-      setIsMuted(!isMuted);
     }
   };
 
   const handlePlayClick = () => {
-    if (playerRef.current) {
-      playerRef.current.playVideo();
-      playerRef.current.unMute();
-      setIsMuted(false);
-      setShowPlayButton(false);
-    }
+    console.log('Play button clicked - loading video');
+    // Load the video and hide the button
+    setIsVideoLoaded(true);
+    setShowPlayButton(false);
+    setIsMuted(false);
   };
+
 
   // Get button height based on number of options (to keep footer same size)
   const getButtonHeight = (count: number) => {
@@ -232,22 +198,43 @@ export default function V2Page() {
           height: '100%',
           maxWidth: 'min(100vw, calc(100vh * 9 / 16))',
           maxHeight: 'calc(100vw * 16 / 9)',
-          position: 'relative'
+          position: 'relative',
+          backgroundColor: '#000'
         }}>
-          <div
-            id="youtube-player"
-            style={{
+          {/* Only load iframe after user clicks play */}
+          {isVideoLoaded ? (
+            <>
+              <iframe
+                ref={iframeRef}
+                src={getEmbedUrl()}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none'
+                }}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+              
+              {/* Invisible overlay to block user interaction after video loads */}
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                pointerEvents: 'auto',
+                zIndex: 1
+              }} />
+            </>
+          ) : (
+            // Show YouTube thumbnail as placeholder
+            <div style={{
               width: '100%',
-              height: '100%'
-            }}
-          />
-          
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            pointerEvents: 'auto',
-            zIndex: 1
-          }} />
+              height: '100%',
+              backgroundImage: videoId ? `url(https://img.youtube.com/vi/${videoId}/maxresdefault.jpg)` : 'none',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: '#000'
+            }} />
+          )}
         </div>
       </div>
 
@@ -434,7 +421,7 @@ export default function V2Page() {
         </div>
       </div>
 
-      {/* Purple Play Button Overlay */}
+      {/* Purple Play Button Overlay - Visual indicator, clicks pass through */}
       {showPlayButton && (
         <div
           style={{
@@ -444,8 +431,8 @@ export default function V2Page() {
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 30,
-            pointerEvents: 'auto',
-            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+            pointerEvents: 'none', // Allow clicks to pass through to iframe
+            backgroundColor: 'rgba(0, 0, 0, 0.2)'
           }}
         >
           <button
@@ -462,7 +449,8 @@ export default function V2Page() {
               justifyContent: 'center',
               boxShadow: '0 4px 20px rgba(139, 92, 246, 0.6), 0 0 40px rgba(139, 92, 246, 0.4)',
               transition: 'all 0.3s',
-              animation: 'playPulse 2s ease-in-out infinite'
+              animation: 'playPulse 2s ease-in-out infinite',
+              pointerEvents: 'auto' // Button itself is clickable
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'scale(1.1)';
