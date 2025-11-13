@@ -15,6 +15,12 @@
 
 ### **1. STREAM VIEWER**
 - ✅ Auto-playing vertical YouTube stream (starts muted)
+- ✅ **Purple play button overlay** (for Base app where autoplay blocked)
+  - Centered on screen with semi-transparent backdrop
+  - 80px circle with white play triangle
+  - Purple glow effect and pulse animation
+  - Starts stream unmuted when clicked
+  - Automatically hides after playback starts
 - ✅ Click N Pray logo (96px, centered in header)
 - ✅ LIVE indicator (top left, red pulsing or grey)
 - ✅ Mute button (top left, below LIVE)

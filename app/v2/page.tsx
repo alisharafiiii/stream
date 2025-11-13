@@ -17,6 +17,7 @@ interface BettingRound {
 interface YTPlayer {
   mute(): void;
   unMute(): void;
+  playVideo(): void;
 }
 
 interface YTPlayerOptions {
@@ -64,6 +65,7 @@ export default function V2Page() {
   const [chatMessage, setChatMessage] = useState('');
   const [comments, setComments] = useState<Comment[]>([]);
   const [userBalance, setUserBalance] = useState(0);
+  const [showPlayButton, setShowPlayButton] = useState(true);
   const playerRef = useRef<YTPlayer | null>(null);
   const commentsRef = useRef<HTMLDivElement>(null);
 
@@ -179,6 +181,15 @@ export default function V2Page() {
         playerRef.current.mute();
       }
       setIsMuted(!isMuted);
+    }
+  };
+
+  const handlePlayClick = () => {
+    if (playerRef.current) {
+      playerRef.current.playVideo();
+      playerRef.current.unMute();
+      setIsMuted(false);
+      setShowPlayButton(false);
     }
   };
 
@@ -422,6 +433,58 @@ export default function V2Page() {
           </div>
         </div>
       </div>
+
+      {/* Purple Play Button Overlay */}
+      {showPlayButton && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 30,
+            pointerEvents: 'auto',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          }}
+        >
+          <button
+            onClick={handlePlayClick}
+            style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              backgroundColor: '#8b5cf6',
+              border: '4px solid #fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 20px rgba(139, 92, 246, 0.6), 0 0 40px rgba(139, 92, 246, 0.4)',
+              transition: 'all 0.3s',
+              animation: 'playPulse 2s ease-in-out infinite'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.1)';
+              e.currentTarget.style.boxShadow = '0 4px 24px rgba(139, 92, 246, 0.8), 0 0 60px rgba(139, 92, 246, 0.6)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = '0 4px 20px rgba(139, 92, 246, 0.6), 0 0 40px rgba(139, 92, 246, 0.4)';
+            }}
+          >
+            {/* Play triangle */}
+            <div style={{
+              width: 0,
+              height: 0,
+              borderLeft: '24px solid #fff',
+              borderTop: '16px solid transparent',
+              borderBottom: '16px solid transparent',
+              marginLeft: '6px'
+            }} />
+          </button>
+        </div>
+      )}
 
       {/* BOTTOM OVERLAY - Betting Dashboard */}
       <div style={{
@@ -1408,6 +1471,16 @@ export default function V2Page() {
           }
           50% {
             transform: scale(1.05);
+          }
+        }
+        @keyframes playPulse {
+          0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.6), 0 0 40px rgba(139, 92, 246, 0.4);
+          }
+          50% {
+            transform: scale(1.05);
+            box-shadow: 0 4px 24px rgba(139, 92, 246, 0.8), 0 0 60px rgba(139, 92, 246, 0.6);
           }
         }
       `}</style>
