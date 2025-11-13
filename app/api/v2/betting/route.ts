@@ -6,11 +6,13 @@ const BETTING_KEY = 'v2:betting:round';
 interface BettingOption {
   name: string;
   color: string;
+  multiplier: number;
 }
 
 interface BettingRound {
   question: string;
   options: BettingOption[];
+  isBettingOpen: boolean;
   updatedAt: number;
 }
 
@@ -24,9 +26,10 @@ export async function GET() {
       return NextResponse.json({
         question: 'WHO WILL WIN?',
         options: [
-          { name: 'OPTION 1', color: '#FF0000' },
-          { name: 'OPTION 2', color: '#0000FF' }
+          { name: 'OPTION 1', color: '#FF0000', multiplier: 2 },
+          { name: 'OPTION 2', color: '#0000FF', multiplier: 2 }
         ],
+        isBettingOpen: true,
         updatedAt: Date.now(),
       });
     }
@@ -45,7 +48,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { question, options } = body;
+    const { question, options, isBettingOpen } = body;
 
     if (!question || !options || !Array.isArray(options)) {
       return NextResponse.json(
@@ -58,8 +61,10 @@ export async function POST(request: Request) {
       question: question.toUpperCase(),
       options: options.map(opt => ({
         name: opt.name.toUpperCase(),
-        color: opt.color
+        color: opt.color,
+        multiplier: opt.multiplier || options.length // Default multiplier
       })),
+      isBettingOpen: isBettingOpen ?? true,
       updatedAt: Date.now(),
     };
 

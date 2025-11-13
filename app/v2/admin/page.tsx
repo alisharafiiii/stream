@@ -21,9 +21,10 @@ export default function AdminPage() {
   const [question, setQuestion] = useState('WHO WILL WIN?');
   const [numOptions, setNumOptions] = useState(2);
   const [options, setOptions] = useState([
-    { name: 'TRUMP', color: '#FF0000' },
-    { name: 'KAMALA', color: '#0000FF' }
+    { name: 'TRUMP', color: '#FF0000', multiplier: 2 },
+    { name: 'KAMALA', color: '#0000FF', multiplier: 2 }
   ]);
+  const [isBettingOpen, setIsBettingOpen] = useState(true);
   const [users, setUsers] = useState<Array<{
     uid: string;
     username?: string;
@@ -47,7 +48,8 @@ export default function AdminPage() {
       while (newOptions.length < numOptions) {
         newOptions.push({ 
           name: `OPTION ${newOptions.length + 1}`, 
-          color: COLORS[newOptions.length % COLORS.length].value 
+          color: COLORS[newOptions.length % COLORS.length].value,
+          multiplier: numOptions // Default multiplier based on number of players
         });
       }
       setOptions(newOptions);
@@ -96,6 +98,7 @@ export default function AdminPage() {
           setNumOptions(bettingData.options.length);
           setOptions(bettingData.options);
         }
+        setIsBettingOpen(bettingData.isBettingOpen ?? true);
       }
     } catch (error) {
       console.error('Error loading config:', error);
@@ -127,7 +130,7 @@ export default function AdminPage() {
       const res = await fetch('/api/v2/betting', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, options })
+        body: JSON.stringify({ question, options, isBettingOpen })
       });
 
       if (res.ok) {
@@ -136,6 +139,28 @@ export default function AdminPage() {
       }
     } catch {
       setMessage('❌ Failed to update betting round');
+    }
+    setLoading(false);
+  };
+
+  const toggleBetting = async () => {
+    const newState = !isBettingOpen;
+    setIsBettingOpen(newState);
+    setLoading(true);
+    
+    try {
+      const res = await fetch('/api/v2/betting', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, options, isBettingOpen: newState })
+      });
+      
+      if (res.ok) {
+        setMessage(newState ? '✅ Betting opened!' : '🔒 Betting closed!');
+        setTimeout(() => setMessage(''), 3000);
+      }
+    } catch {
+      setMessage('❌ Failed to toggle betting');
     }
     setLoading(false);
   };
@@ -436,6 +461,28 @@ export default function AdminPage() {
               ))}
             </select>
 
+            <label style={{ display: 'block', marginBottom: '4px', marginTop: '12px', fontSize: '12px' }}>Multiplier (e.g., 2 = 2x):</label>
+            <input
+              type="number"
+              value={option.multiplier || numOptions}
+              onChange={(e) => {
+                const newOptions = [...options];
+                newOptions[index].multiplier = parseFloat(e.target.value) || numOptions;
+                setOptions(newOptions);
+              }}
+              min="1"
+              step="0.1"
+              style={{
+                width: '100%',
+                padding: '10px',
+                backgroundColor: '#000',
+                border: '2px solid #00FF00',
+                color: '#00FF00',
+                fontFamily: 'monospace',
+                boxSizing: 'border-box'
+              }}
+            />
+
             {/* Preview */}
             <div style={{
               marginTop: '12px',
@@ -446,7 +493,8 @@ export default function AdminPage() {
               textAlign: 'center',
               fontWeight: 'bold'
             }}>
-              {option.name || `OPTION ${index + 1}`}
+              <div>{option.name || `OPTION ${index + 1}`}</div>
+              <div style={{ fontSize: '11px', marginTop: '4px' }}>Wins {option.multiplier || numOptions}x</div>
             </div>
           </div>
         ))}
@@ -468,6 +516,25 @@ export default function AdminPage() {
           }}
         >
           {loading ? 'UPDATING...' : 'UPDATE BETTING ROUND'}
+        </button>
+
+        <button
+          onClick={toggleBetting}
+          disabled={loading}
+          style={{
+            width: '100%',
+            padding: '16px',
+            backgroundColor: isBettingOpen ? '#FF0000' : '#00FF00',
+            color: isBettingOpen ? '#FFF' : '#000',
+            border: `3px solid ${isBettingOpen ? '#FF0000' : '#00FF00'}`,
+            fontFamily: 'monospace',
+            fontSize: '16px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            marginTop: '8px'
+          }}
+        >
+          {loading ? 'UPDATING...' : isBettingOpen ? '🔒 STOP BETTING' : '🎲 START BETTING'}
         </button>
       </div>
       )}

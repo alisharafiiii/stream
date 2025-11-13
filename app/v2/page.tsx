@@ -6,11 +6,13 @@ import { useWalletConnect } from './hooks/useWalletConnect';
 interface BettingOption {
   name: string;
   color: string;
+  multiplier: number;
 }
 
 interface BettingRound {
   question: string;
   options: BettingOption[];
+  isBettingOpen: boolean;
 }
 
 interface Comment {
@@ -28,7 +30,12 @@ export default function V2Page() {
   const [isStreamLive, setIsStreamLive] = useState(true);
   const [bettingRound, setBettingRound] = useState<BettingRound>({
     question: 'WHO WILL WIN?',
-    options: []
+    options: [],
+    isBettingOpen: true
+  });
+  const [betStats, setBetStats] = useState<{ totalBets: number[], betCount: number[] }>({
+    totalBets: [],
+    betCount: []
   });
   const [isDashboardOpen, setIsDashboardOpen] = useState(true);
   const [isBalanceModalOpen, setIsBalanceModalOpen] = useState(false);
@@ -112,9 +119,10 @@ export default function V2Page() {
   useEffect(() => {
     const loadConfig = async () => {
       try {
-        const [streamRes, bettingRes] = await Promise.all([
+        const [streamRes, bettingRes, betsRes] = await Promise.all([
           fetch('/api/v2/stream'),
-          fetch('/api/v2/betting')
+          fetch('/api/v2/betting'),
+          fetch('/api/v2/betting/bets')
         ]);
         
         if (streamRes.ok) {
@@ -126,6 +134,11 @@ export default function V2Page() {
         if (bettingRes.ok) {
           const bettingData = await bettingRes.json();
           setBettingRound(bettingData);
+        }
+
+        if (betsRes.ok) {
+          const statsData = await betsRes.json();
+          setBetStats(statsData);
         }
       } catch (error) {
         console.error('Error loading config:', error);
@@ -168,6 +181,55 @@ export default function V2Page() {
     if (count <= 3) return '16px';
     if (count <= 6) return '14px';
     return '12px';
+  };
+
+
+  const placeBet = async () => {
+    if (!user || selectedOption === null || !betAmount) return;
+
+    const amount = parseFloat(betAmount);
+    if (isNaN(amount) || amount <= 0) {
+      alert('Please enter a valid bet amount');
+      return;
+    }
+
+    if (amount > userBalance) {
+      alert('Insufficient balance');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/v2/betting/bets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.uid,
+          optionIndex: selectedOption,
+          amount
+        })
+      });
+
+      const data = await res.json();
+      
+      if (res.ok) {
+        // Update local balance
+        setUserBalance(data.newBalance);
+        // Clear selection
+        setSelectedOption(null);
+        setBetAmount('');
+        // Reload bet stats
+        const statsRes = await fetch('/api/v2/betting/bets');
+        if (statsRes.ok) {
+          const statsData = await statsRes.json();
+          setBetStats(statsData);
+        }
+      } else {
+        alert(data.error || 'Failed to place bet');
+      }
+    } catch (error) {
+      console.error('Error placing bet:', error);
+      alert('Failed to place bet');
+    }
   };
 
   return (
@@ -446,8 +508,8 @@ export default function V2Page() {
             }}
           >
             <span>{isDashboardOpen ? '▼' : '▶'} {bettingRound.question}</span>
-            <span style={{ fontSize: '16px' }}>
-              {isDashboardOpen ? '▼' : '▶'}
+            <span style={{ fontSize: '11px', color: bettingRound.isBettingOpen ? '#00ff00' : '#ff0000' }}>
+              {bettingRound.isBettingOpen ? 'OPEN' : 'CLOSED'}
             </span>
           </button>
 
@@ -470,59 +532,82 @@ export default function V2Page() {
                 <button
                   key={index}
                   onClick={() => {
-                    // Toggle: if same option clicked, deselect it
-                    setSelectedOption(selectedOption === index ? null : index);
-                    setBetAmount('');
+                    if (bettingRound.isBettingOpen) {
+                      // Toggle: if same option clicked, deselect it
+                      setSelectedOption(selectedOption === index ? null : index);
+                      setBetAmount('');
+                    }
                   }}
+                  disabled={!bettingRound.isBettingOpen}
                   style={{
-                    height: getButtonHeight(bettingRound.options.length),
+                    height: bettingRound.isBettingOpen ? getButtonHeight(bettingRound.options.length) : '40px',
                     width: '100%',
                     backgroundColor: option.color,
                     color: option.color === '#FFFFFF' || option.color === '#FFFF00' ? '#000' : '#fff',
                     border: selectedOption === index ? '3px solid #8b5cf6' : '3px solid #fff',
                     fontFamily: 'monospace',
-                    fontSize: getFontSize(bettingRound.options.length),
+                    fontSize: bettingRound.isBettingOpen ? getFontSize(bettingRound.options.length) : '12px',
                     fontWeight: 'bold',
-                    cursor: 'pointer',
+                    cursor: bettingRound.isBettingOpen ? 'pointer' : 'not-allowed',
+                    opacity: bettingRound.isBettingOpen ? 1 : 0.7,
                     textAlign: 'center',
                     transition: 'transform 0.1s',
                     boxShadow: selectedOption === index ? '0 4px 0 rgba(139, 92, 246, 0.5)' : '0 4px 0 rgba(255,255,255,0.3)',
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    padding: '6px',
+                    padding: '4px',
                     wordBreak: 'break-word',
                     lineHeight: '1.2'
                   }}
                   onMouseDown={(e) => {
-                    e.currentTarget.style.transform = 'translateY(2px)';
-                    e.currentTarget.style.boxShadow = selectedOption === index ? '0 2px 0 rgba(139, 92, 246, 0.5)' : '0 2px 0 rgba(255,255,255,0.3)';
+                    if (bettingRound.isBettingOpen) {
+                      e.currentTarget.style.transform = 'translateY(2px)';
+                      e.currentTarget.style.boxShadow = selectedOption === index ? '0 2px 0 rgba(139, 92, 246, 0.5)' : '0 2px 0 rgba(255,255,255,0.3)';
+                    }
                   }}
                   onMouseUp={(e) => {
-                    e.currentTarget.style.transform = '';
-                    e.currentTarget.style.boxShadow = selectedOption === index ? '0 4px 0 rgba(139, 92, 246, 0.5)' : '0 4px 0 rgba(255,255,255,0.3)';
+                    if (bettingRound.isBettingOpen) {
+                      e.currentTarget.style.transform = '';
+                      e.currentTarget.style.boxShadow = selectedOption === index ? '0 4px 0 rgba(139, 92, 246, 0.5)' : '0 4px 0 rgba(255,255,255,0.3)';
+                    }
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = '';
                     e.currentTarget.style.boxShadow = selectedOption === index ? '0 4px 0 rgba(139, 92, 246, 0.5)' : '0 4px 0 rgba(255,255,255,0.3)';
                   }}
                   onTouchStart={(e) => {
-                    e.currentTarget.style.transform = 'translateY(2px)';
-                    e.currentTarget.style.boxShadow = selectedOption === index ? '0 2px 0 rgba(139, 92, 246, 0.5)' : '0 2px 0 rgba(255,255,255,0.3)';
+                    if (bettingRound.isBettingOpen) {
+                      e.currentTarget.style.transform = 'translateY(2px)';
+                      e.currentTarget.style.boxShadow = selectedOption === index ? '0 2px 0 rgba(139, 92, 246, 0.5)' : '0 2px 0 rgba(255,255,255,0.3)';
+                    }
                   }}
                   onTouchEnd={(e) => {
-                    e.currentTarget.style.transform = '';
-                    e.currentTarget.style.boxShadow = selectedOption === index ? '0 4px 0 rgba(139, 92, 246, 0.5)' : '0 4px 0 rgba(255,255,255,0.3)';
+                    if (bettingRound.isBettingOpen) {
+                      e.currentTarget.style.transform = '';
+                      e.currentTarget.style.boxShadow = selectedOption === index ? '0 4px 0 rgba(139, 92, 246, 0.5)' : '0 4px 0 rgba(255,255,255,0.3)';
+                    }
                   }}
                 >
-                  {option.name}
+                  <div style={{ fontSize: bettingRound.isBettingOpen ? 'inherit' : '10px', marginBottom: '2px' }}>{option.name}</div>
+                  {betStats.totalBets[index] !== undefined && betStats.totalBets[index] > 0 && (
+                    <div style={{ fontSize: '10px', opacity: 0.8 }}>
+                      ${betStats.totalBets[index].toFixed(0)}
+                    </div>
+                  )}
+                  {!bettingRound.isBettingOpen && option.multiplier && (
+                    <div style={{ fontSize: '9px', opacity: 0.6 }}>
+                      {option.multiplier}x
+                    </div>
+                  )}
                 </button>
               ))}
             </div>
           )}
 
-          {/* Bet Amount UI - Shows when option selected - COMPACT */}
-          {isDashboardOpen && selectedOption !== null && bettingRound.options[selectedOption] && (
+          {/* Bet Amount UI - Shows when option selected and betting is open - COMPACT */}
+          {isDashboardOpen && selectedOption !== null && bettingRound.options[selectedOption] && bettingRound.isBettingOpen && (
             <div style={{
               marginTop: '8px',
               padding: '8px',
@@ -618,10 +703,8 @@ export default function V2Page() {
 
               {/* Row 2: Submit button */}
               <button
-                onClick={() => {
-                  console.log('Placing bet:', betAmount, 'on option', selectedOption);
-                }}
-                disabled={!betAmount || parseFloat(betAmount) <= 0}
+                onClick={placeBet}
+                disabled={!betAmount || parseFloat(betAmount) <= 0 || parseFloat(betAmount) > userBalance}
                 style={{
                   width: '100%',
                   padding: '10px',
