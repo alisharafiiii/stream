@@ -46,6 +46,7 @@ export default function V2Page() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
   const [comments, setComments] = useState<Comment[]>([]);
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [userBalance, setUserBalance] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const commentsRef = useRef<HTMLDivElement>(null);
@@ -119,10 +120,11 @@ export default function V2Page() {
   useEffect(() => {
     const loadConfig = async () => {
       try {
-        const [streamRes, bettingRes, betsRes] = await Promise.all([
+        const [streamRes, bettingRes, betsRes, chatRes] = await Promise.all([
           fetch('/api/v2/stream'),
           fetch('/api/v2/betting'),
-          fetch('/api/v2/betting/bets')
+          fetch('/api/v2/betting/bets'),
+          fetch('/api/v2/chat')
         ]);
         
         if (streamRes.ok) {
@@ -140,14 +142,34 @@ export default function V2Page() {
           const statsData = await betsRes.json();
           setBetStats(statsData);
         }
+
+        if (chatRes.ok) {
+          const chatData = await chatRes.json();
+          if (chatData.messages) {
+            setComments(chatData.messages.map((msg: { 
+              id: string; 
+              username: string; 
+              displayName?: string; 
+              profileImage?: string; 
+              message: string; 
+              timestamp: number 
+            }) => ({
+              id: msg.timestamp, // Use timestamp as numeric id
+              username: msg.displayName || msg.username || 'Anonymous',
+              profileImage: msg.profileImage,
+              message: msg.message,
+              timestamp: msg.timestamp
+            })));
+          }
+        }
       } catch (error) {
         console.error('Error loading config:', error);
       }
     };
 
     loadConfig();
-    // Poll for updates every 5 seconds
-    const interval = setInterval(loadConfig, 5000);
+    // Poll for updates - more frequently for chat
+    const interval = setInterval(loadConfig, 2000);
     return () => clearInterval(interval);
   }, []);
 
@@ -1362,38 +1384,106 @@ export default function V2Page() {
                 outline: 'none',
                 boxSizing: 'border-box'
               }}
-              onKeyPress={(e) => {
-                  if (e.key === 'Enter' && chatMessage.trim()) {
-                    console.log('Sending message:', chatMessage);
-                    setComments([...comments, {
-                      id: Date.now(),
-                      username: user?.username || 'Guest',
-                      message: chatMessage,
-                      profileImage: user?.profileImage,
-                      timestamp: Date.now()
-                    }]);
-                    setChatMessage('');
-                    setIsChatOpen(false);
+              onKeyPress={async (e) => {
+                  if (e.key === 'Enter' && chatMessage.trim() && !isLoadingChat) {
+                    setIsLoadingChat(true);
+                    try {
+                      const res = await fetch('/api/v2/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          userId: user?.uid || 'guest',
+                          username: user?.username || 'Guest',
+                          displayName: user?.displayName,
+                          profileImage: user?.profileImage,
+                          message: chatMessage
+                        })
+                      });
+                      
+                      if (res.ok) {
+                        setChatMessage('');
+                        setIsChatOpen(false);
+                        // Reload messages
+                        const chatRes = await fetch('/api/v2/chat');
+                        if (chatRes.ok) {
+                          const chatData = await chatRes.json();
+                          if (chatData.messages) {
+                        setComments(chatData.messages.map((msg: { 
+                          id: string; 
+                          username: string; 
+                          displayName?: string; 
+                          profileImage?: string; 
+                          message: string; 
+                          timestamp: number 
+                        }) => ({
+                          id: msg.timestamp, // Use timestamp as numeric id
+                          username: msg.displayName || msg.username || 'Anonymous',
+                          profileImage: msg.profileImage,
+                          message: msg.message,
+                          timestamp: msg.timestamp
+                        })));
+                          }
+                        }
+                      }
+                    } catch (error) {
+                      console.error('Error sending message:', error);
+                    } finally {
+                      setIsLoadingChat(false);
+                    }
                   }
               }}
             />
             {/* Send icon inside input */}
             <button
-              onClick={() => {
-                if (chatMessage.trim()) {
-                  console.log('Sending message:', chatMessage);
-                  setComments([...comments, {
-                    id: Date.now(),
-                    username: user?.username || 'Guest',
-                    message: chatMessage,
-                    profileImage: user?.profileImage,
-                    timestamp: Date.now()
-                  }]);
-                  setChatMessage('');
-                  setIsChatOpen(false);
+              onClick={async () => {
+                if (chatMessage.trim() && !isLoadingChat) {
+                  setIsLoadingChat(true);
+                  try {
+                    const res = await fetch('/api/v2/chat', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        userId: user?.uid || 'guest',
+                        username: user?.username || 'Guest',
+                        displayName: user?.displayName,
+                        profileImage: user?.profileImage,
+                        message: chatMessage
+                      })
+                    });
+                    
+                    if (res.ok) {
+                      setChatMessage('');
+                      setIsChatOpen(false);
+                      // Reload messages
+                      const chatRes = await fetch('/api/v2/chat');
+                      if (chatRes.ok) {
+                        const chatData = await chatRes.json();
+                        if (chatData.messages) {
+                          setComments(chatData.messages.map((msg: { 
+                            id: string; 
+                            username: string; 
+                            displayName?: string; 
+                            profileImage?: string; 
+                            message: string; 
+                            timestamp: number 
+                          }) => ({
+                            id: msg.timestamp, // Use timestamp as numeric id
+                            username: msg.displayName || msg.username || 'Anonymous',
+                            profileImage: msg.profileImage,
+                            message: msg.message,
+                            timestamp: msg.timestamp
+                          })));
+                        }
+                      }
+                    }
+                  } catch (error) {
+                    console.error('Error sending message:', error);
+                  } finally {
+                    setIsLoadingChat(false);
+                  }
                 }
               }}
-              disabled={!chatMessage.trim()}
+              disabled={!chatMessage.trim() || isLoadingChat}
               style={{
                 position: 'absolute',
                 right: '6px',
