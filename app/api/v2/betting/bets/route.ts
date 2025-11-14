@@ -1,35 +1,45 @@
 import { NextResponse } from 'next/server';
 import { redis } from '@/lib/redis';
 
-const BETS_KEY_PREFIX = 'v2:betting:bets:';
-const ROUND_STATS_KEY = 'v2:betting:round:stats';
-
-interface Bet {
-  userId: string;
-  optionIndex: number;
-  amount: number;
-  timestamp: number;
-}
-
-interface RoundStats {
-  totalBets: number[];  // Total bet amount for each option
-  betCount: number[];   // Number of bets for each option
-}
+const BET_KEY_PREFIX = 'v2:bet:';
+const BETS_LIST_KEY = 'v2:bets:all';
 
 // GET bets statistics for current round
 export async function GET() {
   try {
-    const stats = await redis.get<RoundStats>(ROUND_STATS_KEY);
-    
-    if (!stats) {
-      // Return empty stats
+    // Get current betting round to know how many options we have
+    const bettingRound = await redis.get('v2:betting:round');
+    if (!bettingRound || typeof bettingRound !== 'object' || !('options' in bettingRound)) {
       return NextResponse.json({
         totalBets: [],
         betCount: []
       });
     }
 
-    return NextResponse.json(stats);
+    const options = (bettingRound as { options: unknown[] }).options;
+    const numOptions = options.length;
+
+    // Get all bet IDs
+    const allBets = await redis.smembers(BETS_LIST_KEY) || [];
+    
+    // Initialize stats arrays
+    const totalBets = Array(numOptions).fill(0);
+    const betCount = Array(numOptions).fill(0);
+
+    // Calculate stats from individual bets
+    for (const betId of allBets) {
+      const bet = await redis.hgetall(BET_KEY_PREFIX + betId) as Record<string, string> | null;
+      if (bet && bet.amount && bet.optionIndex !== undefined) {
+        const amount = parseFloat(bet.amount);
+        const index = parseInt(bet.optionIndex);
+        if (!isNaN(amount) && !isNaN(index) && index < numOptions) {
+          totalBets[index] += amount;
+          betCount[index]++;
+        }
+      }
+    }
+
+    return NextResponse.json({ totalBets, betCount });
   } catch (error) {
     console.error('Error fetching bet stats:', error);
     return NextResponse.json(
@@ -61,16 +71,24 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check user balance
-    const user = await redis.get(`v2:user:${userId}`);
-    if (!user || typeof user !== 'object' || !('balance' in user)) {
+    // Check user and balance
+    const userData = await redis.hgetall(`v2:user:${userId}`) as Record<string, string> | null;
+    if (!userData || !userData.uid) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       );
     }
 
-    const currentBalance = (user as { balance?: number }).balance || 0;
+    // Check if user is banned
+    if (userData.isBanned === 'true') {
+      return NextResponse.json(
+        { error: 'You are banned from betting' },
+        { status: 403 }
+      );
+    }
+
+    const currentBalance = parseFloat(userData.balance || '0');
     if (currentBalance < amount) {
       return NextResponse.json(
         { error: 'Insufficient balance' },
@@ -79,41 +97,38 @@ export async function POST(request: Request) {
     }
 
     // Create the bet
-    const bet: Bet = {
+    const betId = `${Date.now()}_${userId}`;
+    
+    // Save bet using hset for consistency
+    await redis.hset(BET_KEY_PREFIX + betId, {
       userId,
       optionIndex,
       amount,
       timestamp: Date.now()
-    };
-
-    // Save bet
-    const betId = `${Date.now()}_${userId}`;
-    await redis.set(`${BETS_KEY_PREFIX}${betId}`, bet);
-
-    // Update user balance
-    await redis.set(`v2:user:${userId}`, {
-      ...user,
-      balance: currentBalance - amount
     });
 
-    // Update round stats
-    const stats = await redis.get<RoundStats>(ROUND_STATS_KEY) || { totalBets: [], betCount: [] };
+    // Add bet ID to the list
+    await redis.sadd(BETS_LIST_KEY, betId);
+
+    // Update user balance and total bets
+    const newBalance = currentBalance - amount;
+    const currentTotalBets = parseFloat(userData.totalBets || '0');
     
-    // Initialize arrays if needed
-    while (stats.totalBets.length <= optionIndex) {
-      stats.totalBets.push(0);
-      stats.betCount.push(0);
-    }
-    
-    stats.totalBets[optionIndex] += amount;
-    stats.betCount[optionIndex] += 1;
-    
-    await redis.set(ROUND_STATS_KEY, stats);
+    await redis.hset(`v2:user:${userId}`, {
+      balance: newBalance,
+      totalBets: currentTotalBets + amount,
+      lastActive: Date.now()
+    });
 
     return NextResponse.json({ 
       success: true, 
-      bet,
-      newBalance: currentBalance - amount
+      bet: {
+        userId,
+        optionIndex,
+        amount,
+        timestamp: Date.now()
+      },
+      newBalance: newBalance
     });
   } catch (error) {
     console.error('Error placing bet:', error);

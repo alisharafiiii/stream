@@ -51,6 +51,17 @@ export async function POST(request: Request) {
       );
     }
 
+    // Check if user is banned
+    const userKey = `v2:user:${userId}`;
+    const userData = await redis.hgetall(userKey) as Record<string, string> | null;
+    
+    if (userData && userData.isBanned === 'true') {
+      return NextResponse.json(
+        { error: 'You are banned from chatting' },
+        { status: 403 }
+      );
+    }
+
     const chatMessage: ChatMessage = {
       id: `${Date.now()}_${userId}`,
       username: username || 'Anonymous',

@@ -36,6 +36,7 @@ export default function AdminPage() {
     balance?: number;
     totalBets?: number;
     totalWon?: number;
+    isBanned?: boolean;
   }>>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -75,6 +76,29 @@ export default function AdminPage() {
       }
     } catch (error) {
       console.error('Error loading users:', error);
+    }
+  };
+
+  const toggleUserBan = async (uid: string, currentBanStatus: boolean) => {
+    try {
+      const res = await fetch('/api/v2/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid, isBanned: !currentBanStatus })
+      });
+      
+      if (res.ok) {
+        // Update local state
+        setUsers(users.map(u => 
+          u.uid === uid ? { ...u, isBanned: !currentBanStatus } : u
+        ));
+        setMessage(`User ${!currentBanStatus ? 'banned' : 'unbanned'} successfully`);
+        setTimeout(() => setMessage(''), 3000);
+      }
+    } catch (error) {
+      console.error('Error toggling ban:', error);
+      setMessage('Failed to update ban status');
+      setTimeout(() => setMessage(''), 3000);
     }
   };
 
@@ -605,6 +629,7 @@ export default function AdminPage() {
                     <th style={{ padding: '10px', textAlign: 'right' }}>BALANCE</th>
                     <th style={{ padding: '10px', textAlign: 'right' }}>BETS</th>
                     <th style={{ padding: '10px', textAlign: 'right' }}>WON</th>
+                    <th style={{ padding: '10px', textAlign: 'center' }}>ACTION</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -671,6 +696,23 @@ export default function AdminPage() {
                       </td>
                       <td style={{ padding: '10px', textAlign: 'right', color: '#006600' }}>
                         ${(u.totalWon || 0).toFixed(2)}
+                      </td>
+                      <td style={{ padding: '10px', textAlign: 'center' }}>
+                        <button
+                          onClick={() => toggleUserBan(u.uid, u.isBanned || false)}
+                          style={{
+                            padding: '4px 12px',
+                            backgroundColor: u.isBanned ? '#FF0000' : '#000',
+                            color: u.isBanned ? '#FFF' : '#00FF00',
+                            border: `2px solid ${u.isBanned ? '#FF0000' : '#00FF00'}`,
+                            fontFamily: 'monospace',
+                            fontSize: '10px',
+                            cursor: 'pointer',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          {u.isBanned ? '🚫 UNBAN' : '✓ BAN'}
+                        </button>
                       </td>
                     </tr>
                   ))}

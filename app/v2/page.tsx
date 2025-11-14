@@ -246,7 +246,11 @@ export default function V2Page() {
           setBetStats(statsData);
         }
       } else {
-        alert(data.error || 'Failed to place bet');
+        if (res.status === 403) {
+          alert('You are banned from betting');
+        } else {
+          alert(data.error || 'Failed to place bet');
+        }
       }
     } catch (error) {
       console.error('Error placing bet:', error);
@@ -1427,6 +1431,9 @@ export default function V2Page() {
                       }
                     } catch (error) {
                       console.error('Error sending message:', error);
+                      if (error instanceof Response && error.status === 403) {
+                        alert('You are banned from chatting');
+                      }
                     } finally {
                       setIsLoadingChat(false);
                     }
@@ -1478,6 +1485,9 @@ export default function V2Page() {
                     }
                   } catch (error) {
                     console.error('Error sending message:', error);
+                    if (error instanceof Response && error.status === 403) {
+                      alert('You are banned from chatting');
+                    }
                   } finally {
                     setIsLoadingChat(false);
                   }
