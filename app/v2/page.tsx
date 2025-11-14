@@ -1428,12 +1428,11 @@ export default function V2Page() {
                         })));
                           }
                         }
+                      } else if (res.status === 403) {
+                        alert('You are banned from chatting');
                       }
                     } catch (error) {
                       console.error('Error sending message:', error);
-                      if (error instanceof Response && error.status === 403) {
-                        alert('You are banned from chatting');
-                      }
                     } finally {
                       setIsLoadingChat(false);
                     }
@@ -1481,13 +1480,12 @@ export default function V2Page() {
                             timestamp: msg.timestamp
                           })));
                         }
+                      } else if (res.status === 403) {
+                        alert('You are banned from chatting');
                       }
                     }
                   } catch (error) {
                     console.error('Error sending message:', error);
-                    if (error instanceof Response && error.status === 403) {
-                      alert('You are banned from chatting');
-                    }
                   } finally {
                     setIsLoadingChat(false);
                   }

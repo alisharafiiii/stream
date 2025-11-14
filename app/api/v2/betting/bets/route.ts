@@ -81,7 +81,9 @@ export async function POST(request: Request) {
     }
 
     // Check if user is banned
+    console.log(`Ban status for betting user ${userId}: ${userData.isBanned}`);
     if (userData.isBanned === 'true') {
+      console.log(`User ${userId} is banned from betting`);
       return NextResponse.json(
         { error: 'You are banned from betting' },
         { status: 403 }

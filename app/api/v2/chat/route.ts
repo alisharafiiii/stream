@@ -53,9 +53,24 @@ export async function POST(request: Request) {
 
     // Check if user is banned
     const userKey = `v2:user:${userId}`;
-    const userData = await redis.hgetall(userKey) as Record<string, string> | null;
+    console.log(`Checking ban status for user ${userId} with key ${userKey}`);
+    
+    let userData = await redis.hgetall(userKey) as Record<string, string> | null;
+    console.log('User data from hgetall:', userData);
+    
+    // If no data in hash format, check old format
+    if (!userData || Object.keys(userData).length === 0) {
+      const oldData = await redis.get(userKey);
+      console.log('Old format data:', oldData);
+      if (oldData && typeof oldData === 'object' && 'isBanned' in oldData) {
+        userData = { isBanned: (oldData as { isBanned?: string }).isBanned || 'false' };
+      }
+    }
+    
+    console.log(`Ban status for ${userId}: ${userData?.isBanned}`);
     
     if (userData && userData.isBanned === 'true') {
+      console.log(`User ${userId} is banned from chatting`);
       return NextResponse.json(
         { error: 'You are banned from chatting' },
         { status: 403 }
