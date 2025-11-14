@@ -77,7 +77,7 @@ export function useWalletConnect() {
         
         if (fid) {
           const walletUser: WalletUser = {
-            uid: `base_${fid}_${Date.now()}`,
+            uid: `base_${fid}`,
             fid: String(fid),
             username: context?.user?.username || `user${fid}`,
             displayName: context?.user?.displayName || context?.user?.username || `User ${fid}`,

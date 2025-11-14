@@ -59,8 +59,13 @@ export default function V2Page() {
   };
 
   const handleWalletSelect = async (walletType: string) => {
-    await connectWithWallet(walletType);
-    setShowWalletSelect(false);
+    try {
+      const result = await connectWithWallet(walletType);
+      console.log('Wallet connected:', result);
+      setShowWalletSelect(false);
+    } catch (error) {
+      console.error('Wallet connection error:', error);
+    }
   };
 
   // Fetch user balance when connected
@@ -1390,6 +1395,7 @@ export default function V2Page() {
               }}
               onKeyPress={async (e) => {
                   if (e.key === 'Enter' && chatMessage.trim() && !isLoadingChat) {
+                    console.log('Sending chat - User state:', user);
                     setIsLoadingChat(true);
                     try {
                       const res = await fetch('/api/v2/chat', {

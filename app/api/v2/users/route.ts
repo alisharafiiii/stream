@@ -26,7 +26,6 @@ interface WalletUser {
 export async function GET() {
   try {
     const userIds = await redis.smembers(USERS_KEY);
-    console.log('Found user IDs:', userIds);
     
     if (!userIds || userIds.length === 0) {
       return NextResponse.json({ users: [] });
@@ -42,7 +41,6 @@ export async function GET() {
           // If empty, try get (old format)
           if (!userData || Object.keys(userData).length === 0) {
             const oldData = await redis.get(`${USER_KEY_PREFIX}${uid}`);
-            console.log(`Old format data for ${uid}:`, oldData);
             
             // If old format exists, convert it
             if (oldData && typeof oldData === 'object') {
@@ -53,7 +51,6 @@ export async function GET() {
           }
           
           if (!userData || !userData.uid) {
-            console.log(`No data found for user ${uid}`);
             return null;
           }
           
@@ -70,10 +67,9 @@ export async function GET() {
             totalBets: parseFloat(userData.totalBets || '0'),
             totalWon: parseFloat(userData.totalWon || '0'),
             lastActive: parseInt(userData.lastActive || '0'),
-            isBanned: userData.isBanned === 'true'
+            isBanned: userData.isBanned === 'true' || (userData.isBanned as unknown) === true
           };
-        } catch (err) {
-          console.error(`Error processing user ${uid}:`, err);
+        } catch {
           return null;
         }
       })
@@ -96,11 +92,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    console.log(`Creating/updating user ${uid} with username ${username}`);
-
     // Check if user exists - try both hgetall and get for compatibility
     let existingUser = await redis.hgetall(`${USER_KEY_PREFIX}${uid}`) as Record<string, string> | null;
-    console.log('Existing user data:', existingUser);
     
     // If no data in hash format, check old format
     if (!existingUser || Object.keys(existingUser).length === 0) {
@@ -149,7 +142,6 @@ export async function POST(request: Request) {
     }
 
     // Save user data
-    console.log(`Saving user data for ${uid}:`, updateData);
     await redis.hset(`${USER_KEY_PREFIX}${uid}`, updateData);
     
     // Add to users set
@@ -157,7 +149,6 @@ export async function POST(request: Request) {
 
     // Fetch updated user data
     const updatedUser = await redis.hgetall(`${USER_KEY_PREFIX}${uid}`) as Record<string, string>;
-    console.log('Updated user data:', updatedUser);
 
     return NextResponse.json({ 
       success: true, 
@@ -193,8 +184,6 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Missing uid' }, { status: 400 });
     }
 
-    console.log(`Updating ban status for ${uid} to ${isBanned}`);
-
     // Check if user exists
     const existingUser = await redis.hgetall(`${USER_KEY_PREFIX}${uid}`) as Record<string, string> | null;
     
@@ -211,15 +200,10 @@ export async function PATCH(request: Request) {
       isBanned: isBanned ? 'true' : 'false'
     });
 
-    // Verify the update
-    const updated = await redis.hget(`${USER_KEY_PREFIX}${uid}`, 'isBanned');
-    console.log(`Ban status for ${uid} is now: ${updated}`);
-
     return NextResponse.json({ 
       success: true, 
       uid,
-      isBanned,
-      actualStatus: updated
+      isBanned
     });
   } catch (error) {
     console.error('Error updating ban status:', error);
