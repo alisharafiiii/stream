@@ -16,6 +16,12 @@ const COLORS = [
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<'stream' | 'betting' | 'users'>('stream');
+  const [showResolve, setShowResolve] = useState(false);
+  const [resolving, setResolving] = useState(false);
+  const [betStats, setBetStats] = useState<{ totalBets: number[]; betCount: number[] }>({ 
+    totalBets: [], 
+    betCount: [] 
+  });
   const [streamUrl, setStreamUrl] = useState('https://www.youtube.com/live/aeFydtug4-w?si=oI3I894G2-Iw6OSj');
   const [isStreamLive, setIsStreamLive] = useState(true);
   const [question, setQuestion] = useState('WHO WILL WIN?');
@@ -79,6 +85,48 @@ export default function AdminPage() {
     }
   };
 
+  const resolveRound = async (winnerIndex: number) => {
+    if (!window.confirm(`Are you sure "${options[winnerIndex].name}" won?`)) {
+      return;
+    }
+
+    setResolving(true);
+    try {
+      const res = await fetch('/api/v2/betting/resolve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ winnerIndex })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setMessage(`Round resolved! ${data.totalPayouts} winners paid. Platform fees: $${data.totalPlatformFees.toFixed(2)}`);
+        setShowResolve(false);
+        
+        // Clear current round data
+        setQuestion('WHO WILL WIN?');
+        setOptions([
+          { name: 'OPTION 1', color: '#FF0000', multiplier: 2 },
+          { name: 'OPTION 2', color: '#0000FF', multiplier: 2 }
+        ]);
+        setNumOptions(2);
+        setBetStats({ totalBets: [], betCount: [] });
+        
+        // Reload config
+        setTimeout(loadConfig, 1000);
+      } else {
+        const error = await res.json();
+        setMessage(`Error: ${error.error}`);
+      }
+    } catch (error) {
+      console.error('Error resolving round:', error);
+      setMessage('Failed to resolve round');
+    } finally {
+      setResolving(false);
+      setTimeout(() => setMessage(''), 5000);
+    }
+  };
+
   const toggleUserBan = async (uid: string, currentBanStatus: boolean) => {
     try {
       const res = await fetch('/api/v2/users', {
@@ -104,9 +152,10 @@ export default function AdminPage() {
 
   const loadConfig = async () => {
     try {
-      const [streamRes, bettingRes] = await Promise.all([
+      const [streamRes, bettingRes, betsRes] = await Promise.all([
         fetch('/api/v2/stream'),
-        fetch('/api/v2/betting')
+        fetch('/api/v2/betting'),
+        fetch('/api/v2/betting/bets')
       ]);
       
       if (streamRes.ok) {
@@ -123,6 +172,13 @@ export default function AdminPage() {
           setOptions(bettingData.options);
         }
         setIsBettingOpen(bettingData.isBettingOpen ?? true);
+        // Show resolve UI if betting is closed and round not resolved
+        setShowResolve(!bettingData.isBettingOpen && !bettingData.winnerIndex);
+      }
+
+      if (betsRes.ok) {
+        const statsData = await betsRes.json();
+        setBetStats(statsData);
       }
     } catch (error) {
       console.error('Error loading config:', error);
@@ -560,6 +616,114 @@ export default function AdminPage() {
         >
           {loading ? 'UPDATING...' : isBettingOpen ? '🔒 STOP BETTING' : '🎲 START BETTING'}
         </button>
+
+        {/* Resolve Round Section */}
+        {showResolve && !isBettingOpen && (
+          <div style={{
+            marginTop: '24px',
+            padding: '20px',
+            border: '3px solid #FFD700',
+            backgroundColor: '#1a1a00',
+            borderRadius: '8px'
+          }}>
+            <h3 style={{ 
+              marginTop: 0, 
+              color: '#FFD700',
+              borderBottom: '2px solid #FFD700',
+              paddingBottom: '8px',
+              marginBottom: '16px'
+            }}>
+              🏆 RESOLVE ROUND - SELECT WINNER 🏆
+            </h3>
+
+            <div style={{ marginBottom: '16px', color: '#00FF00' }}>
+              <strong>Question:</strong> {question}
+            </div>
+
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '12px',
+              marginTop: '20px'
+            }}>
+              {options.map((option, index) => {
+                const totalBet = betStats.totalBets[index] || 0;
+                const betCount = betStats.betCount[index] || 0;
+                const potentialPayout = totalBet * option.multiplier;
+
+                return (
+                  <div
+                    key={index}
+                    style={{
+                      padding: '16px',
+                      border: '2px solid #00FF00',
+                      backgroundColor: '#000',
+                      borderRadius: '4px'
+                    }}
+                  >
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginBottom: '12px',
+                      gap: '12px'
+                    }}>
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        backgroundColor: option.color,
+                        border: '2px solid #00FF00',
+                        borderRadius: '4px'
+                      }} />
+                      <div>
+                        <div style={{ fontWeight: 'bold', color: '#00FF00' }}>
+                          {option.name}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#888' }}>
+                          {option.multiplier}x multiplier
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ fontSize: '12px', marginBottom: '12px' }}>
+                      <div style={{ color: '#00FF00' }}>
+                        Total Bets: ${totalBet.toFixed(2)}
+                      </div>
+                      <div style={{ color: '#888' }}>
+                        {betCount} bet{betCount !== 1 ? 's' : ''}
+                      </div>
+                      {totalBet > 0 && (
+                        <div style={{ color: '#FFD700', marginTop: '4px' }}>
+                          Potential Payout: ${potentialPayout.toFixed(2)}
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => resolveRound(index)}
+                      disabled={resolving}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        backgroundColor: '#FFD700',
+                        color: '#000',
+                        border: '2px solid #FFD700',
+                        fontFamily: 'monospace',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        cursor: resolving ? 'not-allowed' : 'pointer',
+                        opacity: resolving ? 0.5 : 1,
+                        borderRadius: '4px',
+                        textTransform: 'uppercase'
+                      }}
+                    >
+                      {resolving ? 'RESOLVING...' : '🏆 SELECT AS WINNER'}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
       )}
 

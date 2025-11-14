@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useWalletConnect } from './hooks/useWalletConnect';
+import GameResultAnimation from './components/GameResultAnimation';
+import BettingReceipt from './components/BettingReceipt';
 
 interface BettingOption {
   name: string;
@@ -48,6 +50,19 @@ export default function V2Page() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [userBalance, setUserBalance] = useState(0);
+  const [showResultAnimation, setShowResultAnimation] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [roundResult, setRoundResult] = useState<{
+    isWinner: boolean;
+    betAmount: number;
+    winAmount: number;
+    multiplier: number;
+    platformFee: number;
+    optionName: string;
+    winningOption: string;
+  } | null>(null);
+  const [lastResolvedRound, setLastResolvedRound] = useState<number | null>(null);
+  const [userBets, setUserBets] = useState<Array<{ optionIndex: number; amount: number }>>([]);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const commentsRef = useRef<HTMLDivElement>(null);
 
@@ -141,6 +156,59 @@ export default function V2Page() {
         if (bettingRes.ok) {
           const bettingData = await bettingRes.json();
           setBettingRound(bettingData);
+          
+          // Check if round was resolved
+          if (bettingData.winnerIndex !== undefined && 
+              bettingData.resolvedAt && 
+              lastResolvedRound !== bettingData.resolvedAt &&
+              userBets.length > 0) {
+            
+            // Find if user had a winning bet
+            const userWinningBet = userBets.find(bet => bet.optionIndex === bettingData.winnerIndex);
+            const isWinner = !!userWinningBet;
+            
+            if (isWinner && userWinningBet) {
+              // Calculate winnings
+              const multiplier = bettingData.options[bettingData.winnerIndex].multiplier || 2;
+              const grossWin = userWinningBet.amount * multiplier;
+              const platformFee = grossWin * 0.05; // 5% fee
+              const netWin = grossWin - platformFee;
+              
+              setRoundResult({
+                isWinner: true,
+                betAmount: userWinningBet.amount,
+                winAmount: netWin,
+                multiplier,
+                platformFee,
+                optionName: bettingData.options[bettingData.winnerIndex].name,
+                winningOption: bettingData.options[bettingData.winnerIndex].name
+              });
+              
+              // Update balance
+              setUserBalance(prev => prev + netWin);
+            } else {
+              // User lost
+              const lostBet = userBets[0]; // Take first bet
+              setRoundResult({
+                isWinner: false,
+                betAmount: lostBet.amount,
+                winAmount: 0,
+                multiplier: 0,
+                platformFee: 0,
+                optionName: bettingData.options[lostBet.optionIndex].name,
+                winningOption: bettingData.options[bettingData.winnerIndex].name
+              });
+            }
+            
+            setLastResolvedRound(bettingData.resolvedAt);
+            setShowResultAnimation(true);
+            setUserBets([]); // Clear bets after resolution
+            
+            // Fetch updated balance
+            if (user?.uid) {
+              fetchUserBalance();
+            }
+          }
         }
 
         if (betsRes.ok) {
@@ -176,7 +244,8 @@ export default function V2Page() {
     // Poll for updates - more frequently for chat
     const interval = setInterval(loadConfig, 2000);
     return () => clearInterval(interval);
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastResolvedRound, userBets, user?.uid]);
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
@@ -241,6 +310,10 @@ export default function V2Page() {
       if (res.ok) {
         // Update local balance
         setUserBalance(data.newBalance);
+        
+        // Track user's bet
+        setUserBets(prev => [...prev, { optionIndex: selectedOption, amount }]);
+        
         // Clear selection
         setSelectedOption(null);
         setBetAmount('');
@@ -1576,6 +1649,36 @@ export default function V2Page() {
           }
         }
       `}</style>
+
+      {/* Game Result Animation */}
+      {showResultAnimation && roundResult && (
+        <GameResultAnimation
+          isWinner={roundResult.isWinner}
+          amount={roundResult.isWinner ? roundResult.winAmount : roundResult.betAmount}
+          onClose={() => {
+            setShowResultAnimation(false);
+            setShowReceipt(true);
+          }}
+        />
+      )}
+
+      {/* Betting Receipt */}
+      {showReceipt && roundResult && (
+        <BettingReceipt
+          isWinner={roundResult.isWinner}
+          betAmount={roundResult.betAmount}
+          winAmount={roundResult.winAmount}
+          multiplier={roundResult.multiplier}
+          platformFee={roundResult.platformFee}
+          optionName={roundResult.optionName}
+          winningOption={roundResult.winningOption}
+          newBalance={userBalance}
+          onClose={() => {
+            setShowReceipt(false);
+            setRoundResult(null);
+          }}
+        />
+      )}
     </div>
   );
 }
